@@ -111,6 +111,10 @@ Returns the new setting values, like this:
 }
 ```
 
+## Running as a service
+
+You can use the provided systemd unit to run the software as a daemon
+
 ## License
 
 GNU GENERAL PUBLIC LICENSE 3.0
