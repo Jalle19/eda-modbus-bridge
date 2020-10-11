@@ -26,7 +26,7 @@ class HttpHandler:
 
         return web.json_response(await self.modbus.get_flag_summary())
 
-    async def get_summary(self, request):
+    async def get_summary(self, _):
         summary = collections.OrderedDict()
         summary["flags"] = await self.modbus.get_flag_summary()
         summary["readings"] = await self.modbus.get_readings()
