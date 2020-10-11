@@ -1,12 +1,15 @@
 # eda-modbus-bridge
 
-An HTTP bridge for Enervent EDA ventilation units. It provides a very basic HTTP interface for interacting with the 
-ventilation unit. Communication happens over RS-485 (Modbus RTU) by connecting your serial device to the "Freeway" port 
-on the ventilation unit's computer board.
+> I take no responsibility if you break your ventilation unit by using this software!
+
+An HTTP bridge for Enervent ventilation units with EDA automation. It provides a very basic HTTP interface for 
+interacting with the ventilation unit. Communication happens over RS-485 (Modbus RTU) by connecting your serial device 
+to the "Freeway" port on the ventilation unit's computer board.
 
 ## Requirements
 
 * Python 3 (tested with 3.5 and 3.8)
+* An Enervent Pingvin ventilation unit (other EDA-based units may work, but the register numbers probably differ)
 * An RS-485 device (e.g. `/dev/ttyUSB0`) connected to the Enervent unit's Freeway port
 
 ## Usage
