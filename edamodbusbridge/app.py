@@ -1,3 +1,4 @@
+import argparse
 import logging
 from pymodbus.client.asynchronous.serial import AsyncModbusSerialClient
 from pymodbus.client.asynchronous import schedulers
@@ -5,12 +6,19 @@ from aiohttp import web
 from modbus import Modbus
 from handler import HttpHandler
 
-logging.basicConfig()
-log = logging.getLogger()
-log.setLevel(logging.DEBUG)
-
 if __name__ == '__main__':
-    loop, client = AsyncModbusSerialClient(schedulers.ASYNC_IO, port='/dev/ttyUSB0', baudrate=19200, method="rtu")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("serialPort", help="The serial port device to use")
+    parser.add_argument("--httpListenPort", help="The port for the HTTP server to listen on", type=int, default=8080)
+    parser.add_argument("--verbose", help="Use verbose logging", action="store_true")
+    args = parser.parse_args()
+
+    logging.basicConfig()
+    log = logging.getLogger()
+    if args.verbose:
+        log.setLevel(logging.DEBUG)
+
+    loop, client = AsyncModbusSerialClient(schedulers.ASYNC_IO, port=args.serialPort, baudrate=19200, method="rtu")
     modbus = Modbus(client.protocol)
     handler = HttpHandler(modbus)
     app = web.Application()
@@ -23,6 +31,6 @@ if __name__ == '__main__':
     ])
 
     try:
-        loop.run_until_complete(web._run_app(app))
+        loop.run_until_complete(web._run_app(app, port=args.httpListenPort))
     finally:
         loop.close()
