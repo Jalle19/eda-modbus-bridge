@@ -25,8 +25,8 @@ if __name__ == '__main__':
     app.add_routes([
         web.get("/", handler.handle_root),
         web.get("/summary", handler.get_summary),
-        web.post("/enableFlag/{flag}", handler.enable_flag),
-        web.post("/disableFlag/{flag}", handler.disable_flag),
+        web.get("/mode/{flag}", handler.get_mode_status),
+        web.post("/mode/{flag}", handler.set_mode_status),
         web.post("/setSetting/{setting}/{value}", handler.set_setting)
     ])
 

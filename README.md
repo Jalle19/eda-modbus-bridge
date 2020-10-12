@@ -6,6 +6,9 @@ An HTTP bridge for Enervent ventilation units with EDA automation. It provides a
 interacting with the ventilation unit. Communication happens over RS-485 (Modbus RTU) by connecting your serial device 
 to the "Freeway" port on the ventilation unit's computer board.
 
+The endpoints for enabling/disabling the various modes are designed to be consumed by 
+https://www.home-assistant.io/integrations/switch.rest/ with minimal effort.
+
 ## Requirements
 
 * Python 3 (tested with 3.5 and 3.8)
@@ -76,25 +79,23 @@ Returns a JSON object like this:
 }
 ```
 
-### POST /enableFlag/{flag}
+### GET /mode/{flag}
 
-Enables the specified flag and returns a summary of all flags, like this:
+Returns the status of the specified mode/flag. The response looks like this:
 
 ```json
-{
-  "away": true,
-  "longAway": false,
-  "overPressure": false,
-  "maxHeating": false,
-  "maxCooling": false,
-  "manualBoost": false,
-  "summerNightCooling": false
-}
+{"active": false}
 ```
 
-### POST /disableFlag/{flag}
+### POST /mode/{flag}
 
-Same as above, but it disables the flag
+Enables/disables the specified mode/flag depending on the boolean value in the following request body:
+
+```json
+{"active": false}
+```
+
+The response is identical to that of `GET /mode/{flag}`.
 
 ### POST /setSetting/{setting}/{value}
 

@@ -1,5 +1,4 @@
 import collections
-import asyncio
 
 
 def parse_temperature(temperature):
@@ -41,6 +40,14 @@ class Modbus:
         summary["summerNightCooling"] = result.bits[0]
 
         return summary
+
+    async def get_flag(self, flag):
+        if flag not in self.AVAILABLE_FLAGS.keys():
+            raise KeyError()
+
+        result = await self.modbus_client.read_coils(self.AVAILABLE_FLAGS[flag], 1, unit=0x01)
+
+        return result.bits[0]
 
     async def set_flag(self, flag, value):
         if flag not in self.AVAILABLE_FLAGS.keys():

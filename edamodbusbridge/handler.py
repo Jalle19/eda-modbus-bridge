@@ -10,21 +10,25 @@ class HttpHandler:
     async def handle_root(self, _):
         return web.Response(text="eda-modbus-bridge")
 
-    async def enable_flag(self, request):
+    async def get_mode_status(self, request):
         try:
-            await self.modbus.set_flag(request.match_info["flag"], True)
+            status = await self.modbus.get_flag(request.match_info["flag"])
+
+            return web.json_response({
+                "active": status
+            })
         except KeyError:
             raise web.HTTPBadRequest()
 
-        return web.json_response(await self.modbus.get_flag_summary())
-
-    async def disable_flag(self, request):
+    async def set_mode_status(self, request):
         try:
-            await self.modbus.set_flag(request.match_info["flag"], False)
+            body = await request.json()
+
+            await self.modbus.set_flag(request.match_info["flag"], body["active"])
         except KeyError:
             raise web.HTTPBadRequest()
 
-        return web.json_response(await self.modbus.get_flag_summary())
+        return await self.get_mode_status(request)
 
     async def get_summary(self, _):
         summary = collections.OrderedDict()
