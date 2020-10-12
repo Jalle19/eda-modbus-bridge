@@ -50,12 +50,12 @@
 			"response": []
 		},
 		{
-			"name": "/enableFlag/away",
+			"name": "/mode/away",
 			"request": {
-				"method": "POST",
+				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://10.110.1.1:8080/enableFlag/away",
+					"raw": "http://10.110.1.1:8080/mode/away",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -65,7 +65,7 @@
 					],
 					"port": "8080",
 					"path": [
-						"enableFlag",
+						"mode",
 						"away"
 					]
 				}
@@ -73,12 +73,22 @@
 			"response": []
 		},
 		{
-			"name": "/disableFlag/away",
+			"name": "/mode/away",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"active\": false\n}"
+				},
 				"url": {
-					"raw": "http://10.110.1.1:8080/disableFlag/away",
+					"raw": "http://10.110.1.1:8080/mode/away",
 					"protocol": "http",
 					"host": [
 						"10",
@@ -88,7 +98,7 @@
 					],
 					"port": "8080",
 					"path": [
-						"disableFlag",
+						"mode",
 						"away"
 					]
 				}
