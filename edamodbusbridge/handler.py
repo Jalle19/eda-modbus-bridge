@@ -24,8 +24,11 @@ class HttpHandler:
         try:
             body = await request.json()
 
+            if "active" not in body or not isinstance(body["active"], bool):
+                raise ValueError()
+
             await self.modbus.set_flag(request.match_info["flag"], body["active"])
-        except KeyError:
+        except (KeyError, ValueError):
             raise web.HTTPBadRequest()
 
         return await self.get_mode_status(request)
