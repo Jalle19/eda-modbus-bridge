@@ -17,6 +17,10 @@ if __name__ == '__main__':
     log = logging.getLogger()
     if args.verbose:
         log.setLevel(logging.DEBUG)
+    else:
+        log.setLevel(logging.INFO)
+
+    log.info("Listening on port {}, using device {}".format(args.httpListenPort, args.serialPort))
 
     loop, client = AsyncModbusSerialClient(schedulers.ASYNC_IO, port=args.serialPort, baudrate=19200, method="rtu")
     modbus = Modbus(client.protocol)
