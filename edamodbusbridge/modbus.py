@@ -84,6 +84,8 @@ class Modbus:
             readings["cascadeI"] = result.registers[2]
             result = await self.modbus_client.read_holding_registers(56, 1, unit=0x01)
             readings["overPressureTimeLeft"] = result.registers[0]
+            result = await self.modbus_client.read_holding_registers(50, 1, unit=0x01)
+            readings["ventilationLevelActual"] = result.registers[0]
 
         return readings
 
@@ -91,9 +93,8 @@ class Modbus:
         settings = collections.OrderedDict()
 
         async with self.modbus_lock:
-            result = await self.modbus_client.read_holding_registers(50, 4, unit=0x01)
-            settings["ventilationLevelActual"] = result.registers[0]
-            settings["ventilationLevelTarget"] = result.registers[3]
+            result = await self.modbus_client.read_holding_registers(53, 1, unit=0x01)
+            settings["ventilationLevelTarget"] = result.registers[0]
             result = await self.modbus_client.read_holding_registers(135, 1, unit=0x01)
             settings["temperatureTarget"] = parse_temperature(result.registers[0])
 

@@ -36,46 +36,45 @@ Returns a JSON object like this:
 
 ```json
 {
-  "flags": {
-    "away": false,
-    "longAway": false,
-    "overPressure": false,
-    "maxHeating": false,
-    "maxCooling": false,
-    "manualBoost": false,
-    "summerNightCooling": false
-  },
-  "readings": {
-    "freshAirTemperature": 12.6,
-    "supplyAirTemperatureAfterHeatRecovery": 19.5,
-    "supplyAirTemperature": 16.6,
-    "wasteAirTemperature": 19.9,
-    "exhaustAirTemperature": 22.6,
-    "exhaustAirHumidity": 40,
-    "heatRecoverySupplySide": 69,
-    "heatRecoveryExhaustSide": 0,
-    "heatRecoveryTemperatureDifferenceSupplySide": 6.9,
-    "heatRecoveryTemperatureDifferenceExhaustSide": 2.7,
-    "mean48HourExhaustHumidity": 43,
-    "cascadeSp": 170,
-    "cascadeP": 0,
-    "cascadeI": 2,
-    "50 tod": 60,
-    "51 tulo": 30,
-    "52 poisto": 30,
-    "53 pyynt\u00f6": 60
-  },
-  "settings": {
-    "ventilationLevelActual": 60,
-    "ventilationLevelTarget": 60,
-    "temperatureTarget": 17.0
-  },
-  "deviceInformation": {
-    "fanType": true,
-    "familyType": 0,
-    "serialNumber": 0,
-    "softwareVersion": 217
-  }
+    "flags": {
+        "away": false,
+        "longAway": false,
+        "overPressure": false,
+        "maxHeating": false,
+        "maxCooling": false,
+        "manualBoost": false,
+        "summerNightCooling": false
+    },
+    "readings": {
+        "freshAirTemperature": 7.3,
+        "supplyAirTemperatureAfterHeatRecovery": 21.7,
+        "supplyAirTemperature": 21.4,
+        "wasteAirTemperature": 11.2,
+        "exhaustAirTemperature": 22.5,
+        "exhaustAirTemperatureBeforeHeatRecovery": -40.0,
+        "exhaustAirHumidity": 45,
+        "heatRecoverySupplySide": 94,
+        "heatRecoveryExhaustSide": 74,
+        "heatRecoveryTemperatureDifferenceSupplySide": 14.4,
+        "heatRecoveryTemperatureDifferenceExhaustSide": 11.3,
+        "mean48HourExhaustHumidity": 39,
+        "cascadeSp": 170,
+        "cascadeP": 0,
+        "cascadeI": 100,
+        "overPressureTimeLeft": 0,
+        "ventilationLevelActual": 60
+    },
+    "settings": {
+        "ventilationLevelTarget": 60,
+        "temperatureTarget": 17.0
+    },
+    "deviceInformation": {
+        "fanType": true,
+        "heatingConfigurationMode": 1,
+        "familyType": 0,
+        "serialNumber": 0,
+        "softwareVersion": 217
+    }
 }
 ```
 
@@ -106,7 +105,6 @@ Returns the new setting values, like this:
 
 ```json
 {
-  "ventilationLevelActual": 60,
   "ventilationLevelTarget": 60,
   "temperatureTarget": 17.0
 }
