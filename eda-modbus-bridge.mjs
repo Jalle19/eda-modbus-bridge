@@ -26,9 +26,9 @@ const argv = yargs(process.argv.slice(2))
     .argv;
 
 (async () => {
-    console.log(`Opening serial connection to ${argv.device}, slave ID 1`)
+    console.log(`Opening serial connection to ${argv.device}, slave ID ${argv.modbusSlave}`)
     const modbusClient = new ModbusRTU()
-    modbusClient.setID(1)
+    modbusClient.setID(argv.modbusSlave)
     await modbusClient.connectRTUBuffered(argv.device, {
         baudRate: 19200,
         dataBits: 8,
