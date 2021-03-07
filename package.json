@@ -1,0 +1,29 @@
+{
+  "name": "eda-modbus-bridge",
+  "version": "1.0.0",
+  "description": "An HTTP bridge for Enervent ventilation units with EDA automation",
+  "main": "eda-modbus-bridge.mjs",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jalle19/eda-modbus-bridge.git"
+  },
+  "author": "Sam Stenvall <neggelandia@gmail.com>",
+  "license": "GPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/Jalle19/eda-modbus-bridge/issues"
+  },
+  "homepage": "https://github.com/Jalle19/eda-modbus-bridge#readme",
+  "dependencies": {
+    "async-mutex": "^0.3.1",
+    "express": "^4.17.1",
+    "modbus-serial": "^8.0.1",
+    "morgan": "^1.10.0",
+    "yargs": "^16.2.0"
+  }
+}

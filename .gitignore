@@ -1,4 +1,3 @@
 .idea
-venv
 eda-modbus-bridge.iml
-__pycache__
+node_modules

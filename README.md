@@ -11,23 +11,21 @@ https://www.home-assistant.io/integrations/switch.rest/ with minimal effort.
 
 ## Requirements
 
-* Python 3 (tested with 3.5 and 3.8)
+* Node.js (only tested with 14.x)
 * An Enervent Pingvin ventilation unit (other EDA-based units may work, but the register numbers probably differ)
 * An RS-485 device (e.g. `/dev/ttyUSB0`) connected to the Enervent unit's Freeway port
 
 ## Usage
 
 ```
-usage: app.py [-h] [--httpListenPort HTTPLISTENPORT] [--verbose] serialPort
+eda-modbus-bridge.mjs [options]
 
-positional arguments:
-  serialPort            The serial port device to use
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --httpListenPort HTTPLISTENPORT
-                        The port for the HTTP server to listen on
-  --verbose             Use verbose logging
+Options:
+      --help         Show help                                         [boolean]
+      --version      Show version number                               [boolean]
+  -d, --device       The serial device to use, e.g. /dev/ttyUSB0      [required]
+  -s, --modbusSlave  The Modbus slave address                       [default: 1]
+  -p, --httpPort     The HTTP port to listen on                  [default: 8080]
 ```
 
 ### GET /summary
@@ -83,7 +81,7 @@ Returns a JSON object like this:
 Returns the status of the specified mode/flag. The response looks like this:
 
 ```json
-{"active": false}
+{"active":false}
 ```
 
 ### POST /mode/{flag}
@@ -91,7 +89,7 @@ Returns the status of the specified mode/flag. The response looks like this:
 Enables/disables the specified mode/flag depending on the boolean value in the following request body:
 
 ```json
-{"active": false}
+{"active":false}
 ```
 
 The response is identical to that of `GET /mode/{flag}`.
