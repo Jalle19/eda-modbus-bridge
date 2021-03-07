@@ -54,7 +54,7 @@ const argv = yargs(process.argv.slice(2))
         return setSetting(modbusClient, req, res)
     })
 
-    httpServer.listen(argv.port, '0.0.0.0', () => {
-        console.log(`Listening on http://0.0.0.0:${argv.port}`)
+    httpServer.listen(argv.httpPort, '0.0.0.0', () => {
+        console.log(`Listening on http://0.0.0.0:${argv.httpPort}`)
     })
 })();
