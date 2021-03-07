@@ -1,0 +1,31 @@
+{
+  "name": "Enervent EDA Modbus Bridge",
+  "version": "1.0.0",
+  "slug": "hassos_eda_modbus_bridge",
+  "description": "An HTTP bridge for Enervent ventilation units with EDA automation",
+  "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
+  "url": "https://github.com/Jalle19/eda-modbus-bridge",
+  "startup": "services",
+  "boot": "auto",
+  "privileged": [
+    "SYS_MODULE",
+    "SYS_RAWIO"
+  ],
+  "devices": [
+    "/dev/bus/usb:/dev/bus/usb:rwm",
+    "/dev/mem:/dev/mem:rw"
+  ],
+  "auto_uart": true,
+  "options": {
+    "device": "/dev/ttyUSB0"
+  },
+  "schema": {
+    "device": "str"
+  },
+  "ports": {
+    "8080/tcp": 9090
+  },
+  "ports_description": {
+    "8080/tcp": "The HTTP listening port"
+  }
+}
