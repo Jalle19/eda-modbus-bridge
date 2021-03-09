@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/Jalle19/eda-modbus-bridge#readme",
   "dependencies": {
+    "async-mqtt": "^2.6.1",
     "async-mutex": "^0.3.1",
     "express": "^4.17.1",
     "modbus-serial": "^8.0.1",
