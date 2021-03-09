@@ -7,7 +7,7 @@ import {getFlagStatus, root, setFlagStatus, setSetting, summary} from './app/han
 import {getReadingsTopicValues} from './app/mqtt.mjs'
 
 const argv = yargs(process.argv.slice(2))
-    .usage('$0 [options]')
+    .usage('node $0 [options]')
     .options({
         'device': {
             description: 'The serial device to use, e.g. /dev/ttyUSB0',
