@@ -18,7 +18,7 @@ https://www.home-assistant.io/integrations/switch.rest/ with minimal effort.
 ## Usage
 
 ```
-eda-modbus-bridge.mjs [options]
+node eda-modbus-bridge.mjs [options]
 
 Options:
       --help         Show help                                         [boolean]
