@@ -19,8 +19,13 @@ const argv = yargs(process.argv.slice(2))
             default: 1,
             alias: 's'
         },
+        'httpListenAddress': {
+            description: 'The address to listen (HTTP)',
+            default: '0.0.0.0',
+            alias: 'a',
+        },
         'httpPort': {
-            description: 'The HTTP port to listen on',
+            description: 'The port to listen on (HTTP)',
             default: 8080,
             alias: 'p'
         },
@@ -68,8 +73,8 @@ const argv = yargs(process.argv.slice(2))
         return setSetting(modbusClient, req, res)
     })
 
-    httpServer.listen(argv.httpPort, '0.0.0.0', () => {
-        console.log(`Listening on http://0.0.0.0:${argv.httpPort}`)
+    httpServer.listen(argv.httpPort, argv.httpListenAddress, () => {
+        console.log(`Listening on http://${argv.httpListenAddress}:${argv.httpPort}`)
     })
 
     // Optionally create MQTT client
