@@ -2,7 +2,7 @@
   "name": "Enervent EDA Modbus Bridge",
   "version": "1.0.0",
   "slug": "hassos_eda_modbus_bridge",
-  "description": "An HTTP bridge for Enervent ventilation units with EDA automation",
+  "description": "An HTTP/MQTT bridge for Enervent ventilation units with EDA automation",
   "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
   "url": "https://github.com/Jalle19/eda-modbus-bridge",
   "startup": "services",

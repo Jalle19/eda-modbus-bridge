@@ -2,7 +2,7 @@
 
 > I take no responsibility if you break your ventilation unit by using this software!
 
-An HTTP bridge for Enervent ventilation units with EDA automation (e.g. Pingvin). It provides a REST-ful HTTP interface 
+An HTTP/MQTT bridge for Enervent ventilation units with EDA automation (e.g. Pingvin). It provides a REST-ful HTTP interface 
 for interacting with the ventilation unit (reading temperatures and changing certain settings), as well as an MQTT 
 client which can publish readings regularly.
 
