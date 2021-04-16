@@ -15,7 +15,7 @@
     "/dev/bus/usb:/dev/bus/usb:rwm",
     "/dev/mem:/dev/mem:rw"
   ],
-  "auto_uart": true,
+  "uart": true,
   "options": {
     "device": "/dev/ttyUSB0"
   },
