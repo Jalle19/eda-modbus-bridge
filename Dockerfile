@@ -5,8 +5,9 @@ ENV LANG C.UTF-8
 
 WORKDIR /app
 
-COPY package.json package-lock.json /app/
 RUN apk add --no-cache nodejs npm python3 musl-dev make g++ linux-headers
+
+COPY package.json package-lock.json /app/
 RUN npm i
 
 COPY config.json /app/config.json
