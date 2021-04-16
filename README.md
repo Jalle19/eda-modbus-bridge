@@ -10,7 +10,7 @@ Communication happens over RS-485 (Modbus RTU) by connecting a serial device to 
 unit's computer board.
 
 The REST endpoints for enabling/disabling the various modes are designed to be consumed by 
-https://www.home-assistant.io/integrations/switch.rest/ with minimal effort.
+https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See examples in the `docs/` directory.
 
 ## Features
 

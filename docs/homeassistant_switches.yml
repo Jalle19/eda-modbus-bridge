@@ -1,0 +1,52 @@
+# Change 10.110.4.5 to your Home Assistant OS host address. localhost may work when
+# running as an addon, but I haven't tested it.
+switch:
+  - platform: rest
+    name: eda-away
+    resource: http://10.110.4.5:9090/mode/away
+    body_on: '{"active":true}'
+    body_off: '{"active":false}'
+    headers:
+      Content-Type: application/json
+  - platform: rest
+    name: eda-longAway
+    resource: http://10.110.4.5:9090/mode/longAway
+    body_on: '{"active":true}'
+    body_off: '{"active":false}'
+    headers:
+      Content-Type: application/json
+  - platform: rest
+    name: eda-overPressure
+    resource: http://10.110.4.5:9090/mode/overPressure
+    body_on: '{"active":true}'
+    body_off: '{"active":false}'
+    headers:
+      Content-Type: application/json
+  - platform: rest
+    name: eda-maxHeating
+    resource: http://10.110.4.5:9090/mode/maxHeating
+    body_on: '{"active":true}'
+    body_off: '{"active":false}'
+    headers:
+      Content-Type: application/json
+  - platform: rest
+    name: eda-maxCooling
+    resource: http://10.110.4.5:9090/mode/maxCooling
+    body_on: '{"active":true}'
+    body_off: '{"active":false}'
+    headers:
+      Content-Type: application/json
+  - platform: rest
+    name: eda-manualBoost
+    resource: http://10.110.4.5:9090/mode/manualBoost
+    body_on: '{"active":true}'
+    body_off: '{"active":false}'
+    headers:
+      Content-Type: application/json
+  - platform: rest
+    name: eda-summerNightCooling
+    resource: http://10.110.4.5:9090/mode/summerNightCooling
+    body_on: '{"active":true}'
+    body_off: '{"active":false}'
+    headers:
+      Content-Type: application/json
