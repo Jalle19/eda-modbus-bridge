@@ -1,11 +1,13 @@
 import express from 'express'
 import morgan from 'morgan'
+import MQTT from 'async-mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
 import {getFlagStatus, root, setFlagStatus, setSetting, summary} from './app/handlers.mjs'
+import {getReadingsTopicValues} from './app/mqtt.mjs'
 
 const argv = yargs(process.argv.slice(2))
-    .usage('$0 [options]')
+    .usage('node $0 [options]')
     .options({
         'device': {
             description: 'The serial device to use, e.g. /dev/ttyUSB0',
@@ -17,15 +19,31 @@ const argv = yargs(process.argv.slice(2))
             default: 1,
             alias: 's'
         },
+        'httpListenAddress': {
+            description: 'The address to listen (HTTP)',
+            default: '0.0.0.0',
+            alias: 'a',
+        },
         'httpPort': {
-            description: 'The HTTP port to listen on',
+            description: 'The port to listen on (HTTP)',
             default: 8080,
             alias: 'p'
+        },
+        'mqttBrokerUrl': {
+            description: 'The URL to the MQTT broker, e.g. tcp://localhost:1883. Omit to disable MQTT support.',
+            default: undefined,
+            alias: 'm',
+        },
+        'mqttPublishInterval': {
+            description: 'How often messages should be published over MQTT (in seconds)',
+            default: 10,
+            alias: 'i',
         }
     })
     .argv;
 
 (async () => {
+    // Create Modbus client
     console.log(`Opening serial connection to ${argv.device}, slave ID ${argv.modbusSlave}`)
     const modbusClient = new ModbusRTU()
     modbusClient.setID(argv.modbusSlave)
@@ -36,6 +54,7 @@ const argv = yargs(process.argv.slice(2))
         stopBits: 1,
     })
 
+    // Create HTTP server
     const httpServer = express()
     httpServer.use(morgan('tiny'))
     httpServer.use(express.json())
@@ -54,7 +73,32 @@ const argv = yargs(process.argv.slice(2))
         return setSetting(modbusClient, req, res)
     })
 
-    httpServer.listen(argv.httpPort, '0.0.0.0', () => {
-        console.log(`Listening on http://0.0.0.0:${argv.httpPort}`)
+    httpServer.listen(argv.httpPort, argv.httpListenAddress, () => {
+        console.log(`Listening on http://${argv.httpListenAddress}:${argv.httpPort}`)
     })
+
+    // Optionally create MQTT client
+    if (argv.mqttBrokerUrl !== undefined) {
+        console.log(`Connecting to MQTT broker at ${argv.mqttBrokerUrl}`)
+
+        try {
+            const mqttClient = await MQTT.connectAsync(argv.mqttBrokerUrl)
+
+            setInterval(async () => {
+                // Publish each reading to a separate topic
+                const topicMap = await getReadingsTopicValues(modbusClient)
+                const publishPromises = []
+
+                for (const [topic, value] of Object.entries(topicMap)) {
+                    publishPromises.push(mqttClient.publish(topic, JSON.stringify(value)))
+                }
+
+                await Promise.all(publishPromises)
+            }, argv.mqttPublishInterval * 1000)
+        } catch (e) {
+            console.error(`Failed to connect to MQTT broker: ${e.message}`)
+        }
+    } else {
+        console.log('No MQTT broker URL defined, not enabling MQTT support')
+    }
 })();
