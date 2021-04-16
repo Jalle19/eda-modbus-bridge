@@ -1,6 +1,6 @@
 #!/usr/bin/with-contenv bashio
 
 DEVICE="$(bashio::config 'device')"
+EXTRA_OPTIONS="$(bashio::config 'extraOptions')"
 
-ls -lh
-node /app/eda-modbus-bridge.mjs --device ${DEVICE} --httpPort 8080
+node /app/eda-modbus-bridge.mjs --device ${DEVICE} ${EXTRA_OPTIONS}

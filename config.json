@@ -17,10 +17,12 @@
   ],
   "uart": true,
   "options": {
-    "device": "/dev/ttyUSB0"
+    "device": "/dev/ttyUSB0",
+    "extraOptions": ""
   },
   "schema": {
-    "device": "str"
+    "device": "str",
+    "extraOptions": "str"
   },
   "ports": {
     "8080/tcp": 9090
