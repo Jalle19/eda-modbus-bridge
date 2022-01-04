@@ -3,7 +3,13 @@
   "version": "1.0.0",
   "slug": "hassos_eda_modbus_bridge",
   "description": "An HTTP/MQTT bridge for Enervent ventilation units with EDA automation",
-  "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
+  "arch": [
+    "armhf",
+    "armv7",
+    "aarch64",
+    "amd64",
+    "i386"
+  ],
   "url": "https://github.com/Jalle19/eda-modbus-bridge",
   "startup": "services",
   "boot": "auto",
@@ -13,12 +19,30 @@
   ],
   "uart": true,
   "options": {
-    "device": "/dev/ttyUSB0",
-    "extraOptions": ""
+    "modbus": {
+      "device": "/dev/ttyUSB0",
+      "slave": 1
+    },
+    "mqtt": {
+      "server": "",
+      "port": 1883,
+      "username": "",
+      "password": "",
+      "publish_interval": 10
+    }
   },
   "schema": {
-    "device": "str",
-    "extraOptions": "str"
+    "modbus": {
+      "device": "str",
+      "slave": "int?"
+    },
+    "mqtt": {
+      "server": "str?",
+      "port": "int?",
+      "username": "str?",
+      "password": "str?",
+      "publish_interval": "int?"
+    }
   },
   "ports": {
     "8080/tcp": 9090

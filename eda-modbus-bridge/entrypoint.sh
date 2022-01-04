@@ -1,6 +1,7 @@
 #!/usr/bin/with-contenv bashio
 
-DEVICE="$(bashio::config 'device')"
-EXTRA_OPTIONS="$(bashio::config 'extraOptions')"
+source config.sh
 
-node --unhandled-rejections=warn /app/eda-modbus-bridge.mjs --device ${DEVICE} ${EXTRA_OPTIONS}
+get-config
+
+node --unhandled-rejections=warn /app/eda-modbus-bridge.mjs ${MODBUS_DEVICE} ${MODBUS_SLAVE} ${MQTT_SERVER} ${MQTT_CREDENTIALS} ${MQTT_PUBLISH_INTERVAL}

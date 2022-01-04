@@ -11,6 +11,10 @@ COPY package.json package-lock.json /app/
 RUN npm i
 
 COPY config.json /app/config.json
+
+COPY config.sh /app/config.sh
+RUN chmod +x /app/config.sh
+
 COPY entrypoint.sh /app/entrypoint.sh
 COPY app /app/app
 COPY eda-modbus-bridge.mjs /app/
