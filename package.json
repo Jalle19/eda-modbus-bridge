@@ -23,7 +23,7 @@
     "async-mqtt": "^2.6.1",
     "async-mutex": "^0.3.1",
     "express": "^4.17.1",
-    "modbus-serial": "^8.0.1",
+    "modbus-serial": "^8.0.5",
     "morgan": "^1.10.0",
     "yargs": "^16.2.0"
   }
