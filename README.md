@@ -81,8 +81,13 @@ Returns a JSON object like this:
         "ventilationLevelActual": 60
     },
     "settings": {
-        "ventilationLevelTarget": 60,
-        "temperatureTarget": 17.0
+        "ventilationLevelTarget": 75,
+        "overPressureDelay": 60,
+        "awayVentilationLevel": 30,
+        "awayTemperatureReduction": 2,
+        "longAwayVentilationLevel": 60,
+        "longAwayTemperatureReduction": 0,
+        "temperatureTarget": 17
     },
     "deviceInformation": {
         "fanType": true,

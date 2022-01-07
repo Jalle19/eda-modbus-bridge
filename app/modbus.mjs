@@ -12,6 +12,11 @@ const AVAILABLE_FLAGS = {
 
 const AVAILABLE_SETTINGS = {
     'ventilationLevel': 53,
+    'overPressureDelay': 57,
+    'awayVentilationLevel': 100,
+    'awayTemperatureReduction': 101,
+    'longAwayVentilationLevel': 102,
+    'longAwayTemperatureReduction': 103,
     'temperatureTarget': 135,
 }
 
@@ -109,9 +114,19 @@ export const getReadings = async (modbusClient) => {
 }
 
 export const getSettings = async (modbusClient) => {
-    let result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(53, 1))
+    let result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(53, 5))
     let settings = {
-        'ventilationLevelTarget': result.data[0]
+        'ventilationLevelTarget': result.data[0],
+        'overPressureDelay': result.data[4]
+    }
+
+    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(100, 4))
+    settings = {
+        ...settings,
+        'awayVentilationLevel': result.data[0],
+        'awayTemperatureReduction': parseTemperature(result.data[1]),
+        'longAwayVentilationLevel': result.data[2],
+        'longAwayTemperatureReduction': parseTemperature(result.data[3]),
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(135, 1))
@@ -130,14 +145,33 @@ export const setSetting = async (modbusClient, setting, value) => {
 
     let intValue = parseInt(value, 10)
 
-    if (setting === 'ventilationLevel' && (intValue < 20 || intValue > 100)) {
-        throw new RangeError('ventilationLevel out of range')
-    } else if (setting === 'temperatureTarget') {
-        if (intValue < 10 || intValue > 30) {
-            throw new RangeError('temperatureTarget out of range')
-        }
+    switch (setting) {
+        case 'ventilationLevel':
+        case 'awayVentilationLevel':
+        case 'longAwayVentilationLevel':
+            if (intValue < 20 || intValue > 100) {
+                throw new RangeError('level out of range')
+            }
 
-        intValue *= 10
+            break
+        case 'temperatureTarget':
+            if (intValue < 10 || intValue > 30) {
+                throw new RangeError('temperature out of range')
+            }
+
+            intValue *= 10
+            break
+        case 'overPressureDelay':
+            if (intValue < 0 || intValue > 60) {
+                throw new RangeError('delay out of range')
+            }
+
+            break
+        case 'awayTemperatureReduction':
+        case 'longAwayTemperatureReduction':
+            // No minimum/maximum values specified in the register documentation
+            intValue *= 10
+            break
     }
 
     await mutex.runExclusive(async () => modbusClient.writeRegister(AVAILABLE_SETTINGS[setting], intValue))
