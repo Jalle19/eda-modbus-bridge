@@ -1,4 +1,4 @@
-import {Mutex} from 'async-mutex'
+import { Mutex } from 'async-mutex'
 
 const AVAILABLE_FLAGS = {
     'away': 1,
@@ -66,43 +66,43 @@ export const setFlag = async (modbusClient, flag, value) => {
 export const getReadings = async (modbusClient) => {
     let result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(6, 8))
     let readings = {
-        "freshAirTemperature": parseTemperature(result.data[0]),
-        "supplyAirTemperatureAfterHeatRecovery": parseTemperature(result.data[1]),
-        "supplyAirTemperature": parseTemperature(result.data[2]),
-        "wasteAirTemperature": parseTemperature(result.data[3]),
-        "exhaustAirTemperature": parseTemperature(result.data[4]),
-        "exhaustAirTemperatureBeforeHeatRecovery": parseTemperature(result.data[5]),
-        "exhaustAirHumidity": result.data[7],
+        'freshAirTemperature': parseTemperature(result.data[0]),
+        'supplyAirTemperatureAfterHeatRecovery': parseTemperature(result.data[1]),
+        'supplyAirTemperature': parseTemperature(result.data[2]),
+        'wasteAirTemperature': parseTemperature(result.data[3]),
+        'exhaustAirTemperature': parseTemperature(result.data[4]),
+        'exhaustAirTemperatureBeforeHeatRecovery': parseTemperature(result.data[5]),
+        'exhaustAirHumidity': result.data[7],
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(29, 7))
     readings = {
         ...readings,
-        "heatRecoverySupplySide": result.data[0],
-        "heatRecoveryExhaustSide": result.data[1],
-        "heatRecoveryTemperatureDifferenceSupplySide": parseTemperature(result.data[2]),
-        "heatRecoveryTemperatureDifferenceExhaustSide": parseTemperature(result.data[3]),
-        "mean48HourExhaustHumidity": result.data[6],
+        'heatRecoverySupplySide': result.data[0],
+        'heatRecoveryExhaustSide': result.data[1],
+        'heatRecoveryTemperatureDifferenceSupplySide': parseTemperature(result.data[2]),
+        'heatRecoveryTemperatureDifferenceExhaustSide': parseTemperature(result.data[3]),
+        'mean48HourExhaustHumidity': result.data[6],
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(47, 3))
     readings = {
         ...readings,
-        "cascadeSp": result.data[0],
-        "cascadeP": result.data[1],
-        "cascadeI": result.data[2],
+        'cascadeSp': result.data[0],
+        'cascadeP': result.data[1],
+        'cascadeI': result.data[2],
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(56, 1))
     readings = {
         ...readings,
-        "overPressureTimeLeft": result.data[0],
+        'overPressureTimeLeft': result.data[0],
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(50, 1))
     readings = {
         ...readings,
-        "ventilationLevelActual": result.data[0],
+        'ventilationLevelActual': result.data[0],
     }
 
     return readings
