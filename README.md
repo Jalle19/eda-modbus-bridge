@@ -117,7 +117,7 @@ Enables/disables the specified mode/flag depending on the boolean value in the f
 
 The response is identical to that of `GET /mode/{flag}`.
 
-### POST /setSetting/{setting}/{value}
+### POST /setting/{setting}/{value}
 
 > Setting ventilation level doesn't seem to work, probably a firmware bug
 
