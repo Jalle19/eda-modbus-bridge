@@ -189,10 +189,24 @@ export const getDeviceInformation = async (modbusClient) => {
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(597, 3))
     deviceInformation = {
         ...deviceInformation,
-        'familyType': result.data[0],
+        'familyType': getDeviceFamilyName(result.data[0]),
         'serialNumber': result.data[1],
         'softwareVersion': result.data[2]
     }
 
     return deviceInformation
+}
+
+const getDeviceFamilyName = (familyTypeInt) => {
+    return [
+        'Pingvin',
+        'Pandion',
+        'Pelican',
+        'Pegasos',
+        'Pegasos XL',
+        'LTR-3',
+        'LTR-6̈́',
+        'LTR-7',
+        'LTR-7 XL'
+    ][familyTypeInt] ?? 'unknown'
 }
