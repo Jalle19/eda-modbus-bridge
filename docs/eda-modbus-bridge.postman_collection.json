@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a28133d1-0cab-47ba-82ff-3ab1085033dd",
+		"_postman_id": "45be8179-6514-49f4-9658-92c0f062ad16",
 		"name": "eda-modbus-bridge",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -11,15 +11,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://10.110.1.1:8080/",
+					"raw": "http://10.110.4.5:9090/",
 					"protocol": "http",
 					"host": [
 						"10",
 						"110",
-						"1",
-						"1"
+						"4",
+						"5"
 					],
-					"port": "8080",
+					"port": "9090",
 					"path": [
 						""
 					]
@@ -33,15 +33,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://10.110.1.1:8080/summary",
+					"raw": "http://10.110.4.5:9090/summary",
 					"protocol": "http",
 					"host": [
 						"10",
 						"110",
-						"1",
-						"1"
+						"4",
+						"5"
 					],
-					"port": "8080",
+					"port": "9090",
 					"path": [
 						"summary"
 					]
@@ -55,15 +55,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://10.110.1.1:8080/mode/away",
+					"raw": "http://10.110.4.5:9090/mode/away",
 					"protocol": "http",
 					"host": [
 						"10",
 						"110",
-						"1",
-						"1"
+						"4",
+						"5"
 					],
-					"port": "8080",
+					"port": "9090",
 					"path": [
 						"mode",
 						"away"
@@ -88,15 +88,15 @@
 					"raw": "{\n    \"active\": false\n}"
 				},
 				"url": {
-					"raw": "http://10.110.1.1:8080/mode/away",
+					"raw": "http://10.110.4.5:9090/mode/away",
 					"protocol": "http",
 					"host": [
 						"10",
 						"110",
-						"1",
-						"1"
+						"4",
+						"5"
 					],
-					"port": "8080",
+					"port": "9090",
 					"path": [
 						"mode",
 						"away"
@@ -106,48 +106,48 @@
 			"response": []
 		},
 		{
-			"name": "/setSetting/ventilationLevel/75",
+			"name": "/setting/temperatureTarget/17",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "http://10.110.1.1:8080/setSetting/ventilationLevel/75",
+					"raw": "http://10.110.4.5:9090/setting/temperatureTarget/17",
 					"protocol": "http",
 					"host": [
 						"10",
 						"110",
-						"1",
-						"1"
+						"4",
+						"5"
 					],
-					"port": "8080",
+					"port": "9090",
 					"path": [
-						"setSetting",
-						"ventilationLevel",
-						"75"
+						"setting",
+						"temperatureTarget",
+						"17"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "/setSetting/temperatureTarget/19",
+			"name": "/setting/longAwayTemperatureReduction/0",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "http://10.110.1.1:8080/setSetting/temperatureTarget/17",
+					"raw": "http://10.110.4.5:9090/setting/longAwayTemperatureReduction/0",
 					"protocol": "http",
 					"host": [
 						"10",
 						"110",
-						"1",
-						"1"
+						"4",
+						"5"
 					],
-					"port": "8080",
+					"port": "9090",
 					"path": [
-						"setSetting",
-						"temperatureTarget",
-						"17"
+						"setting",
+						"longAwayTemperatureReduction",
+						"0"
 					]
 				}
 			},
