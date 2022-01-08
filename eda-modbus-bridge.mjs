@@ -91,7 +91,7 @@ const argv = yargs(process.argv.slice(2))
                 const publishPromises = []
 
                 for (const [topic, value] of Object.entries(topicMap)) {
-                    publishPromises.push(mqttClient.publish(topic, JSON.stringify(value)))
+                    publishPromises.push(mqttClient.publish(topic, value))
                 }
 
                 await Promise.all(publishPromises)
