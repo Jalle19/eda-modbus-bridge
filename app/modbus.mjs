@@ -103,10 +103,11 @@ export const getReadings = async (modbusClient) => {
         'overPressureTimeLeft': result.data[0],
     }
 
-    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(50, 1))
+    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(50, 4))
     readings = {
         ...readings,
         'ventilationLevelActual': result.data[0],
+        'ventilationLevelTarget': result.data[3],
     }
 
     return readings
