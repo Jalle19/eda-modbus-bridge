@@ -11,7 +11,6 @@ const AVAILABLE_FLAGS = {
 }
 
 const AVAILABLE_SETTINGS = {
-    'ventilationLevel': 53,
     'overPressureDelay': 57,
     'awayVentilationLevel': 100,
     'awayTemperatureReduction': 101,
@@ -114,10 +113,9 @@ export const getReadings = async (modbusClient) => {
 }
 
 export const getSettings = async (modbusClient) => {
-    let result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(53, 5))
+    let result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(57, 1))
     let settings = {
-        'ventilationLevelTarget': result.data[0],
-        'overPressureDelay': result.data[4]
+        'overPressureDelay': result.data[0]
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(100, 4))
@@ -146,7 +144,6 @@ export const setSetting = async (modbusClient, setting, value) => {
     let intValue = parseInt(value, 10)
 
     switch (setting) {
-        case 'ventilationLevel':
         case 'awayVentilationLevel':
         case 'longAwayVentilationLevel':
             if (intValue < 20 || intValue > 100) {
@@ -192,10 +189,24 @@ export const getDeviceInformation = async (modbusClient) => {
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(597, 3))
     deviceInformation = {
         ...deviceInformation,
-        'familyType': result.data[0],
+        'familyType': getDeviceFamilyName(result.data[0]),
         'serialNumber': result.data[1],
         'softwareVersion': result.data[2]
     }
 
     return deviceInformation
+}
+
+const getDeviceFamilyName = (familyTypeInt) => {
+    return [
+        'Pingvin',
+        'Pandion',
+        'Pelican',
+        'Pegasos',
+        'Pegasos XL',
+        'LTR-3',
+        'LTR-6̈́',
+        'LTR-7',
+        'LTR-7 XL'
+    ][familyTypeInt] ?? 'unknown'
 }

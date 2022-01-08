@@ -81,7 +81,6 @@ Returns a JSON object like this:
         "ventilationLevelActual": 60
     },
     "settings": {
-        "ventilationLevelTarget": 75,
         "overPressureDelay": 60,
         "awayVentilationLevel": 30,
         "awayTemperatureReduction": 2,
@@ -119,15 +118,18 @@ The response is identical to that of `GET /mode/{flag}`.
 
 ### POST /setting/{setting}/{value}
 
-> Setting ventilation level doesn't seem to work, probably a firmware bug
+Changes the setting to the specified value. HTTP 400 is thrown if the value specified is out of range or invalid.
 
-Changes the setting to the specified value. Can be used to set the ventilation level and the target temperature. 
 Returns the new setting values, like this:
 
 ```json
 {
-  "ventilationLevelTarget": 60,
-  "temperatureTarget": 17.0
+   "overPressureDelay": 60,
+   "awayVentilationLevel": 30,
+   "awayTemperatureReduction": 2,
+   "longAwayVentilationLevel": 60,
+   "longAwayTemperatureReduction": 0,
+   "temperatureTarget": 17
 }
 ```
 
