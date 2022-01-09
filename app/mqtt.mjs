@@ -103,18 +103,59 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         'ventilationLevelActual': createGenericSensorConfiguration(configurationBase, 'ventilationLevelActual', 'Ventilation level (actual)', '%'),
     }
 
-    // Configuration for each entity
-    const entityConfigurationMap = {
+    // Configurable numbers
+    const numberConfigurationMap = {
+        'overPressureDelay': createNumberConfiguration(configurationBase, 'overPressureDelay', 'Overpressure delay', {
+            'min': 1,
+            'max': 60,
+            'unit_of_measurement': 'minutes',
+        }),
+        'awayVentilationLevel': createNumberConfiguration(configurationBase, 'awayVentilationLevel', 'Away ventilation level', {
+            'min': 1,
+            'max': 100,
+            'unit_of_measurement': '%',
+        }),
+        'awayTemperatureReduction': createNumberConfiguration(configurationBase, 'awayTemperatureReduction', 'Away temperature reduction', {
+            'min': 0,
+            'max': 20,
+            'unit_of_measurement': '°C',
+        }),
+        'longAwayVentilationLevel': createNumberConfiguration(configurationBase, 'longAwayVentilationLevel', 'Long away ventilation level', {
+            'min': 1,
+            'max': 100,
+            'unit_of_measurement': '%',
+        }),
+        'longAwayTemperatureReduction': createNumberConfiguration(configurationBase, 'longAwayTemperatureReduction', 'Long away temperature reduction', {
+            'min': 0,
+            'max': 20,
+            'unit_of_measurement': '°C',
+        }),
+        'temperatureTarget': createNumberConfiguration(configurationBase, 'temperatureTarget', 'Temperature target', {
+            'min': 0,
+            'max': 30,
+            'unit_of_measurement': '°C',
+        })
+    }
+
+    // Configuration for each sensor
+    const sensorConfigurationMap = {
         ...temperatureSensorConfigurationMap,
         ...humiditySensorConfigurationMap,
         ...genericSensorConfigurationMap,
     }
 
     // Publish configurations
-    for (const [entityName, configuration] of Object.entries(entityConfigurationMap)) {
+    for (const [entityName, configuration] of Object.entries(sensorConfigurationMap)) {
         const configurationTopicName = `homeassistant/sensor/${deviceIdentifier}/${entityName}/config`
 
-        console.log(`Publishing Home Assistant auto-discovery configuration for "${entityName}"...`)
+        console.log(`Publishing Home Assistant auto-discovery configuration for sensor "${entityName}"...`)
+        await mqttClient.publish(configurationTopicName, JSON.stringify(configuration))
+    }
+
+    for (const [entityName, configuration] of Object.entries(numberConfigurationMap)) {
+        const configurationTopicName = `homeassistant/number/${deviceIdentifier}/${entityName}/config`
+
+        console.log(`Publishing Home Assistant auto-discovery configuration for number "${entityName}"...`)
         await mqttClient.publish(configurationTopicName, JSON.stringify(configuration))
     }
 }
@@ -157,4 +198,20 @@ const createGenericSensorConfiguration = (configurationBase, readingName, entity
     }
 
     return configuration;
+}
+
+const createNumberConfiguration = (configurationBase, settingName, entityName, extraProperties) => {
+    if (!extraProperties) {
+        extraProperties = {}
+    }
+
+    return {
+        ...configurationBase,
+        'command_topic': `${TOPIC_PREFIX}/settings/${settingName}/set`,
+        'state_topic': `${TOPIC_PREFIX}/settings/${settingName}`,
+        'unique_id': `eda-${settingName}`,
+        'entity_category': 'config',
+        'name': entityName,
+        ...extraProperties,
+    }
 }
