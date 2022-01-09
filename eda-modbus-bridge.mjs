@@ -3,8 +3,8 @@ import morgan from 'morgan'
 import MQTT from 'async-mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
-import {getFlagStatus, root, setFlagStatus, setSetting, summary} from './app/handlers.mjs'
-import {getReadingsTopicValues} from './app/mqtt.mjs'
+import { getFlagStatus, root, setFlagStatus, setSetting, summary } from './app/handlers.mjs'
+import { publishReadings } from './app/mqtt.mjs'
 
 const argv = yargs(process.argv.slice(2))
     .usage('node $0 [options]')
@@ -85,16 +85,9 @@ const argv = yargs(process.argv.slice(2))
         try {
             const mqttClient = await MQTT.connectAsync(argv.mqttBrokerUrl)
 
+            // Publish readings regularly
             setInterval(async () => {
-                // Publish each reading to a separate topic
-                const topicMap = await getReadingsTopicValues(modbusClient)
-                const publishPromises = []
-
-                for (const [topic, value] of Object.entries(topicMap)) {
-                    publishPromises.push(mqttClient.publish(topic, value))
-                }
-
-                await Promise.all(publishPromises)
+                await publishReadings(modbusClient, mqttClient)
             }, argv.mqttPublishInterval * 1000)
         } catch (e) {
             console.error(`Failed to connect to MQTT broker: ${e.message}`)

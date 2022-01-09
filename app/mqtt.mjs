@@ -2,12 +2,13 @@ import {getReadings} from './modbus.mjs'
 
 const TOPIC_PREFIX = 'eda'
 
-export const getReadingsTopicValues = async (modbusClient) => {
-    // Always publish "online" to our status topic
+export const publishReadings = async (modbusClient, mqttClient) => {
+    // Create a map from topic name to value that should be published
     let topicMap = {
-        [`${TOPIC_PREFIX}/status`]: 'online'
+        [`${TOPIC_PREFIX}/status`]: 'online',
     }
 
+    // Publish each reading to a separate topic
     const readings = await getReadings(modbusClient)
 
     for (const [reading, value] of Object.entries(readings)) {
@@ -15,5 +16,11 @@ export const getReadingsTopicValues = async (modbusClient) => {
         topicMap[topicName] = JSON.stringify(value)
     }
 
-    return topicMap
+    const publishPromises = []
+
+    for (const [topic, value] of Object.entries(topicMap)) {
+        publishPromises.push(mqttClient.publish(topic, value))
+    }
+
+    await Promise.all(publishPromises)
 }
