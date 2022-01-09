@@ -106,23 +106,18 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         'device': mqttDeviceInformation,
     }
 
-    // Temperature sensors
-    const temperatureSensorConfigurationMap = {
+    // Sensor configuration
+    const sensorConfigurationMap = {
+        // Temperature sensors
         'freshAirTemperature': createTemperatureSensorConfiguration(configurationBase, 'freshAirTemperature', 'Outside temperature',),
         'supplyAirTemperature': createTemperatureSensorConfiguration(configurationBase, 'supplyAirTemperature', 'Supply air temperature'),
         'supplyAirTemperatureAfterHeatRecovery': createTemperatureSensorConfiguration(configurationBase, 'supplyAirTemperatureAfterHeatRecovery', 'Supply air temperature (after heat recovery)'),
         'exhaustAirTemperature': createTemperatureSensorConfiguration(configurationBase, 'exhaustAirTemperature', 'Exhaust air temperature'),
         'wasteAirTemperature': createTemperatureSensorConfiguration(configurationBase, 'wasteAirTemperature', 'Waste air temperature'),
-    }
-
-    // Humidity sensors
-    const humiditySensorConfigurationMap = {
+        // Humidity sensors
         'exhaustAirHumidity': createHumiditySensorConfiguration(configurationBase, 'exhaustAirHumidity', 'Exhaust air humidity'),
         'mean48HourExhaustHumidity': createHumiditySensorConfiguration(configurationBase, 'mean48HourExhaustHumidity', 'Exhaust air humidity (48h mean)'),
-    }
-
-    // Generic sensors (percentages, minutes left, cascade values)
-    const genericSensorConfigurationMap = {
+        // Generic sensors (percentages, minutes left, cascade values)
         'heatRecoverySupplySide': createGenericSensorConfiguration(configurationBase, 'heatRecoverySupplySide', 'Heat recovery (supply)', '%'),
         'heatRecoveryExhaustSide': createGenericSensorConfiguration(configurationBase, 'heatRecoveryExhaustSide', 'Heat recovery (exhaust)', '%'),
         'cascadeSp': createGenericSensorConfiguration(configurationBase, 'cascadeSp', 'Cascade setpoint'),
@@ -131,13 +126,6 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         'overPressureTimeLeft': createGenericSensorConfiguration(configurationBase, 'overPressureTimeLeft', 'Overpressure time left', 'minutes'),
         'ventilationLevelTarget': createGenericSensorConfiguration(configurationBase, 'ventilationLevelTarget', 'Ventilation level (target)', '%'),
         'ventilationLevelActual': createGenericSensorConfiguration(configurationBase, 'ventilationLevelActual', 'Ventilation level (actual)', '%'),
-    }
-
-    // Configuration for each sensor
-    const sensorConfigurationMap = {
-        ...temperatureSensorConfigurationMap,
-        ...humiditySensorConfigurationMap,
-        ...genericSensorConfigurationMap,
     }
 
     // Configurable numbers
