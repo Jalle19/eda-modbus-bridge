@@ -1,4 +1,4 @@
-import { getReadings, getDeviceInformation, getSettings } from './modbus.mjs'
+import { getReadings, getDeviceInformation, getSettings, setSetting } from './modbus.mjs'
 
 const TOPIC_PREFIX = 'eda'
 
@@ -31,6 +31,27 @@ export const publishReadings = async (modbusClient, mqttClient) => {
     }
 
     await Promise.all(publishPromises)
+}
+
+export const subscribeToSettingChanges = async (modbusClient, mqttClient) => {
+    const topicName = `${TOPIC_PREFIX}/settings/+/set`
+
+    console.log(`Subscribing to topic(s) ${topicName}`)
+
+    await mqttClient.subscribe(topicName)
+}
+
+export const handleMessage = async (modbusClient, topicName, payload) => {
+    console.log(`Received ${payload} on topic ${topicName}`)
+
+    // Handle settings updates
+    if (topicName.startsWith('eda/settings/') && topicName.endsWith('/set')) {
+        const settingName = topicName.substring('eda/settings/'.length, topicName.lastIndexOf('/'))
+
+        console.log(`Updating setting ${settingName} to ${payload}`)
+
+        await setSetting(modbusClient, settingName, payload)
+    }
 }
 
 export const configureMqttDiscovery = async (modbusClient, mqttClient) => {

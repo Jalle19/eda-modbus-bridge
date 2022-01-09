@@ -4,7 +4,7 @@ import MQTT from 'async-mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
 import { getFlagStatus, root, setFlagStatus, setSetting, summary } from './app/handlers.mjs'
-import { publishReadings, configureMqttDiscovery } from './app/mqtt.mjs'
+import { publishReadings, configureMqttDiscovery, subscribeToSettingChanges, handleMessage } from './app/mqtt.mjs'
 
 const argv = yargs(process.argv.slice(2))
     .usage('node $0 [options]')
@@ -91,6 +91,12 @@ const argv = yargs(process.argv.slice(2))
             }, argv.mqttPublishInterval * 1000)
 
             console.log(`MQTT scheduler started, will publish readings every ${argv.mqttPublishInterval} seconds`)
+
+            // Subscribe to setting changes and register a handler
+            await subscribeToSettingChanges(modbusClient, mqttClient)
+            mqttClient.on('message', async (topicName, payload) => {
+                await handleMessage(modbusClient, topicName, payload)
+            })
 
             // Configure Home Assistant MQTT discovery
             await configureMqttDiscovery(modbusClient, mqttClient)
