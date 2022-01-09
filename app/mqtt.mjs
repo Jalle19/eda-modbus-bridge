@@ -58,7 +58,7 @@ export const subscribeToSettingChanges = async (modbusClient, mqttClient) => {
     }
 }
 
-export const handleMessage = async (modbusClient, topicName, payload) => {
+export const handleMessage = async (modbusClient, mqttClient, topicName, payload) => {
     // Payload looks like a string when logged, but any comparison with === will equal false unless we convert the
     // Buffer to a string
     const payloadString = payload.toString()
@@ -79,6 +79,9 @@ export const handleMessage = async (modbusClient, topicName, payload) => {
 
         await setFlag(modbusClient, mode, payloadString === 'ON')
     }
+
+    // Publish all values again for state changes to "take"
+    await publishValues(modbusClient, mqttClient)
 }
 
 export const configureMqttDiscovery = async (modbusClient, mqttClient) => {

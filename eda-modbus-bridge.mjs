@@ -95,7 +95,7 @@ const argv = yargs(process.argv.slice(2))
             // Subscribe to setting changes and register a handler
             await subscribeToSettingChanges(modbusClient, mqttClient)
             mqttClient.on('message', async (topicName, payload) => {
-                await handleMessage(modbusClient, topicName, payload)
+                await handleMessage(modbusClient, mqttClient, topicName, payload)
             })
 
             // Configure Home Assistant MQTT discovery
