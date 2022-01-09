@@ -1,4 +1,4 @@
-import { getReadings, getDeviceInformation } from './modbus.mjs'
+import { getReadings, getDeviceInformation, getSettings } from './modbus.mjs'
 
 const TOPIC_PREFIX = 'eda'
 
@@ -8,11 +8,19 @@ export const publishReadings = async (modbusClient, mqttClient) => {
         [`${TOPIC_PREFIX}/status`]: 'online',
     }
 
-    // Publish each reading to a separate topic
+    // Publish each reading
     const readings = await getReadings(modbusClient)
 
     for (const [reading, value] of Object.entries(readings)) {
         const topicName = `${TOPIC_PREFIX}/readings/${reading}`
+        topicMap[topicName] = JSON.stringify(value)
+    }
+
+    // Publish each setting
+    const settings = await getSettings(modbusClient)
+
+    for (const [setting, value] of Object.entries(settings)) {
+        const topicName = `${TOPIC_PREFIX}/settings/${setting}`
         topicMap[topicName] = JSON.stringify(value)
     }
 
