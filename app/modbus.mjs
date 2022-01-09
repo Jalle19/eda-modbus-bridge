@@ -65,6 +65,22 @@ export const setFlag = async (modbusClient, flag, value) => {
     }
 
     await mutex.runExclusive(async () => modbusClient.writeCoil(AVAILABLE_FLAGS[flag], value))
+
+    // Flags are mutually exclusive, disable all others when enabling one
+    if (value) {
+        await disableAllModesExcept(modbusClient, flag)
+    }
+}
+
+const disableAllModesExcept = async (modbusClient, exceptedMode) => {
+    for (const mode in AVAILABLE_FLAGS) {
+        // summerNightCooling can be enabled simultaneously with other modes
+        if (mode === exceptedMode || mode === 'summerNightCooling') {
+            continue
+        }
+
+        await mutex.runExclusive(async () => modbusClient.writeCoil(AVAILABLE_FLAGS[mode], false))
+    }
 }
 
 export const getReadings = async (modbusClient) => {
