@@ -192,7 +192,7 @@ export const getDeviceInformation = async (modbusClient) => {
         ...deviceInformation,
         'familyType': getDeviceFamilyName(result.data[0]),
         'serialNumber': result.data[1],
-        'softwareVersion': result.data[2]
+        'softwareVersion': result.data[2] / 100
     }
 
     return deviceInformation
