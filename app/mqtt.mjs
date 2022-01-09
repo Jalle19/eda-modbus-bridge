@@ -1,4 +1,4 @@
-import { getReadings, getDeviceInformation, getSettings, setSetting } from './modbus.mjs'
+import { getReadings, getDeviceInformation, getSettings, setSetting, getFlagSummary, setFlag } from './modbus.mjs'
 
 const TOPIC_PREFIX = 'eda'
 
@@ -6,6 +6,17 @@ export const publishValues = async (modbusClient, mqttClient) => {
     // Create a map from topic name to value that should be published
     let topicMap = {
         [`${TOPIC_PREFIX}/status`]: 'online',
+    }
+
+    // Publish state for each mode.
+    const modeSummary = await getFlagSummary(modbusClient)
+
+    for (const [mode, state] of Object.entries(modeSummary)) {
+        const topicName = `${TOPIC_PREFIX}/mode/${mode}`
+
+        // Boolean values are changed to "ON" and "OFF" respectively since those are the
+        // defaults for MQTT switches in Home Assistant
+        topicMap[topicName] = state ? 'ON' : 'OFF'
     }
 
     // Publish each reading
@@ -34,23 +45,39 @@ export const publishValues = async (modbusClient, mqttClient) => {
 }
 
 export const subscribeToSettingChanges = async (modbusClient, mqttClient) => {
-    const topicName = `${TOPIC_PREFIX}/settings/+/set`
+    // Subscribe to both settings and mode changes
+    const topicNames = [
+        `${TOPIC_PREFIX}/mode/+/set`,
+        `${TOPIC_PREFIX}/settings/+/set`,
+    ]
 
-    console.log(`Subscribing to topic(s) ${topicName}`)
+    for (const topicName of topicNames) {
+        console.log(`Subscribing to topic(s) ${topicName}`)
 
-    await mqttClient.subscribe(topicName)
+        await mqttClient.subscribe(topicName)
+    }
 }
 
 export const handleMessage = async (modbusClient, topicName, payload) => {
-    console.log(`Received ${payload} on topic ${topicName}`)
+    // Payload looks like a string when logged, but any comparison with === will equal false unless we convert the
+    // Buffer to a string
+    const payloadString = payload.toString()
+
+    console.log(`Received ${payloadString} on topic ${topicName}`)
 
     // Handle settings updates
     if (topicName.startsWith('eda/settings/') && topicName.endsWith('/set')) {
         const settingName = topicName.substring('eda/settings/'.length, topicName.lastIndexOf('/'))
 
-        console.log(`Updating setting ${settingName} to ${payload}`)
+        console.log(`Updating setting ${settingName} to ${payloadString}`)
 
-        await setSetting(modbusClient, settingName, payload)
+        await setSetting(modbusClient, settingName, payloadString)
+    } else if (topicName.startsWith('eda/mode/') && topicName.endsWith('/set')) {
+        const mode = topicName.substring('eda/mode/'.length, topicName.lastIndexOf('/'))
+
+        console.log(`Updating mode ${mode} to ${payloadString}`)
+
+        await setFlag(modbusClient, mode, payloadString === 'ON')
     }
 }
 
@@ -103,6 +130,13 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         'ventilationLevelActual': createGenericSensorConfiguration(configurationBase, 'ventilationLevelActual', 'Ventilation level (actual)', '%'),
     }
 
+    // Configuration for each sensor
+    const sensorConfigurationMap = {
+        ...temperatureSensorConfigurationMap,
+        ...humiditySensorConfigurationMap,
+        ...genericSensorConfigurationMap,
+    }
+
     // Configurable numbers
     const numberConfigurationMap = {
         'overPressureDelay': createNumberConfiguration(configurationBase, 'overPressureDelay', 'Overpressure delay', {
@@ -137,11 +171,15 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         })
     }
 
-    // Configuration for each sensor
-    const sensorConfigurationMap = {
-        ...temperatureSensorConfigurationMap,
-        ...humiditySensorConfigurationMap,
-        ...genericSensorConfigurationMap,
+    // Configurable switches
+    const switchConfigurationMap = {
+        'away': createSwitchConfiguration(configurationBase, 'away', 'Away'),
+        'longAway': createSwitchConfiguration(configurationBase, 'longAway', 'Long away'),
+        'overPressure': createSwitchConfiguration(configurationBase, 'overPressure', 'Overpressure'),
+        'maxHeating': createSwitchConfiguration(configurationBase, 'maxHeating', 'Max heating'),
+        'maxCooling': createSwitchConfiguration(configurationBase, 'maxCooling', 'Max cooling'),
+        'manualBoost': createSwitchConfiguration(configurationBase, 'manualBoost', 'Manual boost'),
+        'summerNightCooling': createSwitchConfiguration(configurationBase, 'summerNightCooling', 'Summer night cooling'),
     }
 
     // Publish configurations
@@ -156,6 +194,13 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         const configurationTopicName = `homeassistant/number/${deviceIdentifier}/${entityName}/config`
 
         console.log(`Publishing Home Assistant auto-discovery configuration for number "${entityName}"...`)
+        await mqttClient.publish(configurationTopicName, JSON.stringify(configuration))
+    }
+
+    for (const [entityName, configuration] of Object.entries(switchConfigurationMap)) {
+        const configurationTopicName = `homeassistant/switch/${deviceIdentifier}/${entityName}/config`
+
+        console.log(`Publishing Home Assistant auto-discovery configuration for switch "${entityName}"...`)
         await mqttClient.publish(configurationTopicName, JSON.stringify(configuration))
     }
 }
@@ -213,5 +258,16 @@ const createNumberConfiguration = (configurationBase, settingName, entityName, e
         'entity_category': 'config',
         'name': entityName,
         ...extraProperties,
+    }
+}
+
+const createSwitchConfiguration = (configurationBase, modeName, entityName) => {
+    return {
+        ...configurationBase,
+        'unique_id': `eda-${modeName}`,
+        'name': entityName,
+        'icon': 'mdi:fan',
+        'state_topic': `${TOPIC_PREFIX}/mode/${modeName}`,
+        'command_topic': `${TOPIC_PREFIX}/mode/${modeName}/set`,
     }
 }
