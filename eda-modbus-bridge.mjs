@@ -4,7 +4,7 @@ import MQTT from 'async-mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
 import { getFlagStatus, root, setFlagStatus, setSetting, summary } from './app/handlers.mjs'
-import { publishReadings, configureMqttDiscovery, subscribeToSettingChanges, handleMessage } from './app/mqtt.mjs'
+import { publishValues, configureMqttDiscovery, subscribeToSettingChanges, handleMessage } from './app/mqtt.mjs'
 
 const argv = yargs(process.argv.slice(2))
     .usage('node $0 [options]')
@@ -85,9 +85,9 @@ const argv = yargs(process.argv.slice(2))
         try {
             const mqttClient = await MQTT.connectAsync(argv.mqttBrokerUrl)
 
-            // Publish readings regularly
+            // Publish readings/settings/modes regularly
             setInterval(async () => {
-                await publishReadings(modbusClient, mqttClient)
+                await publishValues(modbusClient, mqttClient)
             }, argv.mqttPublishInterval * 1000)
 
             console.log(`MQTT scheduler started, will publish readings every ${argv.mqttPublishInterval} seconds`)

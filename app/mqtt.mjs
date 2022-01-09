@@ -2,7 +2,7 @@ import { getReadings, getDeviceInformation, getSettings, setSetting } from './mo
 
 const TOPIC_PREFIX = 'eda'
 
-export const publishReadings = async (modbusClient, mqttClient) => {
+export const publishValues = async (modbusClient, mqttClient) => {
     // Create a map from topic name to value that should be published
     let topicMap = {
         [`${TOPIC_PREFIX}/status`]: 'online',
