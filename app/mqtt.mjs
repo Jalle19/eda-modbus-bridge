@@ -210,7 +210,7 @@ const createTemperatureSensorConfiguration = (configurationBase, readingName, en
         'device_class': 'temperature',
         'unit_of_measurement': '°C',
         'state_class': 'measurement',
-        'name': entityName,
+        'name': `eda_${entityName}`,
         'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
         'unique_id': `eda-${readingName}`
     }
@@ -222,7 +222,7 @@ const createHumiditySensorConfiguration = (configurationBase, readingName, entit
         'device_class': 'humidity',
         'unit_of_measurement': '%H',
         'state_class': 'measurement',
-        'name': entityName,
+        'name': `eda_${entityName}`,
         'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
         'unique_id': `eda-${readingName}`
     }
@@ -232,7 +232,7 @@ const createGenericSensorConfiguration = (configurationBase, readingName, entity
     const configuration = {
         ...configurationBase,
         'state_class': 'measurement',
-        'name': entityName,
+        'name': `eda_${entityName}`,
         'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
         'unique_id': `eda-${readingName}`
     }
@@ -255,7 +255,7 @@ const createNumberConfiguration = (configurationBase, settingName, entityName, e
         'state_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}`,
         'unique_id': `eda-${settingName}`,
         'entity_category': 'config',
-        'name': entityName,
+        'name': `eda_${entityName}`,
         ...extraProperties,
     }
 }
@@ -264,7 +264,7 @@ const createSwitchConfiguration = (configurationBase, modeName, entityName) => {
     return {
         ...configurationBase,
         'unique_id': `eda-${modeName}`,
-        'name': entityName,
+        'name': `eda_${entityName}`,
         'icon': 'mdi:fan',
         'state_topic': `${TOPIC_PREFIX_MODE}/${modeName}`,
         'command_topic': `${TOPIC_PREFIX_MODE}/${modeName}/set`,
