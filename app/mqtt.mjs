@@ -131,14 +131,14 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         'exhaustAirHumidity': createHumiditySensorConfiguration(configurationBase, 'exhaustAirHumidity', 'Exhaust air humidity'),
         'mean48HourExhaustHumidity': createHumiditySensorConfiguration(configurationBase, 'mean48HourExhaustHumidity', 'Exhaust air humidity (48h mean)'),
         // Generic sensors (percentages, minutes left, cascade values)
-        'heatRecoverySupplySide': createGenericSensorConfiguration(configurationBase, 'heatRecoverySupplySide', 'Heat recovery (supply)', '%'),
-        'heatRecoveryExhaustSide': createGenericSensorConfiguration(configurationBase, 'heatRecoveryExhaustSide', 'Heat recovery (exhaust)', '%'),
-        'cascadeSp': createGenericSensorConfiguration(configurationBase, 'cascadeSp', 'Cascade setpoint'),
-        'cascadeP': createGenericSensorConfiguration(configurationBase, 'cascadeP', 'Cascade P-value'),
-        'cascadeI': createGenericSensorConfiguration(configurationBase, 'cascadeI', 'Cascade I-value'),
-        'overPressureTimeLeft': createGenericSensorConfiguration(configurationBase, 'overPressureTimeLeft', 'Overpressure time left', 'minutes'),
-        'ventilationLevelTarget': createGenericSensorConfiguration(configurationBase, 'ventilationLevelTarget', 'Ventilation level (target)', '%'),
-        'ventilationLevelActual': createGenericSensorConfiguration(configurationBase, 'ventilationLevelActual', 'Ventilation level (actual)', '%'),
+        'heatRecoverySupplySide': createSensorConfiguration(configurationBase, 'heatRecoverySupplySide', 'Heat recovery (supply)', {'unit_of_measurement': '%'}),
+        'heatRecoveryExhaustSide': createSensorConfiguration(configurationBase, 'heatRecoveryExhaustSide', 'Heat recovery (exhaust)', {'unit_of_measurement': '%'}),
+        'cascadeSp': createSensorConfiguration(configurationBase, 'cascadeSp', 'Cascade setpoint'),
+        'cascadeP': createSensorConfiguration(configurationBase, 'cascadeP', 'Cascade P-value'),
+        'cascadeI': createSensorConfiguration(configurationBase, 'cascadeI', 'Cascade I-value'),
+        'overPressureTimeLeft': createSensorConfiguration(configurationBase, 'overPressureTimeLeft', 'Overpressure time left', {'unit_of_measurement': 'minutes'}),
+        'ventilationLevelTarget': createSensorConfiguration(configurationBase, 'ventilationLevelTarget', 'Ventilation level (target)', {'unit_of_measurement': '%'}),
+        'ventilationLevelActual': createSensorConfiguration(configurationBase, 'ventilationLevelActual', 'Ventilation level (actual)', {'unit_of_measurement': '%'}),
     }
 
     // Configurable numbers
@@ -228,20 +228,19 @@ const createHumiditySensorConfiguration = (configurationBase, readingName, entit
     }
 }
 
-const createGenericSensorConfiguration = (configurationBase, readingName, entityName, unit) => {
-    const configuration = {
+const createSensorConfiguration = (configurationBase, readingName, entityName, extraProperties) => {
+    if (!extraProperties) {
+        extraProperties = {}
+    }
+
+    return {
         ...configurationBase,
         'state_class': 'measurement',
         'name': `eda_${entityName}`,
         'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
-        'unique_id': `eda-${readingName}`
-    }
-
-    if (unit) {
-        configuration['unit_of_measurement'] = unit
-    }
-
-    return configuration;
+        'unique_id': `eda-${readingName}`,
+        ...extraProperties,
+    };
 }
 
 const createNumberConfiguration = (configurationBase, settingName, entityName, extraProperties) => {
