@@ -44,8 +44,8 @@ export const publishValues = async (modbusClient, mqttClient) => {
     await Promise.all(publishPromises)
 }
 
-export const subscribeToSettingChanges = async (modbusClient, mqttClient) => {
-    // Subscribe to both settings and mode changes
+export const subscribeToChanges = async (modbusClient, mqttClient) => {
+    // Subscribe to settings and mode changes
     const topicNames = [
         `${TOPIC_PREFIX}/mode/+/set`,
         `${TOPIC_PREFIX}/settings/+/set`,
