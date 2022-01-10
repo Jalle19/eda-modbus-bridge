@@ -203,7 +203,8 @@ export const setSetting = async (modbusClient, setting, value) => {
 export const getDeviceInformation = async (modbusClient) => {
     let result = await mutex.runExclusive(async () => modbusClient.readCoils(16, 1))
     let deviceInformation = {
-        'fanType': result.data[0],
+        // EC means DC motors
+        'fanType': result.data[0] ? 'EC' : 'AC',
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(136, 1))
