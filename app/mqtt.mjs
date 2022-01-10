@@ -226,7 +226,8 @@ const createSensorConfiguration = (configurationBase, readingName, entityName, e
     return {
         ...configurationBase,
         'state_class': 'measurement',
-        'name': `eda_${entityName}`,
+        'name': entityName,
+        'object_id': `eda_${readingName}`,
         'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
         'unique_id': `eda-${readingName}`,
         ...extraProperties,
@@ -244,7 +245,8 @@ const createNumberConfiguration = (configurationBase, settingName, entityName, e
         'state_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}`,
         'unique_id': `eda-${settingName}`,
         'entity_category': 'config',
-        'name': `eda_${entityName}`,
+        'name': entityName,
+        'object_id': `eda_${settingName}`,
         ...extraProperties,
     }
 }
@@ -253,7 +255,8 @@ const createSwitchConfiguration = (configurationBase, modeName, entityName) => {
     return {
         ...configurationBase,
         'unique_id': `eda-${modeName}`,
-        'name': `eda_${entityName}`,
+        'name': entityName,
+        'object_id': `eda_${modeName}`,
         'icon': 'mdi:fan',
         'state_topic': `${TOPIC_PREFIX_MODE}/${modeName}`,
         'command_topic': `${TOPIC_PREFIX_MODE}/${modeName}/set`,
