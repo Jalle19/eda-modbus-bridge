@@ -1,6 +1,9 @@
 import { getReadings, getDeviceInformation, getSettings, setSetting, getFlagSummary, setFlag } from './modbus.mjs'
 
 const TOPIC_PREFIX = 'eda'
+const TOPIC_PREFIX_MODE = `${TOPIC_PREFIX}/mode`
+const TOPIC_PREFIX_READINGS = `${TOPIC_PREFIX}/readings`
+const TOPIC_PREFIX_SETTINGS = `${TOPIC_PREFIX}/settings`
 const TOPIC_NAME_STATUS = `${TOPIC_PREFIX}/status`
 
 export const publishValues = async (modbusClient, mqttClient) => {
@@ -13,7 +16,7 @@ export const publishValues = async (modbusClient, mqttClient) => {
     const modeSummary = await getFlagSummary(modbusClient)
 
     for (const [mode, state] of Object.entries(modeSummary)) {
-        const topicName = `${TOPIC_PREFIX}/mode/${mode}`
+        const topicName = `${TOPIC_PREFIX_MODE}/${mode}`
 
         // Boolean values are changed to "ON" and "OFF" respectively since those are the
         // defaults for MQTT switches in Home Assistant
@@ -24,7 +27,7 @@ export const publishValues = async (modbusClient, mqttClient) => {
     const readings = await getReadings(modbusClient)
 
     for (const [reading, value] of Object.entries(readings)) {
-        const topicName = `${TOPIC_PREFIX}/readings/${reading}`
+        const topicName = `${TOPIC_PREFIX_READINGS}/${reading}`
         topicMap[topicName] = JSON.stringify(value)
     }
 
@@ -32,7 +35,7 @@ export const publishValues = async (modbusClient, mqttClient) => {
     const settings = await getSettings(modbusClient)
 
     for (const [setting, value] of Object.entries(settings)) {
-        const topicName = `${TOPIC_PREFIX}/settings/${setting}`
+        const topicName = `${TOPIC_PREFIX_SETTINGS}/${setting}`
         topicMap[topicName] = JSON.stringify(value)
     }
 
@@ -48,8 +51,8 @@ export const publishValues = async (modbusClient, mqttClient) => {
 export const subscribeToChanges = async (modbusClient, mqttClient) => {
     // Subscribe to settings and mode changes
     const topicNames = [
-        `${TOPIC_PREFIX}/mode/+/set`,
-        `${TOPIC_PREFIX}/settings/+/set`,
+        `${TOPIC_PREFIX_MODE}/+/set`,
+        `${TOPIC_PREFIX_SETTINGS}/+/set`,
     ]
 
     for (const topicName of topicNames) {
@@ -67,14 +70,14 @@ export const handleMessage = async (modbusClient, mqttClient, topicName, payload
     console.log(`Received ${payloadString} on topic ${topicName}`)
 
     // Handle settings updates
-    if (topicName.startsWith('eda/settings/') && topicName.endsWith('/set')) {
-        const settingName = topicName.substring('eda/settings/'.length, topicName.lastIndexOf('/'))
+    if (topicName.startsWith(TOPIC_PREFIX_SETTINGS) && topicName.endsWith('/set')) {
+        const settingName = topicName.substring(TOPIC_PREFIX_SETTINGS.length + 1, topicName.lastIndexOf('/'))
 
         console.log(`Updating setting ${settingName} to ${payloadString}`)
 
         await setSetting(modbusClient, settingName, payloadString)
-    } else if (topicName.startsWith('eda/mode/') && topicName.endsWith('/set')) {
-        const mode = topicName.substring('eda/mode/'.length, topicName.lastIndexOf('/'))
+    } else if (topicName.startsWith(TOPIC_PREFIX_MODE) && topicName.endsWith('/set')) {
+        const mode = topicName.substring(TOPIC_PREFIX_MODE.length + 1, topicName.lastIndexOf('/'))
 
         console.log(`Updating mode ${mode} to ${payloadString}`)
 
@@ -204,7 +207,7 @@ const createTemperatureSensorConfiguration = (configurationBase, readingName, en
         'unit_of_measurement': '°C',
         'state_class': 'measurement',
         'name': entityName,
-        'state_topic': `${TOPIC_PREFIX}/readings/${readingName}`,
+        'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
         'unique_id': `eda-${readingName}`
     }
 }
@@ -216,7 +219,7 @@ const createHumiditySensorConfiguration = (configurationBase, readingName, entit
         'unit_of_measurement': '%H',
         'state_class': 'measurement',
         'name': entityName,
-        'state_topic': `${TOPIC_PREFIX}/readings/${readingName}`,
+        'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
         'unique_id': `eda-${readingName}`
     }
 }
@@ -226,7 +229,7 @@ const createGenericSensorConfiguration = (configurationBase, readingName, entity
         ...configurationBase,
         'state_class': 'measurement',
         'name': entityName,
-        'state_topic': `${TOPIC_PREFIX}/readings/${readingName}`,
+        'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
         'unique_id': `eda-${readingName}`
     }
 
@@ -244,8 +247,8 @@ const createNumberConfiguration = (configurationBase, settingName, entityName, e
 
     return {
         ...configurationBase,
-        'command_topic': `${TOPIC_PREFIX}/settings/${settingName}/set`,
-        'state_topic': `${TOPIC_PREFIX}/settings/${settingName}`,
+        'command_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}/set`,
+        'state_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}`,
         'unique_id': `eda-${settingName}`,
         'entity_category': 'config',
         'name': entityName,
@@ -259,7 +262,7 @@ const createSwitchConfiguration = (configurationBase, modeName, entityName) => {
         'unique_id': `eda-${modeName}`,
         'name': entityName,
         'icon': 'mdi:fan',
-        'state_topic': `${TOPIC_PREFIX}/mode/${modeName}`,
-        'command_topic': `${TOPIC_PREFIX}/mode/${modeName}/set`,
+        'state_topic': `${TOPIC_PREFIX_MODE}/${modeName}`,
+        'command_topic': `${TOPIC_PREFIX_MODE}/${modeName}/set`,
     }
 }
