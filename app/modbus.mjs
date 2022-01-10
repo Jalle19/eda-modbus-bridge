@@ -10,6 +10,16 @@ const AVAILABLE_FLAGS = {
     'summerNightCooling': 12,
 }
 
+// Modes that can only be true one at a time (mapped to their coil number)
+const MUTUALLY_EXCLUSIVE_MODES = {
+    'away': 1,
+    'longAway': 2,
+    'overPressure': 3,
+    'maxHeating': 6,
+    'maxCooling': 7,
+    'manualBoost': 10,
+}
+
 const AVAILABLE_SETTINGS = {
     'overPressureDelay': 57,
     'awayVentilationLevel': 100,
@@ -65,6 +75,21 @@ export const setFlag = async (modbusClient, flag, value) => {
     }
 
     await mutex.runExclusive(async () => modbusClient.writeCoil(AVAILABLE_FLAGS[flag], value))
+
+    // Flags are mutually exclusive, disable all others when enabling one
+    if (value) {
+        await disableAllModesExcept(modbusClient, flag)
+    }
+}
+
+const disableAllModesExcept = async (modbusClient, exceptedMode) => {
+    for (const mode in MUTUALLY_EXCLUSIVE_MODES) {
+        if (mode === exceptedMode) {
+            continue
+        }
+
+        await mutex.runExclusive(async () => modbusClient.writeCoil(AVAILABLE_FLAGS[mode], false))
+    }
 }
 
 export const getReadings = async (modbusClient) => {

@@ -3,8 +3,8 @@ import morgan from 'morgan'
 import MQTT from 'async-mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
-import {getFlagStatus, root, setFlagStatus, setSetting, summary} from './app/handlers.mjs'
-import {getReadingsTopicValues} from './app/mqtt.mjs'
+import { getFlagStatus, root, setFlagStatus, setSetting, summary } from './app/handlers.mjs'
+import { publishValues, configureMqttDiscovery, subscribeToChanges, handleMessage } from './app/mqtt.mjs'
 
 const argv = yargs(process.argv.slice(2))
     .usage('node $0 [options]')
@@ -85,17 +85,22 @@ const argv = yargs(process.argv.slice(2))
         try {
             const mqttClient = await MQTT.connectAsync(argv.mqttBrokerUrl)
 
+            // Publish readings/settings/modes regularly
             setInterval(async () => {
-                // Publish each reading to a separate topic
-                const topicMap = await getReadingsTopicValues(modbusClient)
-                const publishPromises = []
-
-                for (const [topic, value] of Object.entries(topicMap)) {
-                    publishPromises.push(mqttClient.publish(topic, JSON.stringify(value)))
-                }
-
-                await Promise.all(publishPromises)
+                await publishValues(modbusClient, mqttClient)
             }, argv.mqttPublishInterval * 1000)
+
+            console.log(`MQTT scheduler started, will publish readings every ${argv.mqttPublishInterval} seconds`)
+
+            // Subscribe to changes and register a handler
+            await subscribeToChanges(modbusClient, mqttClient)
+            mqttClient.on('message', async (topicName, payload) => {
+                await handleMessage(modbusClient, mqttClient, topicName, payload)
+            })
+
+            // Configure Home Assistant MQTT discovery
+            await configureMqttDiscovery(modbusClient, mqttClient)
+            console.log('Finished configuration Home Assistant MQTT discovery')
         } catch (e) {
             console.error(`Failed to connect to MQTT broker: ${e.message}`)
         }

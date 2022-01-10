@@ -138,6 +138,7 @@ Returns the new setting values, like this:
 The following topics are published to regularly
 
 ```
+eda/status
 eda/readings/freshAirTemperature
 eda/readings/supplyAirTemperatureAfterHeatRecovery
 eda/readings/supplyAirTemperature
