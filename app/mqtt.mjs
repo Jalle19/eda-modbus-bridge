@@ -205,27 +205,17 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
 }
 
 const createTemperatureSensorConfiguration = (configurationBase, readingName, entityName) => {
-    return {
-        ...configurationBase,
+    return createSensorConfiguration(configurationBase, readingName, entityName, {
         'device_class': 'temperature',
         'unit_of_measurement': '°C',
-        'state_class': 'measurement',
-        'name': `eda_${entityName}`,
-        'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
-        'unique_id': `eda-${readingName}`
-    }
+    })
 }
 
 const createHumiditySensorConfiguration = (configurationBase, readingName, entityName) => {
-    return {
-        ...configurationBase,
+    return createSensorConfiguration(configurationBase, readingName, entityName, {
         'device_class': 'humidity',
         'unit_of_measurement': '%H',
-        'state_class': 'measurement',
-        'name': `eda_${entityName}`,
-        'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
-        'unique_id': `eda-${readingName}`
-    }
+    })
 }
 
 const createSensorConfiguration = (configurationBase, readingName, entityName, extraProperties) => {
