@@ -10,6 +10,16 @@ const AVAILABLE_FLAGS = {
     'summerNightCooling': 12,
 }
 
+// Modes that can only be true one at a time (mapped to their coil number)
+const MUTUALLY_EXCLUSIVE_MODES = {
+    'away': 1,
+    'longAway': 2,
+    'overPressure': 3,
+    'maxHeating': 6,
+    'maxCooling': 7,
+    'manualBoost': 10,
+}
+
 const AVAILABLE_SETTINGS = {
     'overPressureDelay': 57,
     'awayVentilationLevel': 100,
@@ -73,9 +83,8 @@ export const setFlag = async (modbusClient, flag, value) => {
 }
 
 const disableAllModesExcept = async (modbusClient, exceptedMode) => {
-    for (const mode in AVAILABLE_FLAGS) {
-        // summerNightCooling can be enabled simultaneously with other modes
-        if (mode === exceptedMode || mode === 'summerNightCooling') {
+    for (const mode in MUTUALLY_EXCLUSIVE_MODES) {
+        if (mode === exceptedMode) {
             continue
         }
 
