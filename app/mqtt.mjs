@@ -1,11 +1,12 @@
 import { getReadings, getDeviceInformation, getSettings, setSetting, getFlagSummary, setFlag } from './modbus.mjs'
 
 const TOPIC_PREFIX = 'eda'
+const TOPIC_NAME_STATUS = `${TOPIC_PREFIX}/status`
 
 export const publishValues = async (modbusClient, mqttClient) => {
     // Create a map from topic name to value that should be published
     let topicMap = {
-        [`${TOPIC_PREFIX}/status`]: 'online',
+        [TOPIC_NAME_STATUS]: 'online',
     }
 
     // Publish state for each mode.
@@ -102,7 +103,7 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
 
     const configurationBase = {
         'platform': 'mqtt',
-        'availability_topic': `${TOPIC_PREFIX}/status`,
+        'availability_topic': TOPIC_NAME_STATUS,
         'device': mqttDeviceInformation,
     }
 
