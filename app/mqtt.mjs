@@ -102,7 +102,7 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
     const modbusDeviceInformation = await getDeviceInformation(modbusClient)
     const softwareVersion = modbusDeviceInformation.softwareVersion
     const modelName = createModelNameString(modbusDeviceInformation)
-    const deviceIdentifier = `enervent-${modbusDeviceInformation.familyType}-${modbusDeviceInformation.fanType}`
+    const deviceIdentifier = `enervent-${modbusDeviceInformation.familyType}-${modbusDeviceInformation.fanType}`.toLowerCase()
 
     // The "device" object that is part of each sensor's configuration payload
     const mqttDeviceInformation = {
