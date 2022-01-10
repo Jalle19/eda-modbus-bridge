@@ -177,26 +177,21 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         'summerNightCooling': createSwitchConfiguration(configurationBase, 'summerNightCooling', 'Summer night cooling'),
     }
 
+    // Final map that describes everything we want to be auto-discovered
+    const configurationMap = {
+        'sensor': sensorConfigurationMap,
+        'number': numberConfigurationMap,
+        'switch': switchConfigurationMap,
+    }
+
     // Publish configurations
-    for (const [entityName, configuration] of Object.entries(sensorConfigurationMap)) {
-        const configurationTopicName = `homeassistant/sensor/${deviceIdentifier}/${entityName}/config`
+    for (const [entityType, entityConfigurationMap] of Object.entries(configurationMap)) {
+        for (const [entityName, configuration] of Object.entries(entityConfigurationMap)) {
+            const configurationTopicName = `homeassistant/${entityType}/${deviceIdentifier}/${entityName}/config`
 
-        console.log(`Publishing Home Assistant auto-discovery configuration for sensor "${entityName}"...`)
-        await mqttClient.publish(configurationTopicName, JSON.stringify(configuration))
-    }
-
-    for (const [entityName, configuration] of Object.entries(numberConfigurationMap)) {
-        const configurationTopicName = `homeassistant/number/${deviceIdentifier}/${entityName}/config`
-
-        console.log(`Publishing Home Assistant auto-discovery configuration for number "${entityName}"...`)
-        await mqttClient.publish(configurationTopicName, JSON.stringify(configuration))
-    }
-
-    for (const [entityName, configuration] of Object.entries(switchConfigurationMap)) {
-        const configurationTopicName = `homeassistant/switch/${deviceIdentifier}/${entityName}/config`
-
-        console.log(`Publishing Home Assistant auto-discovery configuration for switch "${entityName}"...`)
-        await mqttClient.publish(configurationTopicName, JSON.stringify(configuration))
+            console.log(`Publishing Home Assistant auto-discovery configuration for ${entityType} "${entityName}"...`)
+            await mqttClient.publish(configurationTopicName, JSON.stringify(configuration))
+        }
     }
 }
 
