@@ -1,4 +1,12 @@
-import { getReadings, getDeviceInformation, getSettings, setSetting, getFlagSummary, setFlag } from './modbus.mjs'
+import {
+    getReadings,
+    getDeviceInformation,
+    getSettings,
+    setSetting,
+    getFlagSummary,
+    setFlag,
+    createModelNameString
+} from './modbus.mjs'
 
 const TOPIC_PREFIX = 'eda'
 const TOPIC_PREFIX_MODE = `${TOPIC_PREFIX}/mode`
@@ -89,18 +97,19 @@ export const handleMessage = async (modbusClient, mqttClient, topicName, payload
 }
 
 export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
+    // Build information about the ventilation unit. The "deviceIdentifier" is used as <node_id> in discovery topic
+    // names, so it must match [a-zA-Z0-9_-].
     const modbusDeviceInformation = await getDeviceInformation(modbusClient)
-    const familyType = modbusDeviceInformation.familyType
-    const serialNumber = modbusDeviceInformation.serialNumber
     const softwareVersion = modbusDeviceInformation.softwareVersion
-    const deviceIdentifier = `Enervent-${familyType}-${serialNumber}-${softwareVersion}`;
+    const modelName = createModelNameString(modbusDeviceInformation)
+    const deviceIdentifier = `enervent-${modbusDeviceInformation.familyType}-${modbusDeviceInformation.fanType}`
 
     // The "device" object that is part of each sensor's configuration payload
     const mqttDeviceInformation = {
         'identifiers': deviceIdentifier,
-        'name': `Enervent ${familyType}`,
+        'name': `Enervent ${modelName}`,
         'sw_version': softwareVersion,
-        'model': familyType,
+        'model': modelName,
         'manufacturer': 'Enervent',
     }
 
