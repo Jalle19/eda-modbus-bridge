@@ -31,7 +31,7 @@ const AVAILABLE_SETTINGS = {
 
 const mutex = new Mutex()
 
-const parseTemperature = (temperature) => {
+export const parseTemperature = (temperature) => {
     if (temperature > 60000) {
         temperature = (65536 - temperature) * -1
     }

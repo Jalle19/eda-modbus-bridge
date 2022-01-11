@@ -1,5 +1,9 @@
 # Change log
 
+## future release
+
+* add basic test suite
+
 ## 2.0.0
 
 First production-ready version with full MQTT support and good Home Assistant integration

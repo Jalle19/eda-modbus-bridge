@@ -7,7 +7,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "repository": {
     "type": "git",
@@ -26,5 +26,8 @@
     "modbus-serial": "^8.0.5",
     "morgan": "^1.10.0",
     "yargs": "^16.2.0"
+  },
+  "devDependencies": {
+    "jest": "^27.4.7"
   }
 }
