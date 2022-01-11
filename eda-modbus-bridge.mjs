@@ -111,7 +111,5 @@ const argv = yargs(process.argv.slice(2))
         } catch (e) {
             console.error(`Failed to connect to MQTT broker: ${e.message}`)
         }
-    } else {
-        console.log('No MQTT broker URL defined, not enabling MQTT support')
     }
 })();
