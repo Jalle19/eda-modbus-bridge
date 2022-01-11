@@ -38,7 +38,12 @@ const argv = yargs(process.argv.slice(2))
             description: 'How often messages should be published over MQTT (in seconds)',
             default: 10,
             alias: 'i',
-        }
+        },
+        'mqttDiscovery': {
+            description: 'Whether to enable Home Assistant MQTT discovery support. Only effective when mqttBrokerUrl is defined.',
+            type: 'boolean',
+            default: true,
+        },
     })
     .argv;
 
@@ -98,9 +103,11 @@ const argv = yargs(process.argv.slice(2))
                 await handleMessage(modbusClient, mqttClient, topicName, payload)
             })
 
-            // Configure Home Assistant MQTT discovery
-            await configureMqttDiscovery(modbusClient, mqttClient)
-            console.log('Finished configuration Home Assistant MQTT discovery')
+            // Optionally configure Home Assistant MQTT discovery
+            if (argv.mqttDiscovery) {
+                await configureMqttDiscovery(modbusClient, mqttClient)
+                console.log('Finished configuration Home Assistant MQTT discovery')
+            }
         } catch (e) {
             console.error(`Failed to connect to MQTT broker: ${e.message}`)
         }

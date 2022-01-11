@@ -40,6 +40,9 @@ Options:
                              83. Omit to disable MQTT support.
   -i, --mqttPublishInterval  How often messages should be published over MQTT (i
                              n seconds)                            [default: 10]
+      --mqttDiscovery        Whether to disable Home Assistant MQTT discovery su
+                             pport. Only effective when mqttBrokerUrl is defined
+                             .                         [boolean] [default: true]
 ```
 
 ## HTTP endpoints
