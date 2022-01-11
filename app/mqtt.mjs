@@ -1,4 +1,12 @@
-import { getReadings, getDeviceInformation, getSettings, setSetting, getFlagSummary, setFlag } from './modbus.mjs'
+import {
+    getReadings,
+    getDeviceInformation,
+    getSettings,
+    setSetting,
+    getFlagSummary,
+    setFlag,
+    createModelNameString
+} from './modbus.mjs'
 
 const TOPIC_PREFIX = 'eda'
 const TOPIC_PREFIX_MODE = `${TOPIC_PREFIX}/mode`
@@ -89,18 +97,19 @@ export const handleMessage = async (modbusClient, mqttClient, topicName, payload
 }
 
 export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
+    // Build information about the ventilation unit. The "deviceIdentifier" is used as <node_id> in discovery topic
+    // names, so it must match [a-zA-Z0-9_-].
     const modbusDeviceInformation = await getDeviceInformation(modbusClient)
-    const familyType = modbusDeviceInformation.familyType
-    const serialNumber = modbusDeviceInformation.serialNumber
     const softwareVersion = modbusDeviceInformation.softwareVersion
-    const deviceIdentifier = `Enervent-${familyType}-${serialNumber}-${softwareVersion}`;
+    const modelName = createModelNameString(modbusDeviceInformation)
+    const deviceIdentifier = `enervent-${modbusDeviceInformation.familyType}-${modbusDeviceInformation.fanType}`.toLowerCase()
 
     // The "device" object that is part of each sensor's configuration payload
     const mqttDeviceInformation = {
         'identifiers': deviceIdentifier,
-        'name': `Enervent ${familyType}`,
+        'name': `Enervent ${modelName}`,
         'sw_version': softwareVersion,
-        'model': familyType,
+        'model': modelName,
         'manufacturer': 'Enervent',
     }
 
@@ -122,14 +131,14 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         'exhaustAirHumidity': createHumiditySensorConfiguration(configurationBase, 'exhaustAirHumidity', 'Exhaust air humidity'),
         'mean48HourExhaustHumidity': createHumiditySensorConfiguration(configurationBase, 'mean48HourExhaustHumidity', 'Exhaust air humidity (48h mean)'),
         // Generic sensors (percentages, minutes left, cascade values)
-        'heatRecoverySupplySide': createGenericSensorConfiguration(configurationBase, 'heatRecoverySupplySide', 'Heat recovery (supply)', '%'),
-        'heatRecoveryExhaustSide': createGenericSensorConfiguration(configurationBase, 'heatRecoveryExhaustSide', 'Heat recovery (exhaust)', '%'),
-        'cascadeSp': createGenericSensorConfiguration(configurationBase, 'cascadeSp', 'Cascade setpoint'),
-        'cascadeP': createGenericSensorConfiguration(configurationBase, 'cascadeP', 'Cascade P-value'),
-        'cascadeI': createGenericSensorConfiguration(configurationBase, 'cascadeI', 'Cascade I-value'),
-        'overPressureTimeLeft': createGenericSensorConfiguration(configurationBase, 'overPressureTimeLeft', 'Overpressure time left', 'minutes'),
-        'ventilationLevelTarget': createGenericSensorConfiguration(configurationBase, 'ventilationLevelTarget', 'Ventilation level (target)', '%'),
-        'ventilationLevelActual': createGenericSensorConfiguration(configurationBase, 'ventilationLevelActual', 'Ventilation level (actual)', '%'),
+        'heatRecoverySupplySide': createSensorConfiguration(configurationBase, 'heatRecoverySupplySide', 'Heat recovery (supply)', {'unit_of_measurement': '%'}),
+        'heatRecoveryExhaustSide': createSensorConfiguration(configurationBase, 'heatRecoveryExhaustSide', 'Heat recovery (exhaust)', {'unit_of_measurement': '%'}),
+        'cascadeSp': createSensorConfiguration(configurationBase, 'cascadeSp', 'Cascade setpoint'),
+        'cascadeP': createSensorConfiguration(configurationBase, 'cascadeP', 'Cascade P-value'),
+        'cascadeI': createSensorConfiguration(configurationBase, 'cascadeI', 'Cascade I-value'),
+        'overPressureTimeLeft': createSensorConfiguration(configurationBase, 'overPressureTimeLeft', 'Overpressure time left', {'unit_of_measurement': 'minutes'}),
+        'ventilationLevelTarget': createSensorConfiguration(configurationBase, 'ventilationLevelTarget', 'Ventilation level (target)', {'unit_of_measurement': '%'}),
+        'ventilationLevelActual': createSensorConfiguration(configurationBase, 'ventilationLevelActual', 'Ventilation level (actual)', {'unit_of_measurement': '%'}),
     }
 
     // Configurable numbers
@@ -196,43 +205,33 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
 }
 
 const createTemperatureSensorConfiguration = (configurationBase, readingName, entityName) => {
-    return {
-        ...configurationBase,
+    return createSensorConfiguration(configurationBase, readingName, entityName, {
         'device_class': 'temperature',
         'unit_of_measurement': '°C',
-        'state_class': 'measurement',
-        'name': entityName,
-        'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
-        'unique_id': `eda-${readingName}`
-    }
+    })
 }
 
 const createHumiditySensorConfiguration = (configurationBase, readingName, entityName) => {
-    return {
-        ...configurationBase,
+    return createSensorConfiguration(configurationBase, readingName, entityName, {
         'device_class': 'humidity',
         'unit_of_measurement': '%H',
-        'state_class': 'measurement',
-        'name': entityName,
-        'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
-        'unique_id': `eda-${readingName}`
-    }
+    })
 }
 
-const createGenericSensorConfiguration = (configurationBase, readingName, entityName, unit) => {
-    const configuration = {
+const createSensorConfiguration = (configurationBase, readingName, entityName, extraProperties) => {
+    if (!extraProperties) {
+        extraProperties = {}
+    }
+
+    return {
         ...configurationBase,
         'state_class': 'measurement',
         'name': entityName,
+        'object_id': `eda_${readingName}`,
         'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
-        'unique_id': `eda-${readingName}`
-    }
-
-    if (unit) {
-        configuration['unit_of_measurement'] = unit
-    }
-
-    return configuration;
+        'unique_id': `eda-${readingName}`,
+        ...extraProperties,
+    };
 }
 
 const createNumberConfiguration = (configurationBase, settingName, entityName, extraProperties) => {
@@ -247,6 +246,7 @@ const createNumberConfiguration = (configurationBase, settingName, entityName, e
         'unique_id': `eda-${settingName}`,
         'entity_category': 'config',
         'name': entityName,
+        'object_id': `eda_${settingName}`,
         ...extraProperties,
     }
 }
@@ -256,6 +256,7 @@ const createSwitchConfiguration = (configurationBase, modeName, entityName) => {
         ...configurationBase,
         'unique_id': `eda-${modeName}`,
         'name': entityName,
+        'object_id': `eda_${modeName}`,
         'icon': 'mdi:fan',
         'state_topic': `${TOPIC_PREFIX_MODE}/${modeName}`,
         'command_topic': `${TOPIC_PREFIX_MODE}/${modeName}/set`,

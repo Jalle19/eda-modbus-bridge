@@ -203,13 +203,20 @@ export const setSetting = async (modbusClient, setting, value) => {
 export const getDeviceInformation = async (modbusClient) => {
     let result = await mutex.runExclusive(async () => modbusClient.readCoils(16, 1))
     let deviceInformation = {
-        'fanType': result.data[0],
+        // EC means DC motors
+        'fanType': result.data[0] ? 'EC' : 'AC',
     }
 
-    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(136, 1))
+    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(154, 1))
     deviceInformation = {
         ...deviceInformation,
-        'heatingConfigurationMode': result.data[0]
+        'coolingTypeInstalled': getCoolingTypeName(result.data[0])
+    }
+
+    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(171, 1))
+    deviceInformation = {
+        ...deviceInformation,
+        'heatingTypeInstalled': getHeatingTypeName(result.data[0])
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(597, 3))
@@ -235,4 +242,50 @@ const getDeviceFamilyName = (familyTypeInt) => {
         'LTR-7',
         'LTR-7 XL'
     ][familyTypeInt] ?? 'unknown'
+}
+
+const getCoolingTypeName = (coolingTypeInt) => {
+    // 0=Ei jäähdytintä, 1=CW, 2=HP, 3=CG, 4=CX, 5=CX_INV, 6=X2CX, 7=CXBIN, 8=Cooler
+    return [
+        null,
+        'CW',
+        'HP',
+        'CG',
+        'CX',
+        'CX_INV',
+        'X2CX',
+        'CXBIN',
+        'Cooler',
+    ][coolingTypeInt]
+}
+
+const getHeatingTypeName = (heatingTypeInt) => {
+    // 0=Ei lämmitintä, 1=VPK, 2=HP, 3=SLP, 4=SLP PWM. Mapping known values to the actual names used on the product,
+    // these seem to be internal
+    return [
+        'ED',
+        'EDW',
+        'HP',
+        'EDE',
+        'SLP PWM',
+    ][heatingTypeInt] ?? 'unknown'
+}
+
+export const createModelNameString = (deviceInformation) => {
+    // E.g. LTR-3 eco EDE - CG
+    let modelName = deviceInformation.familyType
+
+    if (deviceInformation.fanType === 'EC') {
+        modelName += ' eco'
+    }
+
+    if (deviceInformation.heatingTypeInstalled !== null) {
+        modelName += ` ${deviceInformation.heatingTypeInstalled}`
+    }
+
+    if (deviceInformation.coolingTypeInstalled !== null) {
+        modelName += ` - ${deviceInformation.coolingTypeInstalled}`
+    }
+
+    return modelName
 }
