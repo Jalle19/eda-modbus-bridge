@@ -223,10 +223,10 @@ in Home Assistant automatically through the MQTT integration. The following enti
 * numbers (configurable) for settings
 * switches for the ventilation modes
 
-![](/home/negge/Projects/eda-modbus-bridge/docs/readme_ha1.png "Home Assistant device info")
-![](/home/negge/Projects/eda-modbus-bridge/docs/readme_ha2.png "Home Assistant controls")
-![](/home/negge/Projects/eda-modbus-bridge/docs/readme_ha3.png "Home Assistant sensors")
-![](/home/negge/Projects/eda-modbus-bridge/docs/readme_ha4.png "Home Assistant configuration")
+![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha1.png "Home Assistant device info")
+![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha2.png "Home Assistant controls")
+![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha3.png "Home Assistant sensors")
+![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha4.png "Home Assistant configuration")
 
 ## Running as a systemd service
 
