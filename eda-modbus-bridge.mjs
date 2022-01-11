@@ -19,6 +19,11 @@ const argv = yargs(process.argv.slice(2))
             default: 1,
             alias: 's'
         },
+        'http': {
+            description: 'Whether to enable the HTTP server or not',
+            type: 'boolean',
+            default: true,
+        },
         'httpListenAddress': {
             description: 'The address to listen (HTTP)',
             default: '0.0.0.0',
@@ -38,7 +43,12 @@ const argv = yargs(process.argv.slice(2))
             description: 'How often messages should be published over MQTT (in seconds)',
             default: 10,
             alias: 'i',
-        }
+        },
+        'mqttDiscovery': {
+            description: 'Whether to enable Home Assistant MQTT discovery support. Only effective when mqttBrokerUrl is defined.',
+            type: 'boolean',
+            default: true,
+        },
     })
     .argv;
 
@@ -55,28 +65,30 @@ const argv = yargs(process.argv.slice(2))
         stopBits: 1,
     })
 
-    // Create HTTP server
-    const httpServer = express()
-    httpServer.use(morgan('tiny'))
-    httpServer.use(express.json())
+    // Optionally create HTTP server
+    if (argv.http) {
+        const httpServer = express()
+        httpServer.use(morgan('tiny'))
+        httpServer.use(express.json())
 
-    httpServer.get('/', root)
-    httpServer.get('/summary', (req, res) => {
-        return summary(modbusClient, req, res)
-    })
-    httpServer.get('/mode/:flag', (req, res) => {
-        return getFlagStatus(modbusClient, req, res)
-    })
-    httpServer.post('/mode/:flag', (req, res) => {
-        return setFlagStatus(modbusClient, req, res)
-    })
-    httpServer.post('/setting/:setting/:value', (req, res) => {
-        return setSetting(modbusClient, req, res)
-    })
+        httpServer.get('/', root)
+        httpServer.get('/summary', (req, res) => {
+            return summary(modbusClient, req, res)
+        })
+        httpServer.get('/mode/:flag', (req, res) => {
+            return getFlagStatus(modbusClient, req, res)
+        })
+        httpServer.post('/mode/:flag', (req, res) => {
+            return setFlagStatus(modbusClient, req, res)
+        })
+        httpServer.post('/setting/:setting/:value', (req, res) => {
+            return setSetting(modbusClient, req, res)
+        })
 
-    httpServer.listen(argv.httpPort, argv.httpListenAddress, () => {
-        console.log(`Listening on http://${argv.httpListenAddress}:${argv.httpPort}`)
-    })
+        httpServer.listen(argv.httpPort, argv.httpListenAddress, () => {
+            console.log(`Listening on http://${argv.httpListenAddress}:${argv.httpPort}`)
+        })
+    }
 
     // Optionally create MQTT client
     if (argv.mqttBrokerUrl !== undefined) {
@@ -98,13 +110,13 @@ const argv = yargs(process.argv.slice(2))
                 await handleMessage(modbusClient, mqttClient, topicName, payload)
             })
 
-            // Configure Home Assistant MQTT discovery
-            await configureMqttDiscovery(modbusClient, mqttClient)
-            console.log('Finished configuration Home Assistant MQTT discovery')
+            // Optionally configure Home Assistant MQTT discovery
+            if (argv.mqttDiscovery) {
+                await configureMqttDiscovery(modbusClient, mqttClient)
+                console.log('Finished configuration Home Assistant MQTT discovery')
+            }
         } catch (e) {
             console.error(`Failed to connect to MQTT broker: ${e.message}`)
         }
-    } else {
-        console.log('No MQTT broker URL defined, not enabling MQTT support')
     }
 })();
