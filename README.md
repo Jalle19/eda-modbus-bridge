@@ -234,11 +234,7 @@ You can use the provided systemd unit to run the software as a daemon
 
 ## Running as a Home Assistant OS addon
 
-1. Clone this repository
-2. Copy the working directory to the `addons` directory on your Home Assistant OS host. The easiest way to do this is 
-   using the Samba addon.
-3. Reload the add-on store from the supervisor. The addon should appear under "Local add-ons".
-4. Install and start the addon.
+See https://github.com/Jalle19/home-assistant-addon-repository/tree/main/eda-modbus-bridge
 
 ## License
 
