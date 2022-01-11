@@ -34,6 +34,8 @@ Options:
   -d, --device               The serial device to use, e.g. /dev/ttyUSB0
                                                                       [required]
   -s, --modbusSlave          The Modbus slave address               [default: 1]
+      --http                 Whether to enable the HTTP server or not
+                                                       [boolean] [default: true]
   -a, --httpListenAddress    The address to listen (HTTP)   [default: "0.0.0.0"]
   -p, --httpPort             The port to listen on (HTTP)        [default: 8080]
   -m, --mqttBrokerUrl        The URL to the MQTT broker, e.g. tcp://localhost:18

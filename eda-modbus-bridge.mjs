@@ -19,6 +19,11 @@ const argv = yargs(process.argv.slice(2))
             default: 1,
             alias: 's'
         },
+        'http': {
+            description: 'Whether to enable the HTTP server or not',
+            type: 'boolean',
+            default: true,
+        },
         'httpListenAddress': {
             description: 'The address to listen (HTTP)',
             default: '0.0.0.0',
@@ -60,28 +65,30 @@ const argv = yargs(process.argv.slice(2))
         stopBits: 1,
     })
 
-    // Create HTTP server
-    const httpServer = express()
-    httpServer.use(morgan('tiny'))
-    httpServer.use(express.json())
+    // Optionally create HTTP server
+    if (argv.http) {
+        const httpServer = express()
+        httpServer.use(morgan('tiny'))
+        httpServer.use(express.json())
 
-    httpServer.get('/', root)
-    httpServer.get('/summary', (req, res) => {
-        return summary(modbusClient, req, res)
-    })
-    httpServer.get('/mode/:flag', (req, res) => {
-        return getFlagStatus(modbusClient, req, res)
-    })
-    httpServer.post('/mode/:flag', (req, res) => {
-        return setFlagStatus(modbusClient, req, res)
-    })
-    httpServer.post('/setting/:setting/:value', (req, res) => {
-        return setSetting(modbusClient, req, res)
-    })
+        httpServer.get('/', root)
+        httpServer.get('/summary', (req, res) => {
+            return summary(modbusClient, req, res)
+        })
+        httpServer.get('/mode/:flag', (req, res) => {
+            return getFlagStatus(modbusClient, req, res)
+        })
+        httpServer.post('/mode/:flag', (req, res) => {
+            return setFlagStatus(modbusClient, req, res)
+        })
+        httpServer.post('/setting/:setting/:value', (req, res) => {
+            return setSetting(modbusClient, req, res)
+        })
 
-    httpServer.listen(argv.httpPort, argv.httpListenAddress, () => {
-        console.log(`Listening on http://${argv.httpListenAddress}:${argv.httpPort}`)
-    })
+        httpServer.listen(argv.httpPort, argv.httpListenAddress, () => {
+            console.log(`Listening on http://${argv.httpListenAddress}:${argv.httpPort}`)
+        })
+    }
 
     // Optionally create MQTT client
     if (argv.mqttBrokerUrl !== undefined) {
