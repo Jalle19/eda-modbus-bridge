@@ -39,6 +39,14 @@ const argv = yargs(process.argv.slice(2))
             default: undefined,
             alias: 'm',
         },
+        'mqttUsername': {
+            description: 'The username to use when connecting to the MQTT broker. Omit to disable authentication.',
+            default: undefined,
+        },
+        'mqttPassword': {
+            description: 'The password to use when connecting to the MQTT broker. Required when mqttUsername is defined. Omit to disable authentication.',
+            default: undefined,
+        },
         'mqttPublishInterval': {
             description: 'How often messages should be published over MQTT (in seconds)',
             default: 10,
@@ -95,7 +103,19 @@ const argv = yargs(process.argv.slice(2))
         console.log(`Connecting to MQTT broker at ${argv.mqttBrokerUrl}`)
 
         try {
-            const mqttClient = await MQTT.connectAsync(argv.mqttBrokerUrl)
+            // Handle authentication
+            let clientOptions = {}
+
+            if (argv.mqttUsername && argv.mqttPassword) {
+                console.log('Using MQTT broker authentication')
+
+                clientOptions = {
+                    'username': argv.mqttUsername,
+                    'password': argv.mqttPassword,
+                }
+            }
+
+            const mqttClient = await MQTT.connectAsync(argv.mqttBrokerUrl, clientOptions)
 
             // Publish readings/settings/modes regularly
             setInterval(async () => {

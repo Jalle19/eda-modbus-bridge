@@ -40,11 +40,16 @@ Options:
   -p, --httpPort             The port to listen on (HTTP)        [default: 8080]
   -m, --mqttBrokerUrl        The URL to the MQTT broker, e.g. tcp://localhost:18
                              83. Omit to disable MQTT support.
+      --mqttUsername         The username to use when connecting to the MQTT bro
+                             ker. Omit to disable authentication.
+      --mqttPassword         The password to use when connecting to the MQTT bro
+                             ker. Required when mqttUsername is defined. Omit to
+                              disable authentication.
   -i, --mqttPublishInterval  How often messages should be published over MQTT (i
                              n seconds)                            [default: 10]
-      --mqttDiscovery        Whether to disable Home Assistant MQTT discovery su
-                             pport. Only effective when mqttBrokerUrl is defined
-                             .                         [boolean] [default: true]
+      --mqttDiscovery        Whether to enable Home Assistant MQTT discovery sup
+                             port. Only effective when mqttBrokerUrl is defined.
+                                                       [boolean] [default: true]
 ```
 
 ## HTTP endpoints
@@ -180,6 +185,12 @@ eda/settings/awayTemperatureReduction
 eda/settings/longAwayVentilationLevel
 eda/settings/longAwayTemperatureReduction
 eda/settings/temperatureTarget
+eda/deviceInformation/fanType
+eda/deviceInformation/coolingTypeInstalled
+eda/deviceInformation/heatingTypeInstalled
+eda/deviceInformation/familyType
+eda/deviceInformation/serialNumber
+eda/deviceInformation/softwareVersion
 ```
 
 The following topics can be written to in order to control the operation of the ventilation unit:
@@ -212,10 +223,10 @@ in Home Assistant automatically through the MQTT integration. The following enti
 * numbers (configurable) for settings
 * switches for the ventilation modes
 
-![](/home/negge/Projects/eda-modbus-bridge/docs/readme_ha1.png "Home Assistant device info")
-![](/home/negge/Projects/eda-modbus-bridge/docs/readme_ha2.png "Home Assistant controls")
-![](/home/negge/Projects/eda-modbus-bridge/docs/readme_ha3.png "Home Assistant sensors")
-![](/home/negge/Projects/eda-modbus-bridge/docs/readme_ha4.png "Home Assistant configuration")
+![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha1.png "Home Assistant device info")
+![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha2.png "Home Assistant controls")
+![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha3.png "Home Assistant sensors")
+![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha4.png "Home Assistant configuration")
 
 ## Running as a systemd service
 
