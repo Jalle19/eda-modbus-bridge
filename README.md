@@ -4,7 +4,7 @@
 
 An HTTP/MQTT bridge for Enervent ventilation units with EDA automation (e.g. Pingvin). It provides a REST-ful HTTP interface 
 for interacting with the ventilation unit (reading temperatures and changing certain settings), as well as an MQTT 
-client which can publish readings regularly.
+client which can publish readings/settings regularly and be used to control the ventilation unit.
 
 Communication happens over RS-485 (Modbus RTU) by connecting a serial device to the "Freeway" port on the ventilation 
 unit's computer board.
@@ -15,7 +15,7 @@ https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See
 ## Features
 
 * HTTP API for reading temperatures, modes and settings, as well as changing some settings
-* MQTT support (publishes readings regularly) 
+* MQTT support (read and write), including Home Assistant MQTT discovery support 
 
 ## Requirements
 
@@ -136,12 +136,24 @@ Returns the new setting values, like this:
 }
 ```
 
-## MQTT topics
+## MQTT support
 
-The following topics are published to regularly
+When an MQTT broker URL is specified, the application connects to the broker and starts to regularly publish data at 
+the configured interval (defaults to every 10 seconds).
+
+Every topic is prefixed by `eda/`, so to subscribe to everything the application sends out, subscribe to `eda/#`
+
+The following read-only topics are available:
 
 ```
 eda/status
+eda/mode/away
+eda/mode/longAway
+eda/mode/overPressure
+eda/mode/maxHeating
+eda/mode/maxCooling
+eda/mode/manualBoost
+eda/mode/summerNightCooling
 eda/readings/freshAirTemperature
 eda/readings/supplyAirTemperatureAfterHeatRecovery
 eda/readings/supplyAirTemperature
@@ -159,7 +171,49 @@ eda/readings/cascadeP
 eda/readings/cascadeI
 eda/readings/overPressureTimeLeft
 eda/readings/ventilationLevelActual
+eda/readings/ventilationLevelTarget
+eda/settings/overPressureDelay
+eda/settings/awayVentilationLevel
+eda/settings/awayTemperatureReduction
+eda/settings/longAwayVentilationLevel
+eda/settings/longAwayTemperatureReduction
+eda/settings/temperatureTarget
 ```
+
+The following topics can be written to in order to control the operation of the ventilation unit:
+
+```
+eda/mode/away/set
+eda/mode/longAway/set
+eda/mode/overPressure/set
+eda/mode/maxHeating/set
+eda/mode/maxCooling/set
+eda/mode/manualBoost/set
+eda/mode/summerNightCooling/set
+eda/settings/overPressureDelay/set
+eda/settings/awayVentilationLevel/set
+eda/settings/awayTemperatureReduction/set
+eda/settings/longAwayVentilationLevel/set
+eda/settings/longAwayTemperatureReduction/set
+eda/settings/temperatureTarget/set
+```
+
+* `eda/mode/` topics take the values `ON` or `OFF`
+* `eda/settings/` topics take integer values
+
+### Home Assistant MQTT discovery
+
+The application supports Home Assistant's MQTT Discovery feature, meaning your ventilation unit will show up as a device
+in Home Assistant automatically through the MQTT integration. The following entities are available:
+
+* sensors for all readings
+* numbers (configurable) for settings
+* switches for the ventilation modes
+
+![](/home/negge/Projects/eda-modbus-bridge/docs/readme_ha1.png "Home Assistant device info")
+![](/home/negge/Projects/eda-modbus-bridge/docs/readme_ha2.png "Home Assistant controls")
+![](/home/negge/Projects/eda-modbus-bridge/docs/readme_ha3.png "Home Assistant sensors")
+![](/home/negge/Projects/eda-modbus-bridge/docs/readme_ha4.png "Home Assistant configuration")
 
 ## Running as a systemd service
 
