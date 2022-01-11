@@ -40,11 +40,16 @@ Options:
   -p, --httpPort             The port to listen on (HTTP)        [default: 8080]
   -m, --mqttBrokerUrl        The URL to the MQTT broker, e.g. tcp://localhost:18
                              83. Omit to disable MQTT support.
+      --mqttUsername         The username to use when connecting to the MQTT bro
+                             ker. Omit to disable authentication.
+      --mqttPassword         The password to use when connecting to the MQTT bro
+                             ker. Required when mqttUsername is defined. Omit to
+                              disable authentication.
   -i, --mqttPublishInterval  How often messages should be published over MQTT (i
                              n seconds)                            [default: 10]
-      --mqttDiscovery        Whether to disable Home Assistant MQTT discovery su
-                             pport. Only effective when mqttBrokerUrl is defined
-                             .                         [boolean] [default: true]
+      --mqttDiscovery        Whether to enable Home Assistant MQTT discovery sup
+                             port. Only effective when mqttBrokerUrl is defined.
+                                                       [boolean] [default: true]
 ```
 
 ## HTTP endpoints
