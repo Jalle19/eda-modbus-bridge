@@ -12,6 +12,7 @@ const TOPIC_PREFIX = 'eda'
 const TOPIC_PREFIX_MODE = `${TOPIC_PREFIX}/mode`
 const TOPIC_PREFIX_READINGS = `${TOPIC_PREFIX}/readings`
 const TOPIC_PREFIX_SETTINGS = `${TOPIC_PREFIX}/settings`
+const TOPIC_PREFIX_DEVICE_INFORMATION = `${TOPIC_PREFIX}/deviceInformation`
 const TOPIC_NAME_STATUS = `${TOPIC_PREFIX}/status`
 
 export const publishValues = async (modbusClient, mqttClient) => {
@@ -44,6 +45,14 @@ export const publishValues = async (modbusClient, mqttClient) => {
 
     for (const [setting, value] of Object.entries(settings)) {
         const topicName = `${TOPIC_PREFIX_SETTINGS}/${setting}`
+        topicMap[topicName] = JSON.stringify(value)
+    }
+
+    // Publish device information
+    const deviceInformation = await getDeviceInformation(modbusClient)
+
+    for (const [item, value] of Object.entries(deviceInformation)) {
+        const topicName = `${TOPIC_PREFIX_DEVICE_INFORMATION}/${item}`
         topicMap[topicName] = JSON.stringify(value)
     }
 

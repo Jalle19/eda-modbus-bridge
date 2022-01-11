@@ -185,6 +185,12 @@ eda/settings/awayTemperatureReduction
 eda/settings/longAwayVentilationLevel
 eda/settings/longAwayTemperatureReduction
 eda/settings/temperatureTarget
+eda/deviceInformation/fanType
+eda/deviceInformation/coolingTypeInstalled
+eda/deviceInformation/heatingTypeInstalled
+eda/deviceInformation/familyType
+eda/deviceInformation/serialNumber
+eda/deviceInformation/softwareVersion
 ```
 
 The following topics can be written to in order to control the operation of the ventilation unit:
