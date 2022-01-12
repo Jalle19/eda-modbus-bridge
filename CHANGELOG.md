@@ -3,6 +3,7 @@
 ## future release
 
 * add basic test suite
+* retain MQTT discovery configuration messages (fixes https://github.com/Jalle19/eda-modbus-bridge/issues/29)
 
 ## 2.0.0
 

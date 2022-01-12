@@ -207,8 +207,11 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         for (const [entityName, configuration] of Object.entries(entityConfigurationMap)) {
             const configurationTopicName = `homeassistant/${entityType}/${deviceIdentifier}/${entityName}/config`
 
+            // "retain" is used so that the entities will be available immediately after a Home Assistant restart
             console.log(`Publishing Home Assistant auto-discovery configuration for ${entityType} "${entityName}"...`)
-            await mqttClient.publish(configurationTopicName, JSON.stringify(configuration))
+            await mqttClient.publish(configurationTopicName, JSON.stringify(configuration), {
+                retain: true,
+            })
         }
     }
 }
