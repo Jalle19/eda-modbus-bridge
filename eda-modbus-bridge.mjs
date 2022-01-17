@@ -3,7 +3,7 @@ import morgan from 'morgan'
 import MQTT from 'async-mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
-import { getFlagStatus, root, setFlagStatus, setSetting, summary } from './app/handlers.mjs'
+import { getFlagStatus, root, setFlagStatus, setSetting, summary, getAlarms } from './app/handlers.mjs'
 import { publishValues, configureMqttDiscovery, subscribeToChanges, handleMessage } from './app/mqtt.mjs'
 
 const argv = yargs(process.argv.slice(2))
@@ -83,6 +83,9 @@ const argv = yargs(process.argv.slice(2))
         httpServer.get('/summary', (req, res) => {
             return summary(modbusClient, req, res)
         })
+        httpServer.get('/alarms', (req, res) => {
+            return getAlarms(modbusClient, req, res)
+        })
         httpServer.get('/mode/:flag', (req, res) => {
             return getFlagStatus(modbusClient, req, res)
         })
@@ -117,7 +120,7 @@ const argv = yargs(process.argv.slice(2))
 
             const mqttClient = await MQTT.connectAsync(argv.mqttBrokerUrl, clientOptions)
 
-            // Publish readings/settings/modes regularly
+            // Publish readings/settings/modes/alarms regularly
             setInterval(async () => {
                 await publishValues(modbusClient, mqttClient)
             }, argv.mqttPublishInterval * 1000)

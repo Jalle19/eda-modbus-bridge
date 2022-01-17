@@ -5,13 +5,16 @@ import {
     setSetting,
     getFlagSummary,
     setFlag,
-    createModelNameString
+    createModelNameString,
+    getAlarmStatuses,
+    AVAILABLE_ALARMS
 } from './modbus.mjs'
 
 const TOPIC_PREFIX = 'eda'
 const TOPIC_PREFIX_MODE = `${TOPIC_PREFIX}/mode`
 const TOPIC_PREFIX_READINGS = `${TOPIC_PREFIX}/readings`
 const TOPIC_PREFIX_SETTINGS = `${TOPIC_PREFIX}/settings`
+const TOPIC_PREFIX_ALARM = `${TOPIC_PREFIX}/alarm`
 const TOPIC_PREFIX_DEVICE_INFORMATION = `${TOPIC_PREFIX}/deviceInformation`
 const TOPIC_NAME_STATUS = `${TOPIC_PREFIX}/status`
 
@@ -43,6 +46,16 @@ export const publishValues = async (modbusClient, mqttClient) => {
         topicMap[topicName] = JSON.stringify(value)
     }
 
+    const alarmStatuses = await getAlarmStatuses(modbusClient, false, true)
+
+    for (const [index, alarm] of Object.entries(alarmStatuses)) {
+        const topicName = `${TOPIC_PREFIX_ALARM}/${alarm.name}`
+
+        // Boolean values are changed to "ON" and "OFF" respectively since those are the
+        // defaults for MQTT binary sensors in Home Assistant
+        topicMap[topicName] = alarm.state == 2 ? 'ON' : 'OFF'
+    }
+    
     await publishTopics(mqttClient, topicMap)
 }
 
@@ -216,11 +229,19 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         'summerNightCooling': createSwitchConfiguration(configurationBase, 'summerNightCooling', 'Summer night cooling'),
     }
 
+    const alarmConfigurationMap = {
+    }
+
+    for (const [code, alarm] of Object.entries(AVAILABLE_ALARMS)) {
+        alarmConfigurationMap[alarm.name] = createAlarmConfiguration(configurationBase, alarm)
+    }
+
     // Final map that describes everything we want to be auto-discovered
     const configurationMap = {
         'sensor': sensorConfigurationMap,
         'number': numberConfigurationMap,
         'switch': switchConfigurationMap,
+        'binary_sensor': alarmConfigurationMap,
     }
 
     // Publish configurations
@@ -293,5 +314,16 @@ const createSwitchConfiguration = (configurationBase, modeName, entityName) => {
         'icon': 'mdi:fan',
         'state_topic': `${TOPIC_PREFIX_MODE}/${modeName}`,
         'command_topic': `${TOPIC_PREFIX_MODE}/${modeName}/set`,
+    }
+}
+
+const createAlarmConfiguration = (configurationBase, alarm) => {
+    return {
+        ...configurationBase,
+        'unique_id': `eda-${alarm.name}`,
+        'name': alarm.description,
+        'object_id': `eda_${alarm.name}`,
+        'state_topic': `${TOPIC_PREFIX_ALARM}/${alarm.name}`,
+        'entity_category': 'diagnostic'
     }
 }

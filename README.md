@@ -104,7 +104,15 @@ Returns a JSON object like this:
         "familyType": 0,
         "serialNumber": 0,
         "softwareVersion": 217
-    }
+    },
+    "alarms": [
+        {
+            "name": "ServiceReminder",
+            "description": "Service reminder",
+            "state": 1, // 2 = Active, 1 = Dismissed
+            "date": "2021-10-24T11:28:00.000Z"
+        },...
+    ]
 }
 ```
 
@@ -114,6 +122,23 @@ Returns the status of the specified mode/flag. The response looks like this:
 
 ```json
 {"active":false}
+```
+
+### GET /alarms
+
+Returns the active or dismissed alarms. The response looks like this:
+
+```json
+{
+    "alarms": [
+        {
+            "name": "ServiceReminder",
+            "description": "Service reminder",
+            "state": 1, // 2 = Active, 1 = Dismissed
+            "date": "2021-10-24T11:28:00.000Z"
+        },...
+    ]
+}
 ```
 
 ### POST /mode/{flag}
@@ -191,6 +216,25 @@ eda/deviceInformation/heatingTypeInstalled
 eda/deviceInformation/familyType
 eda/deviceInformation/serialNumber
 eda/deviceInformation/softwareVersion
+eda/alarm/TE5InletAfterHeatExchangerCold
+eda/alarm/TE10InletAfterHeaterCold
+eda/alarm/TE10InletAfterHeaterHot
+eda/alarm/TE20RoomHot
+eda/alarm/TE30OutletCold
+eda/alarm/TE30OutletHot
+eda/alarm/HPFault
+eda/alarm/HeaterFault
+eda/alarm/ReturnWaterCold
+eda/alarm/LTOFault
+eda/alarm/CoolingFault
+eda/alarm/EmergencyStop
+eda/alarm/FireRisk
+eda/alarm/ServiceReminder
+eda/alarm/HeaterPressureSwitch
+eda/alarm/InletFilterDirty
+eda/alarm/OutletFilterDirty
+eda/alarm/InletFanPressureAbnomaly
+eda/alarm/OutletFanPressureAbnomaly
 ```
 
 The following topics can be written to in order to control the operation of the ventilation unit:
@@ -222,6 +266,7 @@ in Home Assistant automatically through the MQTT integration. The following enti
 * sensors for all readings
 * numbers (configurable) for settings
 * switches for the ventilation modes
+* binary sensors for the alarms
 
 ![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha1.png "Home Assistant device info")
 ![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha2.png "Home Assistant controls")
