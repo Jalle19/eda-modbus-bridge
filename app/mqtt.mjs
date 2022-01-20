@@ -22,15 +22,7 @@ export const publishValues = async (modbusClient, mqttClient) => {
     }
 
     // Publish state for each mode.
-    const modeSummary = await getFlagSummary(modbusClient)
-
-    for (const [mode, state] of Object.entries(modeSummary)) {
-        const topicName = `${TOPIC_PREFIX_MODE}/${mode}`
-
-        // Boolean values are changed to "ON" and "OFF" respectively since those are the
-        // defaults for MQTT switches in Home Assistant
-        topicMap[topicName] = state ? 'ON' : 'OFF'
-    }
+    await publishFlags(modbusClient, mqttClient)
 
     // Publish each reading
     const readings = await getReadings(modbusClient)
@@ -41,12 +33,7 @@ export const publishValues = async (modbusClient, mqttClient) => {
     }
 
     // Publish each setting
-    const settings = await getSettings(modbusClient)
-
-    for (const [setting, value] of Object.entries(settings)) {
-        const topicName = `${TOPIC_PREFIX_SETTINGS}/${setting}`
-        topicMap[topicName] = JSON.stringify(value)
-    }
+    await publishSettings(modbusClient, mqttClient)
 
     // Publish device information
     const deviceInformation = await getDeviceInformation(modbusClient)
@@ -56,6 +43,43 @@ export const publishValues = async (modbusClient, mqttClient) => {
         topicMap[topicName] = JSON.stringify(value)
     }
 
+    await publishTopics(mqttClient, topicMap)
+}
+
+const publishFlags = async (modbusClient, mqttClient) => {
+    // Create a map from topic name to value that should be published
+    let topicMap = {}
+
+    // Publish state for each mode.
+    const modeSummary = await getFlagSummary(modbusClient)
+
+    for (const [mode, state] of Object.entries(modeSummary)) {
+        const topicName = `${TOPIC_PREFIX_MODE}/${mode}`
+
+        // Boolean values are changed to "ON" and "OFF" respectively since those are the
+        // defaults for MQTT switches in Home Assistant
+        topicMap[topicName] = state ? 'ON' : 'OFF'
+    }
+
+    await publishTopics(mqttClient, topicMap)
+}
+
+const publishSettings = async (modbusClient, mqttClient, settingName = '') => {
+    // Create a map from topic name to value that should be published
+    let topicMap = {}
+    const settings = await getSettings(modbusClient)
+
+    for (const [setting, value] of Object.entries(settings)) {
+        if(settingName === '' || settingName == setting) {
+            const topicName = `${TOPIC_PREFIX_SETTINGS}/${setting}`
+            topicMap[topicName] = JSON.stringify(value)
+        }
+    }
+
+    await publishTopics(mqttClient, topicMap)
+}
+
+const publishTopics = async (mqttClient, topicMap) => {
     const publishPromises = []
 
     for (const [topic, value] of Object.entries(topicMap)) {
@@ -93,16 +117,15 @@ export const handleMessage = async (modbusClient, mqttClient, topicName, payload
         console.log(`Updating setting ${settingName} to ${payloadString}`)
 
         await setSetting(modbusClient, settingName, payloadString)
+        await publishSettings(modbusClient, mqttClient, settingName)
     } else if (topicName.startsWith(TOPIC_PREFIX_MODE) && topicName.endsWith('/set')) {
         const mode = topicName.substring(TOPIC_PREFIX_MODE.length + 1, topicName.lastIndexOf('/'))
 
         console.log(`Updating mode ${mode} to ${payloadString}`)
 
         await setFlag(modbusClient, mode, payloadString === 'ON')
+        await publishFlags(modbusClient, mqttClient)
     }
-
-    // Publish all values again for state changes to "take"
-    await publishValues(modbusClient, mqttClient)
 }
 
 export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
