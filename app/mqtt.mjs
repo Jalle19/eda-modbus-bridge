@@ -64,16 +64,14 @@ const publishFlags = async (modbusClient, mqttClient) => {
     await publishTopics(mqttClient, topicMap)
 }
 
-const publishSettings = async (modbusClient, mqttClient, settingName = '') => {
+const publishSettings = async (modbusClient, mqttClient) => {
     // Create a map from topic name to value that should be published
     let topicMap = {}
     const settings = await getSettings(modbusClient)
 
     for (const [setting, value] of Object.entries(settings)) {
-        if(settingName === '' || settingName == setting) {
-            const topicName = `${TOPIC_PREFIX_SETTINGS}/${setting}`
-            topicMap[topicName] = JSON.stringify(value)
-        }
+        const topicName = `${TOPIC_PREFIX_SETTINGS}/${setting}`
+        topicMap[topicName] = JSON.stringify(value)
     }
 
     await publishTopics(mqttClient, topicMap)
@@ -117,7 +115,7 @@ export const handleMessage = async (modbusClient, mqttClient, topicName, payload
         console.log(`Updating setting ${settingName} to ${payloadString}`)
 
         await setSetting(modbusClient, settingName, payloadString)
-        await publishSettings(modbusClient, mqttClient, settingName)
+        await publishSettings(modbusClient, mqttClient)
     } else if (topicName.startsWith(TOPIC_PREFIX_MODE) && topicName.endsWith('/set')) {
         const mode = topicName.substring(TOPIC_PREFIX_MODE.length + 1, topicName.lastIndexOf('/'))
 
@@ -163,14 +161,14 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         'exhaustAirHumidity': createHumiditySensorConfiguration(configurationBase, 'exhaustAirHumidity', 'Exhaust air humidity'),
         'mean48HourExhaustHumidity': createHumiditySensorConfiguration(configurationBase, 'mean48HourExhaustHumidity', 'Exhaust air humidity (48h mean)'),
         // Generic sensors (percentages, minutes left, cascade values)
-        'heatRecoverySupplySide': createSensorConfiguration(configurationBase, 'heatRecoverySupplySide', 'Heat recovery (supply)', {'unit_of_measurement': '%'}),
-        'heatRecoveryExhaustSide': createSensorConfiguration(configurationBase, 'heatRecoveryExhaustSide', 'Heat recovery (exhaust)', {'unit_of_measurement': '%'}),
+        'heatRecoverySupplySide': createSensorConfiguration(configurationBase, 'heatRecoverySupplySide', 'Heat recovery (supply)', { 'unit_of_measurement': '%' }),
+        'heatRecoveryExhaustSide': createSensorConfiguration(configurationBase, 'heatRecoveryExhaustSide', 'Heat recovery (exhaust)', { 'unit_of_measurement': '%' }),
         'cascadeSp': createSensorConfiguration(configurationBase, 'cascadeSp', 'Cascade setpoint'),
         'cascadeP': createSensorConfiguration(configurationBase, 'cascadeP', 'Cascade P-value'),
         'cascadeI': createSensorConfiguration(configurationBase, 'cascadeI', 'Cascade I-value'),
-        'overPressureTimeLeft': createSensorConfiguration(configurationBase, 'overPressureTimeLeft', 'Overpressure time left', {'unit_of_measurement': 'minutes'}),
-        'ventilationLevelTarget': createSensorConfiguration(configurationBase, 'ventilationLevelTarget', 'Ventilation level (target)', {'unit_of_measurement': '%'}),
-        'ventilationLevelActual': createSensorConfiguration(configurationBase, 'ventilationLevelActual', 'Ventilation level (actual)', {'unit_of_measurement': '%'}),
+        'overPressureTimeLeft': createSensorConfiguration(configurationBase, 'overPressureTimeLeft', 'Overpressure time left', { 'unit_of_measurement': 'minutes' }),
+        'ventilationLevelTarget': createSensorConfiguration(configurationBase, 'ventilationLevelTarget', 'Ventilation level (target)', { 'unit_of_measurement': '%' }),
+        'ventilationLevelActual': createSensorConfiguration(configurationBase, 'ventilationLevelActual', 'Ventilation level (actual)', { 'unit_of_measurement': '%' }),
     }
 
     // Configurable numbers
