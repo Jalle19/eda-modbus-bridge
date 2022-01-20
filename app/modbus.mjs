@@ -268,24 +268,22 @@ export const getAlarmStatuses = async (modbusClient, onlyActive = true, distinct
         let code = result.data[0]
         let state = result.data[1]
 
-        if (AVAILABLE_ALARMS[code] !== undefined && (onlyActive === false || state > 0)) {
+        if (AVAILABLE_ALARMS[code] !== undefined && (onlyActive && state > 0 || onlyActive === false)) {
             let alarm = Object.assign({}, AVAILABLE_ALARMS[code])
 
             alarm.state = state
             alarm.date = new Date(`${result.data[2] + 2000}-${result.data[3]}-${result.data[4]} ${result.data[5]}:${result.data[6]}:00`)
 
-            if (onlyActive && state > 0 || onlyActive === false) {
-                if (distinct === true) {
-                    if (alarms[code] !== undefined) {
-                        if (alarm.date > alarms[code].date) {
-                            alarms[code].date = alarm.date
-                        }
-                    } else {
-                        alarms[code] = Object.assign({}, alarm)
+            if (distinct === true) {
+                if (alarms[code] !== undefined) {
+                    if (alarm.date > alarms[code].date) {
+                        alarms[code].date = alarm.date
                     }
                 } else {
-                    alarms.push(alarm)
+                    alarms[code] = Object.assign({}, alarm)
                 }
+            } else {
+                alarms.push(alarm)
             }
         }
     }
