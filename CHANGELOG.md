@@ -6,6 +6,7 @@
 * Retain MQTT discovery configuration messages (fixes https://github.com/Jalle19/eda-modbus-bridge/issues/29)
 * Publish only changed settings or modes in MQTT callback (fixes https://github.com/Jalle19/eda-modbus-bridge/issues/33)
 * Add alarms support (fixes https://github.com/Jalle19/eda-modbus-bridge/issues/31)
+* Format code using `prettier`
 
 ## 2.0.0
 
