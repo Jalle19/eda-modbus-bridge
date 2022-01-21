@@ -252,6 +252,33 @@ export const getDeviceInformation = async (modbusClient) => {
     return deviceInformation
 }
 
+export const getAlarmHistory = async (modbusClient) => {
+    let alarmHistory = []
+
+    const startRegister = 385
+    const endRegister = 518
+    const alarmOffset = 7;
+
+    for (let register = startRegister; register <= endRegister; register += alarmOffset) {
+        const result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(register, alarmOffset))
+        const code = result.data[0]
+        const state = result.data[1]
+
+        // Skip unset alarm slots and unknown alarm types
+        if (AVAILABLE_ALARMS[code] === undefined) {
+            continue
+        }
+
+        let alarm = Object.assign({}, AVAILABLE_ALARMS[code])
+        alarm.state = state
+        alarm.date = new Date(`${result.data[2] + 2000}-${result.data[3]}-${result.data[4]} ${result.data[5]}:${result.data[6]}:00`)
+
+        alarmHistory.push(alarm)
+    }
+
+    return alarmHistory
+}
+
 export const getAlarmStatuses = async (modbusClient, onlyActive = true, distinct = true) => {
     let alarms = []
 
