@@ -46,14 +46,14 @@ export const publishValues = async (modbusClient, mqttClient) => {
         topicMap[topicName] = JSON.stringify(value)
     }
 
-    const alarmStatuses = await getAlarmStatuses(modbusClient, false, true)
+    const alarmStatuses = await getAlarmStatuses(modbusClient)
 
     for (const [index, alarm] of Object.entries(alarmStatuses)) {
         const topicName = `${TOPIC_PREFIX_ALARM}/${alarm.name}`
 
         // Boolean values are changed to "ON" and "OFF" respectively since those are the
         // defaults for MQTT binary sensors in Home Assistant
-        topicMap[topicName] = alarm.state == 2 ? 'ON' : 'OFF'
+        topicMap[topicName] = alarm.state === 2 ? 'ON' : 'OFF'
     }
     
     await publishTopics(mqttClient, topicMap)

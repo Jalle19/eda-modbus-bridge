@@ -279,38 +279,19 @@ export const getAlarmHistory = async (modbusClient) => {
     return alarmHistory
 }
 
-export const getAlarmStatuses = async (modbusClient, onlyActive = true, distinct = true) => {
-    let alarms = []
+export const getAlarmStatuses = async (modbusClient) => {
+    let alarms = {...AVAILABLE_ALARMS}
 
-    if (distinct === true && onlyActive === false) {
-        alarms = Object.assign([], AVAILABLE_ALARMS);
-    }
+    // Use the alarm history to determine the state of each alarm
+    const alarmHistory = await getAlarmHistory(modbusClient)
 
-    const startRegister = 385
-    const endRegister = 518
-    const alarmOffset = 7;
+    for (const code in alarms) {
+        // Use "off" as the default alarm state, most likely to be true
+        alarms[code].state = 0
 
-    for (let register = startRegister; register <= endRegister; register += alarmOffset) {
-        let result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(register, 7))
-        let code = result.data[0]
-        let state = result.data[1]
-
-        if (AVAILABLE_ALARMS[code] !== undefined && (onlyActive && state > 0 || onlyActive === false)) {
-            let alarm = Object.assign({}, AVAILABLE_ALARMS[code])
-
-            alarm.state = state
-            alarm.date = new Date(`${result.data[2] + 2000}-${result.data[3]}-${result.data[4]} ${result.data[5]}:${result.data[6]}:00`)
-
-            if (distinct === true) {
-                if (alarms[code] !== undefined) {
-                    if (alarm.date > alarms[code].date) {
-                        alarms[code].date = alarm.date
-                    }
-                } else {
-                    alarms[code] = Object.assign({}, alarm)
-                }
-            } else {
-                alarms.push(alarm)
+        for (const historicAlarm of alarmHistory) {
+            if (historicAlarm.name === alarms[code].name && historicAlarm.state > 0) {
+                alarms[code].state = historicAlarm.state
             }
         }
     }
