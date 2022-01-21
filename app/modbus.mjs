@@ -29,6 +29,28 @@ const AVAILABLE_SETTINGS = {
     'temperatureTarget': 135,
 }
 
+export let AVAILABLE_ALARMS = {
+    1: { name: 'TE5InletAfterHeatExchangerCold', description: 'TE5 inlet after heatexchanger cold' }, // 1=TE5 Tulo LTOn jälkeen kylmä
+    2: { name: 'TE10InletAfterHeaterCold', description: 'TE10 inlet after heater cold' }, // 2=TE10 Tulo lämmityspatterin jälkeen kylmä
+    3: { name: 'TE10InletAfterHeaterHot', description: 'TE10 inlet after heater hot' }, // 3=TE10 Tulo lämmityspatterin jälkeen kuuma
+    4: { name: 'TE20RoomHot', description: 'TE20 room hot' }, // 4=TE20 Huone kuuma
+    5: { name: 'TE30OutletCold', description: 'TE30 outlet cold' }, // 5=TE30 Poisto kylmä
+    6: { name: 'TE30OutletHot', description: 'TE30 outlet hot' }, // 6=TE30 Poisto kuuma
+    7: { name: 'HPFault', description: 'HP fault' }, // 7=HP vika
+    8: { name: 'HeaterFault', description: 'Heater fault' }, // 8=SLP vika
+    9: { name: 'ReturnWaterCold', description: 'Return water cold' }, // 9=Paluuvesi kylmää
+    10: { name: 'LTOFault', description: 'Heatexchanger fault' }, // 10=LTO vika
+    11: { name: 'CoolingFault', description: 'Cooling fault' }, // 11=Jäähdytys vika
+    12: { name: 'EmergencyStop', description: 'Emergency stop' }, // 12=Hätäseis
+    13: { name: 'FireRisk', description: 'Fire risk' }, // 13=Palovaara
+    14: { name: 'ServiceReminder', description: 'Service reminder' }, // 14=Huoltomuistutus
+    15: { name: 'HeaterPressureSwitch', description: 'Heater pressure switch' }, // 15=SLP painevahti
+    16: { name: 'InletFilterDirty', description: 'Inlet filter dirty' }, // 16=Tulosuodatin likainen,
+    17: { name: 'OutletFilterDirty', description: 'Outlet filter dirty' }, // 17=Poistosuodatin likainen
+    20: { name: 'InletFanPressureAbnomaly', description: 'Inlet fan pressure abnomaly' }, // 20=Tulopuhallin painepoikkeama
+    21: { name: 'OutletFanPressureAbnomaly', description: 'Outlet fan pressure abnomaly' }, // 21=Poistopuhallin painepoikkeama
+}
+
 const mutex = new Mutex()
 
 export const parseTemperature = (temperature) => {
@@ -228,6 +250,45 @@ export const getDeviceInformation = async (modbusClient) => {
     }
 
     return deviceInformation
+}
+
+export const getAlarmStatuses = async (modbusClient, onlyActive = true, distinct = true) => {
+    let alarms = []
+
+    if (distinct === true && onlyActive === false) {
+        alarms = Object.assign([], AVAILABLE_ALARMS);
+    }
+
+    const startRegister = 385
+    const endRegister = 518
+    const alarmOffset = 7;
+
+    for (let register = startRegister; register <= endRegister; register += alarmOffset) {
+        let result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(register, 7))
+        let code = result.data[0]
+        let state = result.data[1]
+
+        if (AVAILABLE_ALARMS[code] !== undefined && (onlyActive && state > 0 || onlyActive === false)) {
+            let alarm = Object.assign({}, AVAILABLE_ALARMS[code])
+
+            alarm.state = state
+            alarm.date = new Date(`${result.data[2] + 2000}-${result.data[3]}-${result.data[4]} ${result.data[5]}:${result.data[6]}:00`)
+
+            if (distinct === true) {
+                if (alarms[code] !== undefined) {
+                    if (alarm.date > alarms[code].date) {
+                        alarms[code].date = alarm.date
+                    }
+                } else {
+                    alarms[code] = Object.assign({}, alarm)
+                }
+            } else {
+                alarms.push(alarm)
+            }
+        }
+    }
+
+    return alarms
 }
 
 const getDeviceFamilyName = (familyTypeInt) => {
