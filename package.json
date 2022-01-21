@@ -7,7 +7,9 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "check-prettier": "prettier --check eda-modbus-bridge.mjs app/",
+    "prettier": "prettier --write eda-modbus-bridge.mjs app/"
   },
   "repository": {
     "type": "git",
@@ -28,6 +30,7 @@
     "yargs": "^16.2.0"
   },
   "devDependencies": {
-    "jest": "^27.4.7"
+    "jest": "^27.4.7",
+    "prettier": "^2.5.1"
   }
 }

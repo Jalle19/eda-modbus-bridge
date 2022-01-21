@@ -7,7 +7,7 @@ import {
     setFlag,
     createModelNameString,
     getAlarmStatuses,
-    AVAILABLE_ALARMS
+    AVAILABLE_ALARMS,
 } from './modbus.mjs'
 
 const TOPIC_PREFIX = 'eda'
@@ -55,7 +55,7 @@ export const publishValues = async (modbusClient, mqttClient) => {
         // defaults for MQTT binary sensors in Home Assistant
         topicMap[topicName] = alarm.state === 2 ? 'ON' : 'OFF'
     }
-    
+
     await publishTopics(mqttClient, topicMap)
 }
 
@@ -102,10 +102,7 @@ const publishTopics = async (mqttClient, topicMap) => {
 
 export const subscribeToChanges = async (modbusClient, mqttClient) => {
     // Subscribe to settings and mode changes
-    const topicNames = [
-        `${TOPIC_PREFIX_MODE}/+/set`,
-        `${TOPIC_PREFIX_SETTINGS}/+/set`,
-    ]
+    const topicNames = [`${TOPIC_PREFIX_MODE}/+/set`, `${TOPIC_PREFIX_SETTINGS}/+/set`]
 
     for (const topicName of topicNames) {
         console.log(`Subscribing to topic(s) ${topicName}`)
@@ -145,7 +142,8 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
     const modbusDeviceInformation = await getDeviceInformation(modbusClient)
     const softwareVersion = modbusDeviceInformation.softwareVersion
     const modelName = createModelNameString(modbusDeviceInformation)
-    const deviceIdentifier = `enervent-${modbusDeviceInformation.familyType}-${modbusDeviceInformation.fanType}`.toLowerCase()
+    const deviceIdentifier =
+        `enervent-${modbusDeviceInformation.familyType}-${modbusDeviceInformation.fanType}`.toLowerCase()
 
     // The "device" object that is part of each sensor's configuration payload
     const mqttDeviceInformation = {
@@ -165,23 +163,76 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
     // Sensor configuration
     const sensorConfigurationMap = {
         // Temperature sensors
-        'freshAirTemperature': createTemperatureSensorConfiguration(configurationBase, 'freshAirTemperature', 'Outside temperature',),
-        'supplyAirTemperature': createTemperatureSensorConfiguration(configurationBase, 'supplyAirTemperature', 'Supply air temperature'),
-        'supplyAirTemperatureAfterHeatRecovery': createTemperatureSensorConfiguration(configurationBase, 'supplyAirTemperatureAfterHeatRecovery', 'Supply air temperature (after heat recovery)'),
-        'exhaustAirTemperature': createTemperatureSensorConfiguration(configurationBase, 'exhaustAirTemperature', 'Exhaust air temperature'),
-        'wasteAirTemperature': createTemperatureSensorConfiguration(configurationBase, 'wasteAirTemperature', 'Waste air temperature'),
+        'freshAirTemperature': createTemperatureSensorConfiguration(
+            configurationBase,
+            'freshAirTemperature',
+            'Outside temperature'
+        ),
+        'supplyAirTemperature': createTemperatureSensorConfiguration(
+            configurationBase,
+            'supplyAirTemperature',
+            'Supply air temperature'
+        ),
+        'supplyAirTemperatureAfterHeatRecovery': createTemperatureSensorConfiguration(
+            configurationBase,
+            'supplyAirTemperatureAfterHeatRecovery',
+            'Supply air temperature (after heat recovery)'
+        ),
+        'exhaustAirTemperature': createTemperatureSensorConfiguration(
+            configurationBase,
+            'exhaustAirTemperature',
+            'Exhaust air temperature'
+        ),
+        'wasteAirTemperature': createTemperatureSensorConfiguration(
+            configurationBase,
+            'wasteAirTemperature',
+            'Waste air temperature'
+        ),
         // Humidity sensors
-        'exhaustAirHumidity': createHumiditySensorConfiguration(configurationBase, 'exhaustAirHumidity', 'Exhaust air humidity'),
-        'mean48HourExhaustHumidity': createHumiditySensorConfiguration(configurationBase, 'mean48HourExhaustHumidity', 'Exhaust air humidity (48h mean)'),
+        'exhaustAirHumidity': createHumiditySensorConfiguration(
+            configurationBase,
+            'exhaustAirHumidity',
+            'Exhaust air humidity'
+        ),
+        'mean48HourExhaustHumidity': createHumiditySensorConfiguration(
+            configurationBase,
+            'mean48HourExhaustHumidity',
+            'Exhaust air humidity (48h mean)'
+        ),
         // Generic sensors (percentages, minutes left, cascade values)
-        'heatRecoverySupplySide': createSensorConfiguration(configurationBase, 'heatRecoverySupplySide', 'Heat recovery (supply)', { 'unit_of_measurement': '%' }),
-        'heatRecoveryExhaustSide': createSensorConfiguration(configurationBase, 'heatRecoveryExhaustSide', 'Heat recovery (exhaust)', { 'unit_of_measurement': '%' }),
+        'heatRecoverySupplySide': createSensorConfiguration(
+            configurationBase,
+            'heatRecoverySupplySide',
+            'Heat recovery (supply)',
+            { 'unit_of_measurement': '%' }
+        ),
+        'heatRecoveryExhaustSide': createSensorConfiguration(
+            configurationBase,
+            'heatRecoveryExhaustSide',
+            'Heat recovery (exhaust)',
+            { 'unit_of_measurement': '%' }
+        ),
         'cascadeSp': createSensorConfiguration(configurationBase, 'cascadeSp', 'Cascade setpoint'),
         'cascadeP': createSensorConfiguration(configurationBase, 'cascadeP', 'Cascade P-value'),
         'cascadeI': createSensorConfiguration(configurationBase, 'cascadeI', 'Cascade I-value'),
-        'overPressureTimeLeft': createSensorConfiguration(configurationBase, 'overPressureTimeLeft', 'Overpressure time left', { 'unit_of_measurement': 'minutes' }),
-        'ventilationLevelTarget': createSensorConfiguration(configurationBase, 'ventilationLevelTarget', 'Ventilation level (target)', { 'unit_of_measurement': '%' }),
-        'ventilationLevelActual': createSensorConfiguration(configurationBase, 'ventilationLevelActual', 'Ventilation level (actual)', { 'unit_of_measurement': '%' }),
+        'overPressureTimeLeft': createSensorConfiguration(
+            configurationBase,
+            'overPressureTimeLeft',
+            'Overpressure time left',
+            { 'unit_of_measurement': 'minutes' }
+        ),
+        'ventilationLevelTarget': createSensorConfiguration(
+            configurationBase,
+            'ventilationLevelTarget',
+            'Ventilation level (target)',
+            { 'unit_of_measurement': '%' }
+        ),
+        'ventilationLevelActual': createSensorConfiguration(
+            configurationBase,
+            'ventilationLevelActual',
+            'Ventilation level (actual)',
+            { 'unit_of_measurement': '%' }
+        ),
     }
 
     // Configurable numbers
@@ -191,31 +242,51 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             'max': 60,
             'unit_of_measurement': 'minutes',
         }),
-        'awayVentilationLevel': createNumberConfiguration(configurationBase, 'awayVentilationLevel', 'Away ventilation level', {
-            'min': 1,
-            'max': 100,
-            'unit_of_measurement': '%',
-        }),
-        'awayTemperatureReduction': createNumberConfiguration(configurationBase, 'awayTemperatureReduction', 'Away temperature reduction', {
-            'min': 0,
-            'max': 20,
-            'unit_of_measurement': '°C',
-        }),
-        'longAwayVentilationLevel': createNumberConfiguration(configurationBase, 'longAwayVentilationLevel', 'Long away ventilation level', {
-            'min': 1,
-            'max': 100,
-            'unit_of_measurement': '%',
-        }),
-        'longAwayTemperatureReduction': createNumberConfiguration(configurationBase, 'longAwayTemperatureReduction', 'Long away temperature reduction', {
-            'min': 0,
-            'max': 20,
-            'unit_of_measurement': '°C',
-        }),
+        'awayVentilationLevel': createNumberConfiguration(
+            configurationBase,
+            'awayVentilationLevel',
+            'Away ventilation level',
+            {
+                'min': 1,
+                'max': 100,
+                'unit_of_measurement': '%',
+            }
+        ),
+        'awayTemperatureReduction': createNumberConfiguration(
+            configurationBase,
+            'awayTemperatureReduction',
+            'Away temperature reduction',
+            {
+                'min': 0,
+                'max': 20,
+                'unit_of_measurement': '°C',
+            }
+        ),
+        'longAwayVentilationLevel': createNumberConfiguration(
+            configurationBase,
+            'longAwayVentilationLevel',
+            'Long away ventilation level',
+            {
+                'min': 1,
+                'max': 100,
+                'unit_of_measurement': '%',
+            }
+        ),
+        'longAwayTemperatureReduction': createNumberConfiguration(
+            configurationBase,
+            'longAwayTemperatureReduction',
+            'Long away temperature reduction',
+            {
+                'min': 0,
+                'max': 20,
+                'unit_of_measurement': '°C',
+            }
+        ),
         'temperatureTarget': createNumberConfiguration(configurationBase, 'temperatureTarget', 'Temperature target', {
             'min': 0,
             'max': 30,
             'unit_of_measurement': '°C',
-        })
+        }),
     }
 
     // Configurable switches
@@ -226,11 +297,14 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         'maxHeating': createSwitchConfiguration(configurationBase, 'maxHeating', 'Max heating'),
         'maxCooling': createSwitchConfiguration(configurationBase, 'maxCooling', 'Max cooling'),
         'manualBoost': createSwitchConfiguration(configurationBase, 'manualBoost', 'Manual boost'),
-        'summerNightCooling': createSwitchConfiguration(configurationBase, 'summerNightCooling', 'Summer night cooling'),
+        'summerNightCooling': createSwitchConfiguration(
+            configurationBase,
+            'summerNightCooling',
+            'Summer night cooling'
+        ),
     }
 
-    const alarmConfigurationMap = {
-    }
+    const alarmConfigurationMap = {}
 
     for (const [code, alarm] of Object.entries(AVAILABLE_ALARMS)) {
         alarmConfigurationMap[alarm.name] = createAlarmConfiguration(configurationBase, alarm)
@@ -285,7 +359,7 @@ const createSensorConfiguration = (configurationBase, readingName, entityName, e
         'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
         'unique_id': `eda-${readingName}`,
         ...extraProperties,
-    };
+    }
 }
 
 const createNumberConfiguration = (configurationBase, settingName, entityName, extraProperties) => {
@@ -324,6 +398,6 @@ const createAlarmConfiguration = (configurationBase, alarm) => {
         'name': alarm.description,
         'object_id': `eda_${alarm.name}`,
         'state_topic': `${TOPIC_PREFIX_ALARM}/${alarm.name}`,
-        'entity_category': 'diagnostic'
+        'entity_category': 'diagnostic',
     }
 }

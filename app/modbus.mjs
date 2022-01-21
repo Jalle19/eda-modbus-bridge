@@ -75,7 +75,7 @@ export const getFlagSummary = async (modbusClient) => {
     result = await mutex.runExclusive(async () => modbusClient.readCoils(12, 1))
     summary = {
         ...summary,
-        'summerNightCooling': result.data[0]
+        'summerNightCooling': result.data[0],
     }
 
     return summary
@@ -163,7 +163,7 @@ export const getReadings = async (modbusClient) => {
 export const getSettings = async (modbusClient) => {
     let result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(57, 1))
     let settings = {
-        'overPressureDelay': result.data[0]
+        'overPressureDelay': result.data[0],
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(100, 4))
@@ -178,7 +178,7 @@ export const getSettings = async (modbusClient) => {
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(135, 1))
     settings = {
         ...settings,
-        'temperatureTarget': parseTemperature(result.data[0])
+        'temperatureTarget': parseTemperature(result.data[0]),
     }
 
     return settings
@@ -232,13 +232,13 @@ export const getDeviceInformation = async (modbusClient) => {
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(154, 1))
     deviceInformation = {
         ...deviceInformation,
-        'coolingTypeInstalled': getCoolingTypeName(result.data[0])
+        'coolingTypeInstalled': getCoolingTypeName(result.data[0]),
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(171, 1))
     deviceInformation = {
         ...deviceInformation,
-        'heatingTypeInstalled': getHeatingTypeName(result.data[0])
+        'heatingTypeInstalled': getHeatingTypeName(result.data[0]),
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(597, 3))
@@ -246,7 +246,7 @@ export const getDeviceInformation = async (modbusClient) => {
         ...deviceInformation,
         'familyType': getDeviceFamilyName(result.data[0]),
         'serialNumber': result.data[1],
-        'softwareVersion': result.data[2] / 100
+        'softwareVersion': result.data[2] / 100,
     }
 
     return deviceInformation
@@ -257,7 +257,7 @@ export const getAlarmHistory = async (modbusClient) => {
 
     const startRegister = 385
     const endRegister = 518
-    const alarmOffset = 7;
+    const alarmOffset = 7
 
     for (let register = startRegister; register <= endRegister; register += alarmOffset) {
         const result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(register, alarmOffset))
@@ -280,7 +280,7 @@ export const getAlarmHistory = async (modbusClient) => {
 }
 
 export const getAlarmStatuses = async (modbusClient) => {
-    let alarms = {...AVAILABLE_ALARMS}
+    let alarms = { ...AVAILABLE_ALARMS }
 
     // Use the alarm history to determine the state of each alarm
     const alarmHistory = await getAlarmHistory(modbusClient)
@@ -300,24 +300,26 @@ export const getAlarmStatuses = async (modbusClient) => {
 }
 
 const getDeviceFamilyName = (familyTypeInt) => {
-    return [
-        'Pingvin',
-        'Pandion',
-        'Pelican',
-        'Pegasos',
-        'Pegasos XL',
-        'LTR-3',
-        'LTR-6̈́',
-        'LTR-7',
-        'LTR-7 XL'
-    ][familyTypeInt] ?? 'unknown'
+    return (
+        [
+            'Pingvin', // prettier-hack
+            'Pandion',
+            'Pelican',
+            'Pegasos',
+            'Pegasos XL',
+            'LTR-3',
+            'LTR-6̈́',
+            'LTR-7',
+            'LTR-7 XL',
+        ][familyTypeInt] ?? 'unknown'
+    )
 }
 
 const getCoolingTypeName = (coolingTypeInt) => {
     // 0=Ei jäähdytintä, 1=CW, 2=HP, 3=CG, 4=CX, 5=CX_INV, 6=X2CX, 7=CXBIN, 8=Cooler
     return [
         null,
-        'CW',
+        'CW', // prettier-hack
         'HP',
         'CG',
         'CX',
@@ -331,13 +333,15 @@ const getCoolingTypeName = (coolingTypeInt) => {
 const getHeatingTypeName = (heatingTypeInt) => {
     // 0=Ei lämmitintä, 1=VPK, 2=HP, 3=SLP, 4=SLP PWM. Mapping known values to the actual names used on the product,
     // these seem to be internal
-    return [
-        'ED',
-        'EDW',
-        'HP',
-        'EDE',
-        'SLP PWM',
-    ][heatingTypeInt] ?? 'unknown'
+    return (
+        [
+            'ED', // prettier-hack
+            'EDW',
+            'HP',
+            'EDE',
+            'SLP PWM',
+        ][heatingTypeInt] ?? 'unknown'
+    )
 }
 
 export const createModelNameString = (deviceInformation) => {

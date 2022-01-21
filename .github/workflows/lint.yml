@@ -1,4 +1,4 @@
-name: Run tests
+name: Run linters
 
 on:
   push:
@@ -9,8 +9,8 @@ on:
       - master
 
 jobs:
-  test:
-    name: Run tests
+  prettier:
+    name: Check formatting with Prettier
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -20,5 +20,5 @@ jobs:
           node-version: '14.x'
       - name: Install dependencies
         run: npm ci
-      - name: Run tests
-        run: npm test
+      - name: Check formatting
+        run: npm run check-prettier

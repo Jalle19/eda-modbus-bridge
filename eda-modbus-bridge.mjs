@@ -12,12 +12,12 @@ const argv = yargs(process.argv.slice(2))
         'device': {
             description: 'The serial device to use, e.g. /dev/ttyUSB0',
             demand: true,
-            alias: 'd'
+            alias: 'd',
         },
         'modbusSlave': {
             description: 'The Modbus slave address',
             default: 1,
-            alias: 's'
+            alias: 's',
         },
         'http': {
             description: 'Whether to enable the HTTP server or not',
@@ -32,7 +32,7 @@ const argv = yargs(process.argv.slice(2))
         'httpPort': {
             description: 'The port to listen on (HTTP)',
             default: 8080,
-            alias: 'p'
+            alias: 'p',
         },
         'mqttBrokerUrl': {
             description: 'The URL to the MQTT broker, e.g. tcp://localhost:1883. Omit to disable MQTT support.',
@@ -44,7 +44,8 @@ const argv = yargs(process.argv.slice(2))
             default: undefined,
         },
         'mqttPassword': {
-            description: 'The password to use when connecting to the MQTT broker. Required when mqttUsername is defined. Omit to disable authentication.',
+            description:
+                'The password to use when connecting to the MQTT broker. Required when mqttUsername is defined. Omit to disable authentication.',
             default: undefined,
         },
         'mqttPublishInterval': {
@@ -53,14 +54,14 @@ const argv = yargs(process.argv.slice(2))
             alias: 'i',
         },
         'mqttDiscovery': {
-            description: 'Whether to enable Home Assistant MQTT discovery support. Only effective when mqttBrokerUrl is defined.',
+            description:
+                'Whether to enable Home Assistant MQTT discovery support. Only effective when mqttBrokerUrl is defined.',
             type: 'boolean',
             default: true,
         },
-    })
-    .argv;
+    }).argv
 
-(async () => {
+;(async () => {
     // Create Modbus client
     console.log(`Opening serial connection to ${argv.device}, slave ID ${argv.modbusSlave}`)
     const modbusClient = new ModbusRTU()
@@ -139,4 +140,4 @@ const argv = yargs(process.argv.slice(2))
             console.error(`Failed to connect to MQTT broker: ${e.message}`)
         }
     }
-})();
+})()
