@@ -6,7 +6,7 @@ import {
     getSettings,
     setFlag,
     setSetting as modbusSetSetting,
-    getAlarmStatuses
+    getAlarmHistory,
 } from './modbus.mjs'
 
 export const root = async (req, res) => {
@@ -19,7 +19,7 @@ export const summary = async (modbusClient, req, res) => {
         'readings': await getReadings(modbusClient),
         'settings': await getSettings(modbusClient),
         'deviceInformation': await getDeviceInformation(modbusClient),
-        'alarms': await getAlarmStatuses(modbusClient, true, false),
+        'alarmHistory': await getAlarmHistory(modbusClient),
     }
 
     res.json(summary)
@@ -68,19 +68,6 @@ export const setSetting = async (modbusClient, req, res) => {
 
         res.json({
             'settings': await getSettings(modbusClient),
-        })
-    } catch (e) {
-        res.status(400)
-        res.send(e.message)
-    }
-}
-
-export const getAlarms = async (modbusClient, req, res) => {
-    try {
-        const alarms = await getAlarmStatuses(modbusClient, true, false)
-
-        res.json({
-            'alarms': alarms,
         })
     } catch (e) {
         res.status(400)
