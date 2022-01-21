@@ -51,6 +51,8 @@ test('parse alarm timestamp', () => {
 
     const timestamp = parseAlarmTimestamp(alarmResult)
 
-    // 13:45 GMT+2 == 11:45 UTC
-    expect(timestamp.toISOString()).toEqual('2022-01-21T11:45:00.000Z')
+    // The ventilation unit is assumed to be using the same timezone as the computer running this software,
+    // i.e. the result from Modbus is in local time.
+    expect(timestamp.toLocaleString('fi-FI')).toEqual('21.1.2022 klo 13.45.00')
+    expect(timestamp.toLocaleString('en-US')).toEqual('1/21/2022, 1:45:00 PM')
 })

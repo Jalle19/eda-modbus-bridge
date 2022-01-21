@@ -360,6 +360,5 @@ export const createModelNameString = (deviceInformation) => {
 }
 
 export const parseAlarmTimestamp = (result) => {
-    // The ventilation unit is assumed to use the same timezone as the computer running this program
-    return new Date(`${result.data[2] + 2000}-${result.data[3]}-${result.data[4]} ${result.data[5]}:${result.data[6]}:00`)
+    return new Date(result.data[2] + 2000, result.data[3] - 1, result.data[4], result.data[5], result.data[6])
 }
