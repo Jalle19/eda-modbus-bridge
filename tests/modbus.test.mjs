@@ -1,6 +1,6 @@
 import {
     parseTemperature,
-    createModelNameString
+    createModelNameString, parseAlarmTimestamp
 } from '../app/modbus.mjs'
 
 test('parse temperature', () => {
@@ -34,4 +34,23 @@ test('create model name from device information', () => {
         heatingTypeInstalled: null,
         coolingTypeInstalled: null,
     })).toEqual('Pandion')
+})
+
+test('parse alarm timestamp', () => {
+    const alarmResult = {
+        data: [
+            10, // type
+            2, // state,
+            22, // year
+            1, // month
+            21, // day
+            13, // hour
+            45, // minute
+        ]
+    }
+
+    const timestamp = parseAlarmTimestamp(alarmResult)
+
+    // 13:45 GMT+2 == 11:45 UTC
+    expect(timestamp.toISOString()).toEqual('2022-01-21T11:45:00.000Z')
 })

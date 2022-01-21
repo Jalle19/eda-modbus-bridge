@@ -271,7 +271,7 @@ export const getAlarmHistory = async (modbusClient) => {
 
         let alarm = Object.assign({}, AVAILABLE_ALARMS[code])
         alarm.state = state
-        alarm.date = new Date(`${result.data[2] + 2000}-${result.data[3]}-${result.data[4]} ${result.data[5]}:${result.data[6]}:00`)
+        alarm.date = parseAlarmTimestamp(result)
 
         alarmHistory.push(alarm)
     }
@@ -357,4 +357,9 @@ export const createModelNameString = (deviceInformation) => {
     }
 
     return modelName
+}
+
+export const parseAlarmTimestamp = (result) => {
+    // The ventilation unit is assumed to use the same timezone as the computer running this program
+    return new Date(`${result.data[2] + 2000}-${result.data[3]}-${result.data[4]} ${result.data[5]}:${result.data[6]}:00`)
 }
