@@ -15,28 +15,34 @@ test('parse temperature', () => {
 
 test('create model name from device information', () => {
     // Heating, no cooling, DC fan
-    expect(createModelNameString({
-        familyType: 'Pingvin',
-        fanType: 'EC',
-        heatingTypeInstalled: 'EDE',
-        coolingTypeInstalled: null,
-    })).toEqual('Pingvin eco EDE')
+    expect(
+        createModelNameString({
+            familyType: 'Pingvin',
+            fanType: 'EC',
+            heatingTypeInstalled: 'EDE',
+            coolingTypeInstalled: null,
+        })
+    ).toEqual('Pingvin eco EDE')
 
     // Heating, cooling, DC fan
-    expect(createModelNameString({
-        familyType: 'Pegasus',
-        fanType: 'EC',
-        heatingTypeInstalled: 'EDE',
-        coolingTypeInstalled: 'CG',
-    })).toEqual('Pegasus eco EDE - CG')
+    expect(
+        createModelNameString({
+            familyType: 'Pegasus',
+            fanType: 'EC',
+            heatingTypeInstalled: 'EDE',
+            coolingTypeInstalled: 'CG',
+        })
+    ).toEqual('Pegasus eco EDE - CG')
 
     // No heating, no cooling, AC fan
-    expect(createModelNameString({
-        familyType: 'Pandion',
-        fanType: 'AC',
-        heatingTypeInstalled: null,
-        coolingTypeInstalled: null,
-    })).toEqual('Pandion')
+    expect(
+        createModelNameString({
+            familyType: 'Pandion',
+            fanType: 'AC',
+            heatingTypeInstalled: null,
+            coolingTypeInstalled: null,
+        })
+    ).toEqual('Pandion')
 })
 
 test('parse alarm timestamp', () => {
@@ -49,7 +55,7 @@ test('parse alarm timestamp', () => {
             21, // day
             13, // hour
             45, // minute
-        ]
+        ],
     }
 
     const timestamp = parseAlarmTimestamp(alarmResult)
