@@ -1,6 +1,9 @@
 import {
     parseTemperature,
-    createModelNameString, parseAlarmTimestamp
+    createModelNameString,
+    parseAlarmTimestamp,
+    getDeviceFamilyName,
+    getHeatingTypeName,
 } from '../app/modbus.mjs'
 
 test('parse temperature', () => {
@@ -12,28 +15,34 @@ test('parse temperature', () => {
 
 test('create model name from device information', () => {
     // Heating, no cooling, DC fan
-    expect(createModelNameString({
-        familyType: 'Pingvin',
-        fanType: 'EC',
-        heatingTypeInstalled: 'EDE',
-        coolingTypeInstalled: null,
-    })).toEqual('Pingvin eco EDE')
+    expect(
+        createModelNameString({
+            familyType: 'Pingvin',
+            fanType: 'EC',
+            heatingTypeInstalled: 'EDE',
+            coolingTypeInstalled: null,
+        })
+    ).toEqual('Pingvin eco EDE')
 
     // Heating, cooling, DC fan
-    expect(createModelNameString({
-        familyType: 'Pegasus',
-        fanType: 'EC',
-        heatingTypeInstalled: 'EDE',
-        coolingTypeInstalled: 'CG',
-    })).toEqual('Pegasus eco EDE - CG')
+    expect(
+        createModelNameString({
+            familyType: 'Pegasus',
+            fanType: 'EC',
+            heatingTypeInstalled: 'EDE',
+            coolingTypeInstalled: 'CG',
+        })
+    ).toEqual('Pegasus eco EDE - CG')
 
     // No heating, no cooling, AC fan
-    expect(createModelNameString({
-        familyType: 'Pandion',
-        fanType: 'AC',
-        heatingTypeInstalled: null,
-        coolingTypeInstalled: null,
-    })).toEqual('Pandion')
+    expect(
+        createModelNameString({
+            familyType: 'Pandion',
+            fanType: 'AC',
+            heatingTypeInstalled: null,
+            coolingTypeInstalled: null,
+        })
+    ).toEqual('Pandion')
 })
 
 test('parse alarm timestamp', () => {
@@ -46,13 +55,22 @@ test('parse alarm timestamp', () => {
             21, // day
             13, // hour
             45, // minute
-        ]
+        ],
     }
 
     const timestamp = parseAlarmTimestamp(alarmResult)
 
     // The ventilation unit is assumed to be using the same timezone as the computer running this software,
     // i.e. the result from Modbus is in local time.
-    expect(timestamp.toLocaleString('fi-FI')).toEqual('21.1.2022 klo 13.45.00')
     expect(timestamp.toLocaleString('en-US')).toEqual('1/21/2022, 1:45:00 PM')
+})
+
+test('device family name', () => {
+    expect(getDeviceFamilyName(0)).toEqual('Pingvin')
+    expect(getDeviceFamilyName(999)).toEqual('unknown')
+})
+
+test('heating type name', () => {
+    expect(getHeatingTypeName(0)).toEqual('ED')
+    expect(getHeatingTypeName(999)).toEqual('unknown')
 })

@@ -7,6 +7,7 @@
 * Publish only changed settings or modes in MQTT callback (fixes https://github.com/Jalle19/eda-modbus-bridge/issues/33)
 * Add alarms support (fixes https://github.com/Jalle19/eda-modbus-bridge/issues/31)
 * Format code using `prettier`
+* Support running on Node.js 12.x (fixes https://github.com/Jalle19/eda-modbus-bridge/issues/38)
 
 ## 2.0.0
 

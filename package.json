@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "check-prettier": "prettier --check eda-modbus-bridge.mjs app/",
-    "prettier": "prettier --write eda-modbus-bridge.mjs app/"
+    "check-prettier": "prettier --check eda-modbus-bridge.mjs app/ tests/",
+    "prettier": "prettier --write eda-modbus-bridge.mjs app/ tests/"
   },
   "repository": {
     "type": "git",

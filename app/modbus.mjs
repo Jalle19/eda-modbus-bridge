@@ -299,7 +299,7 @@ export const getAlarmStatuses = async (modbusClient) => {
     return alarms
 }
 
-const getDeviceFamilyName = (familyTypeInt) => {
+export const getDeviceFamilyName = (familyTypeInt) => {
     return (
         [
             'Pingvin', // prettier-hack
@@ -311,7 +311,7 @@ const getDeviceFamilyName = (familyTypeInt) => {
             'LTR-6̈́',
             'LTR-7',
             'LTR-7 XL',
-        ][familyTypeInt] ?? 'unknown'
+        ][familyTypeInt] || 'unknown'
     )
 }
 
@@ -330,7 +330,7 @@ const getCoolingTypeName = (coolingTypeInt) => {
     ][coolingTypeInt]
 }
 
-const getHeatingTypeName = (heatingTypeInt) => {
+export const getHeatingTypeName = (heatingTypeInt) => {
     // 0=Ei lämmitintä, 1=VPK, 2=HP, 3=SLP, 4=SLP PWM. Mapping known values to the actual names used on the product,
     // these seem to be internal
     return (
@@ -340,7 +340,7 @@ const getHeatingTypeName = (heatingTypeInt) => {
             'HP',
             'EDE',
             'SLP PWM',
-        ][heatingTypeInt] ?? 'unknown'
+        ][heatingTypeInt] || 'unknown'
     )
 }
 
