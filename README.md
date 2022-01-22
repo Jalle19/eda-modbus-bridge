@@ -19,7 +19,7 @@ https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See
 
 ## Requirements
 
-* Node.js (only tested with 14.x)
+* Node.js 12.x or newer
 * An Enervent Pingvin ventilation unit (other EDA-based units may work, but the Modbus register numbers probably differ)
 * An RS-485 device (e.g. `/dev/ttyUSB0`) connected to the Enervent unit's Freeway port
 
