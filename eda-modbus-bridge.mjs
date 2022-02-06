@@ -136,6 +136,11 @@ const argv = yargs(process.argv.slice(2))
                 await configureMqttDiscovery(modbusClient, mqttClient)
                 console.log('Finished configuration Home Assistant MQTT discovery')
             }
+
+            // Log reconnection attempts
+            mqttClient.on('reconnect', () => {
+                console.log(`Attempting to reconnect to ${argv.mqttBrokerUrl}`)
+            })
         } catch (e) {
             console.error(`Failed to connect to MQTT broker: ${e.message}`)
         }
