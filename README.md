@@ -21,7 +21,8 @@ https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See
 
 * Node.js 12.x or newer
 * An Enervent ventilation unit with EDA automation (Pingvin and Pandion confirmed working)
-* An RS-485 device (e.g. `/dev/ttyUSB0`) connected to the Enervent unit's Freeway port
+* An RS-485 device (e.g. `/dev/ttyUSB0`) connected to the Enervent unit's Freeway port (see 
+* [docs/CONNECTION.md](./docs/CONNECTION.md) for details on how to connect to the unit)
 
 ## Usage
 
