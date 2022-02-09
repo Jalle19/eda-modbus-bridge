@@ -4,6 +4,8 @@ const AVAILABLE_FLAGS = {
     'away': 1,
     'longAway': 2,
     'overPressure': 3,
+    'cookerHood': 4,
+    'centralVacuumCleaner': 5,
     'maxHeating': 6,
     'maxCooling': 7,
     'manualBoost': 10,
@@ -62,20 +64,18 @@ export const parseTemperature = (temperature) => {
 }
 
 export const getFlagSummary = async (modbusClient) => {
-    let result = await mutex.runExclusive(async () => modbusClient.readCoils(1, 10))
+    let result = await mutex.runExclusive(async () => modbusClient.readCoils(0, 13))
     let summary = {
-        'away': result.data[0],
-        'longAway': result.data[1],
-        'overPressure': result.data[2],
-        'maxHeating': result.data[5],
-        'maxCooling': result.data[6],
-        'manualBoost': result.data[9],
-    }
-
-    result = await mutex.runExclusive(async () => modbusClient.readCoils(12, 1))
-    summary = {
-        ...summary,
-        'summerNightCooling': result.data[0],
+        'stop': result.data[0],
+        'away': result.data[1],
+        'longAway': result.data[2],
+        'overPressure': result.data[3],
+        'cookerHood': result.data[4],
+        'centralVacuumCleaner': result.data[5],
+        'maxHeating': result.data[6],
+        'maxCooling': result.data[7],
+        'manualBoost': result.data[10],
+        'summerNightCooling': result.data[12]
     }
 
     return summary
@@ -229,6 +229,12 @@ export const getDeviceInformation = async (modbusClient) => {
         'fanType': result.data[0] ? 'EC' : 'AC',
     }
 
+    result = await mutex.runExclusive(async () => modbusClient.readCoils(0, 72))
+    let unitType = 0 + result.data[51]
+    deviceInformation = {
+        ...deviceInformation,
+        'unitType': getUnitTypeNames(unitType),
+    }
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(154, 1))
     deviceInformation = {
         ...deviceInformation,
@@ -242,11 +248,24 @@ export const getDeviceInformation = async (modbusClient) => {
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(597, 3))
+    let model = '-'
+    if (unitType == 0) {
+        model = getDeviceFamilyName(result.data[0])
+    } else if (unitType == 1) {
+        model = getDeviceProName(result.data[0])
+    }
+
     deviceInformation = {
         ...deviceInformation,
         'familyType': getDeviceFamilyName(result.data[0]),
+        'modelType': model,
         'serialNumber': result.data[1],
         'softwareVersion': result.data[2] / 100,
+    }
+
+    deviceInformation = {
+        ...deviceInformation,
+        'modelName': createModelNameString(deviceInformation)
     }
 
     return deviceInformation
@@ -299,6 +318,15 @@ export const getAlarmStatuses = async (modbusClient) => {
     return alarms
 }
 
+export const getUnitTypeNames = (unitTypeInt) => {
+    return (
+        [
+            'Family',
+            'PRO',
+        ][unitTypeInt] || 'unknown'
+    )
+}
+
 export const getDeviceFamilyName = (familyTypeInt) => {
     return (
         [
@@ -308,10 +336,23 @@ export const getDeviceFamilyName = (familyTypeInt) => {
             'Pegasos',
             'Pegasos XL',
             'LTR-3',
-            'LTR-6̈́',
+            'LTR-6',
             'LTR-7',
             'LTR-7 XL',
         ][familyTypeInt] || 'unknown'
+    )
+}
+
+export const getDeviceProName = (proTypeInt) => {
+    return (
+        [
+            'RS',
+            'RSC',
+            'LTR',
+            'LTC',
+            'LTT',
+            'LTP',
+        ][proTypeInt] || 'unknown'
     )
 }
 
