@@ -66,7 +66,7 @@ export const parseTemperature = (temperature) => {
 export const getFlagSummary = async (modbusClient) => {
     let result = await mutex.runExclusive(async () => modbusClient.readCoils(0, 13))
     let summary = {
-        'stop': result.data[0],
+        // 'stop': result.data[0], // - Can not return value if stopped.
         'away': result.data[1],
         'longAway': result.data[2],
         'overPressure': result.data[3],
@@ -248,7 +248,7 @@ export const getDeviceInformation = async (modbusClient) => {
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(597, 3))
-    let model = '-'
+    let model = 'unknown'
     if (unitType == 0) {
         model = getDeviceFamilyName(result.data[0])
     } else if (unitType == 1) {
