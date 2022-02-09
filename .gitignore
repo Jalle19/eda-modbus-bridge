@@ -2,3 +2,5 @@
 eda-modbus-bridge.iml
 node_modules
 data
+*~
+

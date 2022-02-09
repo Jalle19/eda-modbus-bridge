@@ -75,7 +75,7 @@ export const getFlagSummary = async (modbusClient) => {
         'maxHeating': result.data[6],
         'maxCooling': result.data[7],
         'manualBoost': result.data[10],
-        'summerNightCooling': result.data[12]
+        'summerNightCooling': result.data[12],
     }
 
     return summary
@@ -265,7 +265,7 @@ export const getDeviceInformation = async (modbusClient) => {
 
     deviceInformation = {
         ...deviceInformation,
-        'modelName': createModelNameString(deviceInformation)
+        'modelName': createModelNameString(deviceInformation),
     }
 
     return deviceInformation
@@ -319,12 +319,7 @@ export const getAlarmStatuses = async (modbusClient) => {
 }
 
 export const getUnitTypeNames = (unitTypeInt) => {
-    return (
-        [
-            'Family',
-            'PRO',
-        ][unitTypeInt] || 'unknown'
-    )
+    return ['Family', 'PRO'][unitTypeInt] || 'unknown'
 }
 
 export const getDeviceFamilyName = (familyTypeInt) => {
@@ -344,16 +339,7 @@ export const getDeviceFamilyName = (familyTypeInt) => {
 }
 
 export const getDeviceProName = (proTypeInt) => {
-    return (
-        [
-            'RS',
-            'RSC',
-            'LTR',
-            'LTC',
-            'LTT',
-            'LTP',
-        ][proTypeInt] || 'unknown'
-    )
+    return ['RS', 'RSC', 'LTR', 'LTC', 'LTT', 'LTP'][proTypeInt] || 'unknown'
 }
 
 const getCoolingTypeName = (coolingTypeInt) => {
