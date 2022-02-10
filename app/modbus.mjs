@@ -230,7 +230,7 @@ export const getDeviceInformation = async (modbusClient) => {
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readCoils(0, 72))
-    const unitType = result.data[51]
+    const unitType = 0 + result.data[51]
     deviceInformation = {
         ...deviceInformation,
         'unitType': getUnitTypeName(unitType),
