@@ -230,10 +230,10 @@ export const getDeviceInformation = async (modbusClient) => {
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readCoils(0, 72))
-    let unitType = 0 + result.data[51]
+    const unitType = result.data[51]
     deviceInformation = {
         ...deviceInformation,
-        'unitType': getUnitTypeNames(unitType),
+        'unitType': getUnitTypeName(unitType),
     }
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(154, 1))
     deviceInformation = {
@@ -318,8 +318,13 @@ export const getAlarmStatuses = async (modbusClient) => {
     return alarms
 }
 
-export const getUnitTypeNames = (unitTypeInt) => {
-    return ['Family', 'PRO'][unitTypeInt] || 'unknown'
+export const getUnitTypeName = (unitTypeInt) => {
+    return (
+        [
+            'Family', // prettier-hack
+            'PRO',
+        ][unitTypeInt] || 'unknown'
+    )
 }
 
 export const getDeviceFamilyName = (familyTypeInt) => {
@@ -339,7 +344,16 @@ export const getDeviceFamilyName = (familyTypeInt) => {
 }
 
 export const getDeviceProName = (proTypeInt) => {
-    return ['RS', 'RSC', 'LTR', 'LTC', 'LTT', 'LTP'][proTypeInt] || 'unknown'
+    return (
+        [
+            'RS', // prettier-hack
+            'RSC',
+            'LTR',
+            'LTC',
+            'LTT',
+            'LTP',
+        ][proTypeInt] || 'unknown'
+    )
 }
 
 const getCoolingTypeName = (coolingTypeInt) => {
