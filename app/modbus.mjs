@@ -36,22 +36,22 @@ export let AVAILABLE_ALARMS = {
     1: { name: 'TE5SupplyAirAfterHRCold', description: 'TE5 Supply air after HR cold' },
     2: { name: 'TE10SupplyAirAfterHeaterCold', description: 'TE10 Supply air after heater cold' },
     3: { name: 'TE10SupplyAirAfterHeaterHot', description: 'TE10 Supply air after heater hot' },
-    4: { name: 'TE20RoomTempHot', description: 'TE20 Room temp hot' },
-    5: { name: 'TE30ExtractAirCold', description: 'TE30 Extract air cold' },
-    6: { name: 'TE30ExtractAirHot', description: 'TE30 Extract air hot' },
+    4: { name: 'TE20RoomTempHot', description: 'TE20 Room temperature hot' },
+    5: { name: 'TE30ExtractAirCold', description: 'TE30 Waste air cold' },
+    6: { name: 'TE30ExtractAirHot', description: 'TE30 Waste air hot' },
     7: { name: 'HPError', description: 'Heatpump error' },
-    8: { name: 'EHError', description: 'Heater error' }, // Electrical Heater error?
+    8: { name: 'EHError', description: 'Electrical heater error' },
     9: { name: 'ReturnWaterCold', description: 'Return water cold' },
     10: { name: 'HRError', description: 'Heat recovery error' },
     11: { name: 'CoolingError', description: 'Cooling error' },
     12: { name: 'EmergencyStop', description: 'Emergency stop' },
     13: { name: 'FireRisk', description: 'Fire risk' },
     14: { name: 'ServiceReminder', description: 'Service reminder' },
-    15: { name: 'EHPDA', description: 'Heater pressure switch' }, // ?? EH PDA / SLP painevahti
+    15: { name: 'EHPDA', description: 'Electrical heater pressure switch' },
     16: { name: 'SupplyFilterDirty', description: 'Supply filter dirty' },
-    17: { name: 'ExtractFilterDirty', description: 'Extract filter dirty' },
+    17: { name: 'ExtractFilterDirty', description: 'Waste filter dirty' },
     20: { name: 'SupplyFanPressureError', description: 'Supply fan pressure error' },
-    21: { name: 'ExtractFanPressureError', description: 'Extract fan pressure error' },
+    21: { name: 'ExtractFanPressureError', description: 'Waste fan pressure error' },
 }
 
 const mutex = new Mutex()
