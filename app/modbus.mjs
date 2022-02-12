@@ -51,7 +51,7 @@ export let AVAILABLE_ALARMS = {
     16: { name: 'SupplyFilterDirty', description: 'Supply filter dirty' },
     17: { name: 'ExtractFilterDirty', description: 'Extract filter dirty' },
     20: { name: 'SupplyFanPressureError', description: 'Supply fan pressure error' },
-    21: { name: 'ExtractFanPressureError', description: 'Extract fan pressure error' }
+    21: { name: 'ExtractFanPressureError', description: 'Extract fan pressure error' },
 }
 
 const mutex = new Mutex()
