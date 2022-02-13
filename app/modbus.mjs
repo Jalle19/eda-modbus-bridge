@@ -32,25 +32,30 @@ const AVAILABLE_SETTINGS = {
 }
 
 export let AVAILABLE_ALARMS = {
-    1: { name: 'TE5InletAfterHeatExchangerCold', description: 'TE5 inlet after heatexchanger cold' }, // 1=TE5 Tulo LTOn jälkeen kylmä
-    2: { name: 'TE10InletAfterHeaterCold', description: 'TE10 inlet after heater cold' }, // 2=TE10 Tulo lämmityspatterin jälkeen kylmä
-    3: { name: 'TE10InletAfterHeaterHot', description: 'TE10 inlet after heater hot' }, // 3=TE10 Tulo lämmityspatterin jälkeen kuuma
-    4: { name: 'TE20RoomHot', description: 'TE20 room hot' }, // 4=TE20 Huone kuuma
-    5: { name: 'TE30OutletCold', description: 'TE30 outlet cold' }, // 5=TE30 Poisto kylmä
-    6: { name: 'TE30OutletHot', description: 'TE30 outlet hot' }, // 6=TE30 Poisto kuuma
-    7: { name: 'HPFault', description: 'HP fault' }, // 7=HP vika
-    8: { name: 'HeaterFault', description: 'Heater fault' }, // 8=SLP vika
-    9: { name: 'ReturnWaterCold', description: 'Return water cold' }, // 9=Paluuvesi kylmää
-    10: { name: 'LTOFault', description: 'Heatexchanger fault' }, // 10=LTO vika
-    11: { name: 'CoolingFault', description: 'Cooling fault' }, // 11=Jäähdytys vika
-    12: { name: 'EmergencyStop', description: 'Emergency stop' }, // 12=Hätäseis
-    13: { name: 'FireRisk', description: 'Fire risk' }, // 13=Palovaara
-    14: { name: 'ServiceReminder', description: 'Service reminder' }, // 14=Huoltomuistutus
-    15: { name: 'HeaterPressureSwitch', description: 'Heater pressure switch' }, // 15=SLP painevahti
-    16: { name: 'InletFilterDirty', description: 'Inlet filter dirty' }, // 16=Tulosuodatin likainen,
-    17: { name: 'OutletFilterDirty', description: 'Outlet filter dirty' }, // 17=Poistosuodatin likainen
-    20: { name: 'InletFanPressureAbnomaly', description: 'Inlet fan pressure abnomaly' }, // 20=Tulopuhallin painepoikkeama
-    21: { name: 'OutletFanPressureAbnomaly', description: 'Outlet fan pressure abnomaly' }, // 21=Poistopuhallin painepoikkeama
+    // Alarm number
+    // Name and descr based on Enervent EN EDA Modbus regirsters: 3x0385
+    // Waste air is used in some places where we don't care about if it's before (Extract)
+    // or after (Exhaust) the HRC. Filter sits before HRC, and fans after HRC.
+
+    1: { name: 'TE5SupplyAirAfterHRCold', description: 'TE5 Supply air after heat recovery cold' },
+    2: { name: 'TE10SupplyAirAfterHeaterCold', description: 'TE10 Supply air after heater cold' },
+    3: { name: 'TE10SupplyAirAfterHeaterHot', description: 'TE10 Supply air after heater hot' },
+    4: { name: 'TE20RoomTempHot', description: 'TE20 Room temperature hot' },
+    5: { name: 'TE30ExtractAirCold', description: 'TE30 Extract air cold' },
+    6: { name: 'TE30ExtractAirHot', description: 'TE30 Extract air hot' },
+    7: { name: 'HPError', description: 'Heatpump' },
+    8: { name: 'EHError', description: 'Electrical heater' },
+    9: { name: 'ReturnWaterCold', description: 'Return water cold' },
+    10: { name: 'HRError', description: 'Heat recovery' },
+    11: { name: 'CoolingError', description: 'Cooling' },
+    12: { name: 'EmergencyStop', description: 'Emergency stop' },
+    13: { name: 'FireRisk', description: 'Fire risk' },
+    14: { name: 'ServiceReminder', description: 'Service reminder' },
+    15: { name: 'EHPDA', description: 'Electrical heater pressure switch' },
+    16: { name: 'SupplyFilterDirty', description: 'Supply filter dirty' },
+    17: { name: 'ExtractFilterDirty', description: 'Waste filter dirty' },
+    20: { name: 'SupplyFanPressureError', description: 'Supply fan pressure' },
+    21: { name: 'ExtractFanPressureError', description: 'Waste fan pressure' },
 }
 
 const mutex = new Mutex()
