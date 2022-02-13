@@ -33,12 +33,16 @@ const AVAILABLE_SETTINGS = {
 
 export let AVAILABLE_ALARMS = {
     // Alarm number
-    1: { name: 'TE5SupplyAirAfterHRCold', description: 'TE5 Supply air after HR cold' },
+    // Name and descr based on Enervent EN EDA Modbus regirsters: 3x0385
+    // Waste air is used in some places where we don't care about if it's before (Extract)
+    // or after (Exhaust) the HRC. Filter sits before HRC, and fans after HRC.
+
+    1: { name: 'TE5SupplyAirAfterHRCold', description: 'TE5 Supply air after heat recovery cold' },
     2: { name: 'TE10SupplyAirAfterHeaterCold', description: 'TE10 Supply air after heater cold' },
     3: { name: 'TE10SupplyAirAfterHeaterHot', description: 'TE10 Supply air after heater hot' },
     4: { name: 'TE20RoomTempHot', description: 'TE20 Room temperature hot' },
-    5: { name: 'TE30ExtractAirCold', description: 'TE30 Waste air cold' },
-    6: { name: 'TE30ExtractAirHot', description: 'TE30 Waste air hot' },
+    5: { name: 'TE30ExtractAirCold', description: 'TE30 Extract air cold' },
+    6: { name: 'TE30ExtractAirHot', description: 'TE30 Extract air hot' },
     7: { name: 'HPError', description: 'Heatpump' },
     8: { name: 'EHError', description: 'Electrical heater' },
     9: { name: 'ReturnWaterCold', description: 'Return water cold' },
