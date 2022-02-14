@@ -4,6 +4,7 @@ import {
     parseAlarmTimestamp,
     getDeviceFamilyName,
     getHeatingTypeName,
+    parseStateBitField,
 } from '../app/modbus.mjs'
 
 test('parse temperature', () => {
@@ -73,4 +74,90 @@ test('device family name', () => {
 test('heating type name', () => {
     expect(getHeatingTypeName(0)).toEqual('ED')
     expect(getHeatingTypeName(999)).toEqual('unknown')
+})
+
+test('parse state bitfield', () => {
+    // Nothing set
+    expect(parseStateBitField(0)).toEqual({
+        'normal': true,
+        'maxCooling': false,
+        'maxHeating': false,
+        'emergencyStop': false,
+        'stop': false,
+        'away': false,
+        'longAway': false,
+        'temperatureBoost': false,
+        'co2Boost': false,
+        'humidityBoost': false,
+        'manualBoost': false,
+        'overPressure': false,
+        'cookerHood': false,
+        'centralVacuumCleaner': false,
+        'heaterCooldown': false,
+        'summerNightCooling': false,
+        'defrosting': false,
+    })
+
+    // Typical situation 1 (away enabled)
+    expect(parseStateBitField(16)).toEqual({
+        'normal': false,
+        'maxCooling': false,
+        'maxHeating': false,
+        'emergencyStop': false,
+        'stop': false,
+        'away': true,
+        'longAway': false,
+        'temperatureBoost': false,
+        'co2Boost': false,
+        'humidityBoost': false,
+        'manualBoost': false,
+        'overPressure': false,
+        'cookerHood': false,
+        'centralVacuumCleaner': false,
+        'heaterCooldown': false,
+        'summerNightCooling': false,
+        'defrosting': false,
+    })
+
+    // Typical situation 2 (away enabled, summerNightCooling active)
+    expect(parseStateBitField(16 + 16384)).toEqual({
+        'normal': false,
+        'maxCooling': false,
+        'maxHeating': false,
+        'emergencyStop': false,
+        'stop': false,
+        'away': true,
+        'longAway': false,
+        'temperatureBoost': false,
+        'co2Boost': false,
+        'humidityBoost': false,
+        'manualBoost': false,
+        'overPressure': false,
+        'cookerHood': false,
+        'centralVacuumCleaner': false,
+        'heaterCooldown': false,
+        'summerNightCooling': true,
+        'defrosting': false,
+    })
+
+    // Arbitrary situation (every second bit flipped)
+    expect(parseStateBitField(1 + 4 + 16 + 64 + 256 + 1024 + 4096 + 16384)).toEqual({
+        'normal': false,
+        'maxCooling': true,
+        'maxHeating': false,
+        'emergencyStop': true,
+        'stop': false,
+        'away': true,
+        'longAway': false,
+        'temperatureBoost': true,
+        'co2Boost': false,
+        'humidityBoost': true,
+        'manualBoost': false,
+        'overPressure': true,
+        'cookerHood': false,
+        'centralVacuumCleaner': true,
+        'heaterCooldown': false,
+        'summerNightCooling': true,
+        'defrosting': false,
+    })
 })
