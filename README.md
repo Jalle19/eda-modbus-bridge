@@ -236,7 +236,26 @@ eda/alarm/InletFilterDirty
 eda/alarm/OutletFilterDirty
 eda/alarm/InletFanPressureAbnomaly
 eda/alarm/OutletFanPressureAbnomaly
+eda/deviceState/normal
+eda/deviceState/maxCooling
+eda/deviceState/maxHeating
+eda/deviceState/emergencyStop
+eda/deviceState/stop
+eda/deviceState/away
+eda/deviceState/longAway
+eda/deviceState/temperatureBoost
+eda/deviceState/co2Boost
+eda/deviceState/humidityBoost
+eda/deviceState/manualBoost
+eda/deviceState/overPressure
+eda/deviceState/cookerHood
+eda/deviceState/centralVacuumCleaner
+eda/deviceState/heaterCooldown
+eda/deviceState/summerNightCooling
+eda/deviceState/defrosting
 ```
+
+Boolean values are expressed as `ON` or `OFF`.
 
 The following topics can be written to in order to control the operation of the ventilation unit:
 

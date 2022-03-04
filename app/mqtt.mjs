@@ -7,6 +7,7 @@ import {
     setFlag,
     createModelNameString,
     getAlarmStatuses,
+    getDeviceState,
     AVAILABLE_ALARMS,
 } from './modbus.mjs'
 
@@ -16,6 +17,7 @@ const TOPIC_PREFIX_READINGS = `${TOPIC_PREFIX}/readings`
 const TOPIC_PREFIX_SETTINGS = `${TOPIC_PREFIX}/settings`
 const TOPIC_PREFIX_ALARM = `${TOPIC_PREFIX}/alarm`
 const TOPIC_PREFIX_DEVICE_INFORMATION = `${TOPIC_PREFIX}/deviceInformation`
+const TOPIC_PREFIX_DEVICE_STATE = `${TOPIC_PREFIX}/deviceState`
 const TOPIC_NAME_STATUS = `${TOPIC_PREFIX}/status`
 
 export const publishValues = async (modbusClient, mqttClient) => {
@@ -46,6 +48,7 @@ export const publishValues = async (modbusClient, mqttClient) => {
         topicMap[topicName] = JSON.stringify(value)
     }
 
+    // Publish alarm status
     const alarmStatuses = await getAlarmStatuses(modbusClient)
 
     for (const [index, alarm] of Object.entries(alarmStatuses)) {
@@ -54,6 +57,17 @@ export const publishValues = async (modbusClient, mqttClient) => {
         // Boolean values are changed to "ON" and "OFF" respectively since those are the
         // defaults for MQTT binary sensors in Home Assistant
         topicMap[topicName] = alarm.state === 2 ? 'ON' : 'OFF'
+    }
+
+    // Publish device state
+    const deviceState = await getDeviceState(modbusClient)
+
+    for (const [name, value] of Object.entries(deviceState)) {
+        const topicName = `${TOPIC_PREFIX_DEVICE_STATE}/${name}`
+
+        // Boolean values are changed to "ON" and "OFF" respectively since those are the
+        // defaults for MQTT binary sensors in Home Assistant
+        topicMap[topicName] = value ? 'ON' : 'OFF'
     }
 
     await publishTopics(mqttClient, topicMap)
