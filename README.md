@@ -265,11 +265,14 @@ The following topics are published to once during application startup:
 
 ```
 eda/deviceInformation/fanType
+eda/deviceInformation/unitType
 eda/deviceInformation/coolingTypeInstalled
 eda/deviceInformation/heatingTypeInstalled
 eda/deviceInformation/familyType
+eda/deviceInformation/modelType
 eda/deviceInformation/serialNumber
 eda/deviceInformation/softwareVersion
+eda/deviceInformation/modelName
 ```
 
 The following topics can be written to in order to control the operation of the ventilation unit:
