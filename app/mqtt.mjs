@@ -51,7 +51,7 @@ export const publishValues = async (modbusClient, mqttClient) => {
     // Publish alarm status
     const alarmStatuses = await getAlarmStatuses(modbusClient)
 
-    for (const [index, alarm] of Object.entries(alarmStatuses)) {
+    for (const [, alarm] of Object.entries(alarmStatuses)) {
         const topicName = `${TOPIC_PREFIX_ALARM}/${alarm.name}`
 
         // Boolean values are changed to "ON" and "OFF" respectively since those are the
@@ -321,7 +321,7 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
     // Binary sensors for alarms
     let binarySensorConfigurationMap = {}
 
-    for (const [code, alarm] of Object.entries(AVAILABLE_ALARMS)) {
+    for (const [, alarm] of Object.entries(AVAILABLE_ALARMS)) {
         binarySensorConfigurationMap[alarm.name] = createAlarmConfiguration(configurationBase, alarm)
     }
 
