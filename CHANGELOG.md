@@ -7,6 +7,7 @@
 * Expose the device state (https://github.com/Jalle19/eda-modbus-bridge/issues/46)
 * Configure entity icons for alarm sensors
 * Move Home Assistant related logic to `homeassistant.mjs`
+* Publish device information over MQTT once only (https://github.com/Jalle19/eda-modbus-bridge/issues/43)
 
 ## 2.1.0
 

@@ -38,15 +38,6 @@ export const publishValues = async (modbusClient, mqttClient) => {
     // Publish each setting
     await publishSettings(modbusClient, mqttClient)
 
-    // Publish device information
-    const deviceInformation = await getDeviceInformation(modbusClient)
-
-    for (const [item, value] of Object.entries(deviceInformation)) {
-        const topicName = `${TOPIC_PREFIX_DEVICE_INFORMATION}/${item}`
-        topicMap[topicName] = JSON.stringify(value)
-    }
-
-    // Publish alarm status
     const alarmStatuses = await getAlarmStatuses(modbusClient)
 
     for (const [, alarm] of Object.entries(alarmStatuses)) {
@@ -65,6 +56,22 @@ export const publishValues = async (modbusClient, mqttClient) => {
     }
 
     await publishTopics(mqttClient, topicMap)
+}
+
+export const publishDeviceInformation = async (modbusClient, mqttClient) => {
+    let topicMap = {}
+
+    const deviceInformation = await getDeviceInformation(modbusClient)
+
+    for (const [item, value] of Object.entries(deviceInformation)) {
+        const topicName = `${TOPIC_PREFIX_DEVICE_INFORMATION}/${item}`
+        topicMap[topicName] = JSON.stringify(value)
+    }
+
+    // Retain the values, they never change
+    await publishTopics(mqttClient, topicMap, {
+        retain: true,
+    })
 }
 
 const publishFlags = async (modbusClient, mqttClient) => {
@@ -96,11 +103,11 @@ const publishSettings = async (modbusClient, mqttClient) => {
     await publishTopics(mqttClient, topicMap)
 }
 
-const publishTopics = async (mqttClient, topicMap) => {
+const publishTopics = async (mqttClient, topicMap, publishOptions = {}) => {
     const publishPromises = []
 
     for (const [topic, value] of Object.entries(topicMap)) {
-        publishPromises.push(mqttClient.publish(topic, value))
+        publishPromises.push(mqttClient.publish(topic, value, publishOptions))
     }
 
     await Promise.all(publishPromises)

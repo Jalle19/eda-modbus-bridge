@@ -181,11 +181,12 @@ Returns the new setting values, like this:
 ## MQTT support
 
 When an MQTT broker URL is specified, the application connects to the broker and starts to regularly publish data at 
-the configured interval (defaults to every 10 seconds).
+the configured interval (defaults to every 10 seconds). Device information is published only on startup and retained 
+in the broker.
 
 Every topic is prefixed by `eda/`, so to subscribe to everything the application sends out, subscribe to `eda/#`
 
-The following read-only topics are available:
+The following read-only topics are regularly published:
 
 ```
 eda/status
@@ -220,12 +221,6 @@ eda/settings/awayTemperatureReduction
 eda/settings/longAwayVentilationLevel
 eda/settings/longAwayTemperatureReduction
 eda/settings/temperatureTarget
-eda/deviceInformation/fanType
-eda/deviceInformation/coolingTypeInstalled
-eda/deviceInformation/heatingTypeInstalled
-eda/deviceInformation/familyType
-eda/deviceInformation/serialNumber
-eda/deviceInformation/softwareVersion
 eda/alarm/TE5InletAfterHeatExchangerCold
 eda/alarm/TE10InletAfterHeaterCold
 eda/alarm/TE10InletAfterHeaterHot
@@ -265,6 +260,17 @@ eda/deviceState/defrosting
 ```
 
 Boolean values are expressed as `ON` or `OFF`.
+
+The following topics are published to once during application startup:
+
+```
+eda/deviceInformation/fanType
+eda/deviceInformation/coolingTypeInstalled
+eda/deviceInformation/heatingTypeInstalled
+eda/deviceInformation/familyType
+eda/deviceInformation/serialNumber
+eda/deviceInformation/softwareVersion
+```
 
 The following topics can be written to in order to control the operation of the ventilation unit:
 
