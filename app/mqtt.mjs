@@ -54,9 +54,7 @@ export const publishValues = async (modbusClient, mqttClient) => {
     for (const [, alarm] of Object.entries(alarmStatuses)) {
         const topicName = `${TOPIC_PREFIX_ALARM}/${alarm.name}`
 
-        // Boolean values are changed to "ON" and "OFF" respectively since those are the
-        // defaults for MQTT binary sensors in Home Assistant
-        topicMap[topicName] = alarm.state === 2 ? 'ON' : 'OFF'
+        topicMap[topicName] = createBinaryValue(alarm.state === 2)
     }
 
     // Publish device state
@@ -65,9 +63,7 @@ export const publishValues = async (modbusClient, mqttClient) => {
     for (const [name, value] of Object.entries(deviceState)) {
         const topicName = `${TOPIC_PREFIX_DEVICE_STATE}/${name}`
 
-        // Boolean values are changed to "ON" and "OFF" respectively since those are the
-        // defaults for MQTT binary sensors in Home Assistant
-        topicMap[topicName] = value ? 'ON' : 'OFF'
+        topicMap[topicName] = createBinaryValue(value)
     }
 
     await publishTopics(mqttClient, topicMap)
@@ -83,9 +79,7 @@ const publishFlags = async (modbusClient, mqttClient) => {
     for (const [mode, state] of Object.entries(modeSummary)) {
         const topicName = `${TOPIC_PREFIX_MODE}/${mode}`
 
-        // Boolean values are changed to "ON" and "OFF" respectively since those are the
-        // defaults for MQTT switches in Home Assistant
-        topicMap[topicName] = state ? 'ON' : 'OFF'
+        topicMap[topicName] = createBinaryValue(state)
     }
 
     await publishTopics(mqttClient, topicMap)
@@ -375,6 +369,12 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             })
         }
     }
+}
+
+const createBinaryValue = (value) => {
+    // Boolean values are exposed as "ON" and "OFF" respectively since those are the
+    // defaults for MQTT binary sensors in Home Assistant
+    return value ? 'ON' : 'OFF'
 }
 
 const createTemperatureSensorConfiguration = (configurationBase, readingName, entityName) => {
