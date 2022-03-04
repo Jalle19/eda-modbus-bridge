@@ -318,10 +318,41 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         ),
     }
 
-    const alarmConfigurationMap = {}
+    // Binary sensors for alarms
+    let binarySensorConfigurationMap = {}
 
     for (const [code, alarm] of Object.entries(AVAILABLE_ALARMS)) {
-        alarmConfigurationMap[alarm.name] = createAlarmConfiguration(configurationBase, alarm)
+        binarySensorConfigurationMap[alarm.name] = createAlarmConfiguration(configurationBase, alarm)
+    }
+
+    // Binary sensors for device state
+    binarySensorConfigurationMap = {
+        ...binarySensorConfigurationMap,
+        'normal': createDeviceStateConfiguration(configurationBase, 'normal', 'Normal'),
+        'maxCooling': createDeviceStateConfiguration(configurationBase, 'maxCooling', 'Max cooling'),
+        'maxHeating': createDeviceStateConfiguration(configurationBase, 'maxHeating', 'Max heating'),
+        'emergencyStop': createDeviceStateConfiguration(configurationBase, 'emergencyStop', 'Emergency stop'),
+        'stop': createDeviceStateConfiguration(configurationBase, 'stop', 'Stopped'),
+        'away': createDeviceStateConfiguration(configurationBase, 'away', 'Away'),
+        'longAway': createDeviceStateConfiguration(configurationBase, 'longAway', 'Long away'),
+        'temperatureBoost': createDeviceStateConfiguration(configurationBase, 'temperatureBoost', 'Temperature boost'),
+        'co2Boost': createDeviceStateConfiguration(configurationBase, 'co2Boost', 'CO2 boost'),
+        'humidityBoost': createDeviceStateConfiguration(configurationBase, 'humidityBoost', 'Humidity boost'),
+        'manualBoost': createDeviceStateConfiguration(configurationBase, 'manualBoost', 'Manual boost'),
+        'overPressure': createDeviceStateConfiguration(configurationBase, 'overPressure', 'Overpressure'),
+        'cookerHood': createDeviceStateConfiguration(configurationBase, 'cookerHood', 'Cooker hood'),
+        'centralVacuumCleaner': createDeviceStateConfiguration(
+            configurationBase,
+            'centralVacuumCleaner',
+            'Central vacuum cleaner'
+        ),
+        'heaterCooldown': createDeviceStateConfiguration(configurationBase, 'heaterCooldown', 'Heater cooldown'),
+        'summerNightCooling': createDeviceStateConfiguration(
+            configurationBase,
+            'summerNightCooling',
+            'Summer night cooling'
+        ),
+        'defrosting': createDeviceStateConfiguration(configurationBase, 'defrosting', 'Defrosting'),
     }
 
     // Final map that describes everything we want to be auto-discovered
@@ -329,7 +360,7 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         'sensor': sensorConfigurationMap,
         'number': numberConfigurationMap,
         'switch': switchConfigurationMap,
-        'binary_sensor': alarmConfigurationMap,
+        'binary_sensor': binarySensorConfigurationMap,
     }
 
     // Publish configurations
@@ -412,6 +443,18 @@ const createAlarmConfiguration = (configurationBase, alarm) => {
         'name': alarm.description,
         'object_id': `eda_${alarm.name}`,
         'state_topic': `${TOPIC_PREFIX_ALARM}/${alarm.name}`,
+        'entity_category': 'diagnostic',
+    }
+}
+
+const createDeviceStateConfiguration = (configurationBase, stateName, entityName) => {
+    return {
+        ...configurationBase,
+        // Must not collide with switch names for the same thing, e.g. "away"
+        'unique_id': `eda-state-${stateName}`,
+        'name': entityName,
+        'object_id': `eda_state_${stateName}`,
+        'state_topic': `${TOPIC_PREFIX_DEVICE_STATE}/${stateName}`,
         'entity_category': 'diagnostic',
     }
 }
