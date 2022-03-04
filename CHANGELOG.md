@@ -6,6 +6,7 @@
 * Add documentation on how to physically connect to the unit
 * Expose the device state (https://github.com/Jalle19/eda-modbus-bridge/issues/46)
 * Configure entity icons for alarm sensors
+* Move Home Assistant related logic to `homeassistant.mjs`
 
 ## 2.1.0
 
