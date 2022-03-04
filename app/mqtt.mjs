@@ -442,6 +442,7 @@ const createAlarmConfiguration = (configurationBase, alarm) => {
         'unique_id': `eda-${alarm.name}`,
         'name': alarm.description,
         'object_id': `eda_${alarm.name}`,
+        'icon': 'mdi:alarm-bell',
         'state_topic': `${TOPIC_PREFIX_ALARM}/${alarm.name}`,
         'entity_category': 'diagnostic',
     }
