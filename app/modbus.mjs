@@ -323,6 +323,12 @@ export const getAlarmStatuses = async (modbusClient) => {
     return alarms
 }
 
+export const getDeviceState = async (modbusClient) => {
+    const result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(44, 1))
+
+    return parseStateBitField(result.data[0])
+}
+
 export const getUnitTypeName = (unitTypeInt) => {
     return (
         [
@@ -411,4 +417,26 @@ export const createModelNameString = (deviceInformation) => {
 
 export const parseAlarmTimestamp = (result) => {
     return new Date(result.data[2] + 2000, result.data[3] - 1, result.data[4], result.data[5], result.data[6])
+}
+
+export const parseStateBitField = (state) => {
+    return {
+        'normal': state === 0,
+        'maxCooling': Boolean(state & 1),
+        'maxHeating': Boolean(state & 2),
+        'emergencyStop': Boolean(state & 4),
+        'stop': Boolean(state & 8),
+        'away': Boolean(state & 16),
+        'longAway': Boolean(state & 32),
+        'temperatureBoost': Boolean(state & 64),
+        'co2Boost': Boolean(state & 128),
+        'humidityBoost': Boolean(state & 256),
+        'manualBoost': Boolean(state & 512),
+        'overPressure': Boolean(state & 1024),
+        'cookerHood': Boolean(state & 2048),
+        'centralVacuumCleaner': Boolean(state & 4096),
+        'heaterCooldown': Boolean(state & 8192),
+        'summerNightCooling': Boolean(state & 16384),
+        'defrosting': Boolean(state & 32768),
+    }
 }

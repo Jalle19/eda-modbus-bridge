@@ -3,7 +3,7 @@ import morgan from 'morgan'
 import MQTT from 'async-mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
-import { getFlagStatus, root, setFlagStatus, setSetting, summary } from './app/handlers.mjs'
+import { getFlagStatus, root, setFlagStatus, setSetting, summary } from './app/http.mjs'
 import { publishValues, configureMqttDiscovery, subscribeToChanges, handleMessage } from './app/mqtt.mjs'
 
 const argv = yargs(process.argv.slice(2))

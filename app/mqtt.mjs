@@ -7,6 +7,7 @@ import {
     setFlag,
     createModelNameString,
     getAlarmStatuses,
+    getDeviceState,
     AVAILABLE_ALARMS,
 } from './modbus.mjs'
 
@@ -16,6 +17,7 @@ const TOPIC_PREFIX_READINGS = `${TOPIC_PREFIX}/readings`
 const TOPIC_PREFIX_SETTINGS = `${TOPIC_PREFIX}/settings`
 const TOPIC_PREFIX_ALARM = `${TOPIC_PREFIX}/alarm`
 const TOPIC_PREFIX_DEVICE_INFORMATION = `${TOPIC_PREFIX}/deviceInformation`
+const TOPIC_PREFIX_DEVICE_STATE = `${TOPIC_PREFIX}/deviceState`
 const TOPIC_NAME_STATUS = `${TOPIC_PREFIX}/status`
 
 export const publishValues = async (modbusClient, mqttClient) => {
@@ -46,14 +48,22 @@ export const publishValues = async (modbusClient, mqttClient) => {
         topicMap[topicName] = JSON.stringify(value)
     }
 
+    // Publish alarm status
     const alarmStatuses = await getAlarmStatuses(modbusClient)
 
-    for (const [index, alarm] of Object.entries(alarmStatuses)) {
+    for (const [, alarm] of Object.entries(alarmStatuses)) {
         const topicName = `${TOPIC_PREFIX_ALARM}/${alarm.name}`
 
-        // Boolean values are changed to "ON" and "OFF" respectively since those are the
-        // defaults for MQTT binary sensors in Home Assistant
-        topicMap[topicName] = alarm.state === 2 ? 'ON' : 'OFF'
+        topicMap[topicName] = createBinaryValue(alarm.state === 2)
+    }
+
+    // Publish device state
+    const deviceState = await getDeviceState(modbusClient)
+
+    for (const [name, value] of Object.entries(deviceState)) {
+        const topicName = `${TOPIC_PREFIX_DEVICE_STATE}/${name}`
+
+        topicMap[topicName] = createBinaryValue(value)
     }
 
     await publishTopics(mqttClient, topicMap)
@@ -69,9 +79,7 @@ const publishFlags = async (modbusClient, mqttClient) => {
     for (const [mode, state] of Object.entries(modeSummary)) {
         const topicName = `${TOPIC_PREFIX_MODE}/${mode}`
 
-        // Boolean values are changed to "ON" and "OFF" respectively since those are the
-        // defaults for MQTT switches in Home Assistant
-        topicMap[topicName] = state ? 'ON' : 'OFF'
+        topicMap[topicName] = createBinaryValue(state)
     }
 
     await publishTopics(mqttClient, topicMap)
@@ -304,10 +312,41 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         ),
     }
 
-    const alarmConfigurationMap = {}
+    // Binary sensors for alarms
+    let binarySensorConfigurationMap = {}
 
-    for (const [code, alarm] of Object.entries(AVAILABLE_ALARMS)) {
-        alarmConfigurationMap[alarm.name] = createAlarmConfiguration(configurationBase, alarm)
+    for (const [, alarm] of Object.entries(AVAILABLE_ALARMS)) {
+        binarySensorConfigurationMap[alarm.name] = createAlarmConfiguration(configurationBase, alarm)
+    }
+
+    // Binary sensors for device state
+    binarySensorConfigurationMap = {
+        ...binarySensorConfigurationMap,
+        'normal': createDeviceStateConfiguration(configurationBase, 'normal', 'Normal'),
+        'maxCooling': createDeviceStateConfiguration(configurationBase, 'maxCooling', 'Max cooling'),
+        'maxHeating': createDeviceStateConfiguration(configurationBase, 'maxHeating', 'Max heating'),
+        'emergencyStop': createDeviceStateConfiguration(configurationBase, 'emergencyStop', 'Emergency stop'),
+        'stop': createDeviceStateConfiguration(configurationBase, 'stop', 'Stopped'),
+        'away': createDeviceStateConfiguration(configurationBase, 'away', 'Away'),
+        'longAway': createDeviceStateConfiguration(configurationBase, 'longAway', 'Long away'),
+        'temperatureBoost': createDeviceStateConfiguration(configurationBase, 'temperatureBoost', 'Temperature boost'),
+        'co2Boost': createDeviceStateConfiguration(configurationBase, 'co2Boost', 'CO2 boost'),
+        'humidityBoost': createDeviceStateConfiguration(configurationBase, 'humidityBoost', 'Humidity boost'),
+        'manualBoost': createDeviceStateConfiguration(configurationBase, 'manualBoost', 'Manual boost'),
+        'overPressure': createDeviceStateConfiguration(configurationBase, 'overPressure', 'Overpressure'),
+        'cookerHood': createDeviceStateConfiguration(configurationBase, 'cookerHood', 'Cooker hood'),
+        'centralVacuumCleaner': createDeviceStateConfiguration(
+            configurationBase,
+            'centralVacuumCleaner',
+            'Central vacuum cleaner'
+        ),
+        'heaterCooldown': createDeviceStateConfiguration(configurationBase, 'heaterCooldown', 'Heater cooldown'),
+        'summerNightCooling': createDeviceStateConfiguration(
+            configurationBase,
+            'summerNightCooling',
+            'Summer night cooling'
+        ),
+        'defrosting': createDeviceStateConfiguration(configurationBase, 'defrosting', 'Defrosting'),
     }
 
     // Final map that describes everything we want to be auto-discovered
@@ -315,7 +354,7 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         'sensor': sensorConfigurationMap,
         'number': numberConfigurationMap,
         'switch': switchConfigurationMap,
-        'binary_sensor': alarmConfigurationMap,
+        'binary_sensor': binarySensorConfigurationMap,
     }
 
     // Publish configurations
@@ -330,6 +369,12 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             })
         }
     }
+}
+
+const createBinaryValue = (value) => {
+    // Boolean values are exposed as "ON" and "OFF" respectively since those are the
+    // defaults for MQTT binary sensors in Home Assistant
+    return value ? 'ON' : 'OFF'
 }
 
 const createTemperatureSensorConfiguration = (configurationBase, readingName, entityName) => {
@@ -398,6 +443,18 @@ const createAlarmConfiguration = (configurationBase, alarm) => {
         'name': alarm.description,
         'object_id': `eda_${alarm.name}`,
         'state_topic': `${TOPIC_PREFIX_ALARM}/${alarm.name}`,
+        'entity_category': 'diagnostic',
+    }
+}
+
+const createDeviceStateConfiguration = (configurationBase, stateName, entityName) => {
+    return {
+        ...configurationBase,
+        // Must not collide with switch names for the same thing, e.g. "away"
+        'unique_id': `eda-state-${stateName}`,
+        'name': entityName,
+        'object_id': `eda_state_${stateName}`,
+        'state_topic': `${TOPIC_PREFIX_DEVICE_STATE}/${stateName}`,
         'entity_category': 'diagnostic',
     }
 }

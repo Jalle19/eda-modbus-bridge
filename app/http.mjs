@@ -7,6 +7,7 @@ import {
     setFlag,
     setSetting as modbusSetSetting,
     getAlarmHistory,
+    getDeviceState,
 } from './modbus.mjs'
 
 export const root = async (req, res) => {
@@ -20,6 +21,7 @@ export const summary = async (modbusClient, req, res) => {
         'settings': await getSettings(modbusClient),
         'deviceInformation': await getDeviceInformation(modbusClient),
         'alarmHistory': await getAlarmHistory(modbusClient),
+        'deviceState': await getDeviceState(modbusClient),
     }
 
     res.json(summary)
