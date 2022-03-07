@@ -4,7 +4,8 @@ import MQTT from 'async-mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
 import { getFlagStatus, root, setFlagStatus, setSetting, summary } from './app/http.mjs'
-import { publishValues, configureMqttDiscovery, subscribeToChanges, handleMessage } from './app/mqtt.mjs'
+import { publishValues, subscribeToChanges, handleMessage } from './app/mqtt.mjs'
+import { configureMqttDiscovery } from './app/homeassistant.mjs'
 
 const argv = yargs(process.argv.slice(2))
     .usage('node $0 [options]')
