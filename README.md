@@ -33,6 +33,17 @@ https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See
 See further down in this README on how to run the application as a Home Assistant addon as well as how to run it in 
 the background using systemd.
 
+### Running as a systemd service
+
+You can use the provided systemd unit to run the software as a daemon. Simply copy the file to
+`/etc/systemd/system/eda-modbus-bridge.service`, edit it to suit your needs (you'll most likely want to change the
+user it is being run as) then run `sudo systemctl enable eda-modbus-bridge` to start the service automatically on
+boot, and finally `sudo systemctl start eda-modbus-bridge` to start the service.
+
+### Running as a Home Assistant OS addon
+
+See https://github.com/Jalle19/home-assistant-addon-repository/tree/main/eda-modbus-bridge
+
 ## Usage
 
 ```
@@ -310,17 +321,6 @@ in Home Assistant automatically through the MQTT integration. The following enti
 ![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha2.png "Home Assistant controls")
 ![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha3.png "Home Assistant sensors")
 ![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha4.png "Home Assistant configuration")
-
-## Running as a systemd service
-
-You can use the provided systemd unit to run the software as a daemon. Simply copy the file to 
-`/etc/systemd/system/eda-modbus-bridge.service`, edit it to suit your needs (you'll most likely want to change the 
-user it is being run as) then run `sudo systemctl enable eda-modbus-bridge` to start the service automatically on 
-boot, and finally `sudo systemctl start eda-modbus-bridge` to start the service.
-
-## Running as a Home Assistant OS addon
-
-See https://github.com/Jalle19/home-assistant-addon-repository/tree/main/eda-modbus-bridge
 
 ## License
 
