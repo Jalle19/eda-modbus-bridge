@@ -1,6 +1,6 @@
 # Change log
 
-## future release
+## 2.2.0
 
 * Log attempts to reconnect to the MQTT broker (https://github.com/Jalle19/eda-modbus-bridge/issues/36)
 * Add documentation on how to physically connect to the unit
