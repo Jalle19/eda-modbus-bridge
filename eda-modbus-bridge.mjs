@@ -4,7 +4,7 @@ import MQTT from 'async-mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
 import { getFlagStatus, root, setFlagStatus, setSetting, summary } from './app/http.mjs'
-import { publishValues, subscribeToChanges, handleMessage } from './app/mqtt.mjs'
+import { publishValues, subscribeToChanges, handleMessage, publishDeviceInformation } from './app/mqtt.mjs'
 import { configureMqttDiscovery } from './app/homeassistant.mjs'
 
 const argv = yargs(process.argv.slice(2))
@@ -118,6 +118,9 @@ const argv = yargs(process.argv.slice(2))
             }
 
             const mqttClient = await MQTT.connectAsync(argv.mqttBrokerUrl, clientOptions)
+
+            // Publish device information once only (since it doesn't change)
+            await publishDeviceInformation(modbusClient, mqttClient)
 
             // Publish readings/settings/modes/alarms regularly
             setInterval(async () => {
