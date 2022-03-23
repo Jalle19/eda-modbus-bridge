@@ -26,16 +26,38 @@ https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See
 
 ## Installation
 
-1. Clone the repository
-2. Run `npm i` to install dependencies
-3. Run the application with `node eda-modbus-bridge.mjs`. Specify whatever options you need.
+The following instructions will install the application to `/opt/eda-modbus-bridge`.
+
+```bash
+sudo su -
+git clone https://github.com/Jalle19/eda-modbus-bridge.git /opt/eda-modbus-bridge
+cd /opt/eda-modbus-bridge
+npm install --production
+```
+
+That's it, the application is now installed. You can run it manually with 
+`node /opt/eda-modbus-bridge/eda-modbus-bridge.mjs`, or see the next chapter on how to run it as a system service.
 
 ### Running as a systemd service
 
-You can use the provided systemd unit to run the software as a daemon. Simply copy the file to
-`/etc/systemd/system/eda-modbus-bridge.service`, edit it to suit your needs (you'll most likely want to change the
-user it is being run as) then run `sudo systemctl enable eda-modbus-bridge` to start the service automatically on
-boot, and finally `sudo systemctl start eda-modbus-bridge` to start the service.
+The following instructions assume you've installed the application to `/opt/eda-modbus-bridge`.
+
+```bash
+sudo cp /opt/eda-modbus-bridge/systemd/eda-modbus-bridge.service /etc/systemd/system/
+sudo systemctl enable eda-modbus-bridge
+sudo systemctl start eda-modbus-bridge
+```
+
+You can now check that it is running with `sudo systemctl status eda-modbus-bridge`.
+
+If you need to change any command-line options (e.g. to configure the MQTT broker URL), 
+edit `/etc/systemd/system/eda-modbus-bridge`. After you have edited the file you need to reload systemd and restart 
+the application:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart eda-modbus-bridge
+```
 
 ### Running as a Home Assistant OS addon
 
