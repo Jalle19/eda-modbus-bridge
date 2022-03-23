@@ -30,9 +30,6 @@ https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See
 2. Run `npm i` to install dependencies
 3. Run the application with `node eda-modbus-bridge.mjs`. Specify whatever options you need.
 
-See further down in this README on how to run the application as a Home Assistant addon as well as how to run it in 
-the background using systemd.
-
 ### Running as a systemd service
 
 You can use the provided systemd unit to run the software as a daemon. Simply copy the file to
