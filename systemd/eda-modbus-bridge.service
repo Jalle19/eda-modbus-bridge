@@ -3,7 +3,7 @@ Description=HTTP bridge for Enervent ventilation units with EDA automation
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/node /home/eda/eda-modbus-bridge/eda-modbus-bridge.mjs -d /dev/ttyUSB0 -p 9090
+ExecStart=/usr/bin/node /home/eda/eda-modbus-bridge/eda-modbus-bridge.mjs -d /dev/ttyUSB0
 
 [Install]
 WantedBy=multi-user.target
