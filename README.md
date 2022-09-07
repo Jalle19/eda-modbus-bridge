@@ -1,5 +1,6 @@
 # eda-modbus-bridge
 
+[![CodeQL](https://github.com/Jalle19/eda-modbus-bridge/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Jalle19/eda-modbus-bridge/actions/workflows/codeql-analysis.yml)
 [![Run tests](https://github.com/Jalle19/eda-modbus-bridge/actions/workflows/test.yml/badge.svg)](https://github.com/Jalle19/eda-modbus-bridge/actions/workflows/test.yml)
 
 An HTTP/MQTT bridge for Enervent ventilation units with EDA automation (e.g. Pingvin and Pandion). It provides a REST-ful 
