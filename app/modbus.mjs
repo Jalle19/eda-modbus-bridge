@@ -10,6 +10,7 @@ const AVAILABLE_FLAGS = {
     'maxCooling': 7,
     'manualBoost': 10,
     'summerNightCooling': 12,
+    'eco': 40,
 }
 
 // Modes that can only be true one at a time (mapped to their coil number)
@@ -20,6 +21,7 @@ const MUTUALLY_EXCLUSIVE_MODES = {
     'maxHeating': 6,
     'maxCooling': 7,
     'manualBoost': 10,
+    'eco': 40,
 }
 
 const AVAILABLE_SETTINGS = {
@@ -81,6 +83,12 @@ export const getFlagSummary = async (modbusClient) => {
         'maxCooling': result.data[7],
         'manualBoost': result.data[10],
         'summerNightCooling': result.data[12],
+    }
+
+    result = await mutex.runExclusive(async () => modbusClient.readCoils(40, 1))
+    summary = {
+        ...summary,
+        'eco': result.data[0],
     }
 
     return summary
