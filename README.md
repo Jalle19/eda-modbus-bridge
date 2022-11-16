@@ -31,6 +31,7 @@ https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See
   * [Home Assistant MQTT discovery](#home-assistant-mqtt-discovery)
 * [Known issues](#known-issues)
 * [License](#license)
+* [Credits](#credits)
 
 ## Features
 
@@ -381,3 +382,8 @@ in Home Assistant automatically through the MQTT integration. The following enti
 GNU GENERAL PUBLIC LICENSE 3.0
 
 Some documentation under `docs/` is proprietary. 
+
+## Credits
+
+Credits to Jaakko Ala-Paavola for creating https://web.archive.org/web/20201020102005/http://ala-paavola.fi/jaakko/doku.php?id=pingvin 
+and self-hosting a copy of the relatively hard to find EDA modbus register PDF document.
