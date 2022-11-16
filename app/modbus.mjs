@@ -257,7 +257,7 @@ export const getDeviceInformation = async (modbusClient) => {
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(171, 1))
     deviceInformation = {
         ...deviceInformation,
-        'heatingTypeInstalled': getHeatingTypeName(result.data[0]),
+        'heatingTypeInstalled': getAutomationAndHeatingTypeName(result.data[0]),
     }
 
     result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(597, 3))
@@ -390,22 +390,22 @@ const getCoolingTypeName = (coolingTypeInt) => {
     ][coolingTypeInt]
 }
 
-export const getHeatingTypeName = (heatingTypeInt) => {
-    // 0=Ei lämmitintä, 1=VPK, 2=HP, 3=SLP, 4=SLP PWM. Mapping known values to the actual names used on the product,
-    // these seem to be internal
+export const getAutomationAndHeatingTypeName = (heatingTypeInt) => {
+    // 0=Ei lämmitintä, 1=VPK, 2=HP, 3=SLP, 4=SLP PWM
+    // E prefix is used for units with EDA automation
+    // M prefix is used for units with MD automation
     return (
         [
-            'ED', // prettier-hack
-            'EDW',
-            'HP',
-            'EDE',
-            'SLP PWM',
+            'ED/MD', // prettier-hack
+            'EDW/MDW',
+            'EDX/MDX',
+            'EDE/MDE',
         ][heatingTypeInt] || 'unknown'
     )
 }
 
 export const createModelNameString = (deviceInformation) => {
-    // E.g. LTR-3 eco EDE - CG
+    // E.g. LTR-3 eco EDE/MDE - CG
     let modelName = deviceInformation.familyType
 
     if (deviceInformation.fanType === 'EC') {

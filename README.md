@@ -3,7 +3,7 @@
 [![CodeQL](https://github.com/Jalle19/eda-modbus-bridge/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Jalle19/eda-modbus-bridge/actions/workflows/codeql-analysis.yml)
 [![Run tests](https://github.com/Jalle19/eda-modbus-bridge/actions/workflows/test.yml/badge.svg)](https://github.com/Jalle19/eda-modbus-bridge/actions/workflows/test.yml)
 
-An HTTP/MQTT bridge for Enervent ventilation units with EDA automation (e.g. Pingvin and Pandion). It provides a REST-ful 
+An HTTP/MQTT bridge for Enervent ventilation units with EDA (and its successor, MD) automation (e.g. Pingvin and Pandion). It provides a REST-ful 
 HTTP interface for interacting with the ventilation unit (reading temperatures and changing certain settings), as well 
 as an MQTT client which can publish readings/settings regularly and be used to control the ventilation unit.
 
@@ -21,7 +21,7 @@ https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See
 ## Requirements
 
 * Node.js 12.x or newer
-* An Enervent ventilation unit with EDA automation (Pingvin, Pandion and LTR-3 confirmed working)
+* An Enervent ventilation unit with EDA or MD automation (Pingvin, Pandion and LTR-3 confirmed working)
 * An RS-485 device (e.g. `/dev/ttyUSB0`) connected to the Enervent unit's Freeway port (see 
 * [docs/CONNECTION.md](./docs/CONNECTION.md) for details on how to connect to the unit)
 

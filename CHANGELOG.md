@@ -2,7 +2,7 @@
 
 ## future release
 
-* Add support for "eco mode" (https://github.com/Jalle19/eda-modbus-bridge/issues/58)
+* Add initial support for MD automation units (https://github.com/Jalle19/eda-modbus-bridge/issues/58)
 
 ## 2.2.0
 
