@@ -174,6 +174,7 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             'summerNightCooling',
             'Summer night cooling'
         ),
+        'eco': createSwitchConfiguration(configurationBase, 'eco', 'Eco'),
     }
 
     // Binary sensors for alarms

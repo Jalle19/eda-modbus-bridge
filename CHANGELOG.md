@@ -1,5 +1,9 @@
 # Change log
 
+## future release
+
+* Add initial support for MD automation units (https://github.com/Jalle19/eda-modbus-bridge/issues/58)
+
 ## 2.2.0
 
 * Log attempts to reconnect to the MQTT broker (https://github.com/Jalle19/eda-modbus-bridge/issues/36)

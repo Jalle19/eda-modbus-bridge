@@ -3,7 +3,7 @@ import {
     createModelNameString,
     parseAlarmTimestamp,
     getDeviceFamilyName,
-    getHeatingTypeName,
+    getAutomationAndHeatingTypeName,
     parseStateBitField,
 } from '../app/modbus.mjs'
 
@@ -72,8 +72,9 @@ test('device family name', () => {
 })
 
 test('heating type name', () => {
-    expect(getHeatingTypeName(0)).toEqual('ED')
-    expect(getHeatingTypeName(999)).toEqual('unknown')
+    expect(getAutomationAndHeatingTypeName(0)).toEqual('ED/MD')
+    expect(getAutomationAndHeatingTypeName(3)).toEqual('EDE/MDE')
+    expect(getAutomationAndHeatingTypeName(4)).toEqual('unknown')
 })
 
 test('parse state bitfield', () => {
