@@ -13,6 +13,26 @@ unit's computer board.
 The REST endpoints for enabling/disabling the various modes are designed to be consumed by 
 https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See examples in the `docs/` directory.
 
+## Table of contents
+
+* [Features](#features)
+* [Requirements](#requirements)
+* [Installation](#installation)
+  * [Running as a systemd service](#running-as-a-systemd-service)
+  * [Running as a Home Assistant OS addon](#running-as-a-home-assistant-os-addon)
+* [Usage](#usage)
+* [HTTP endpoints](#http-endpoints)
+  * [GET /summary](#get-summary)
+  * [GET /mode/{flag}](#get-modeflag)
+  * [GET /alarms](#get-alarms)
+  * [POST /mode/{flag}](#post-modeflag)
+  * [POST /setting/{setting}/{value}](#post-settingsettingvalue)
+* [MQTT support](#mqtt-support)
+  * [Home Assistant MQTT discovery](#home-assistant-mqtt-discovery)
+* [Known issues](#known-issues)
+* [License](#license)
+* [Credits](#credits)
+
 ## Features
 
 * HTTP API for reading temperatures, modes and settings, as well as changing some settings
@@ -342,6 +362,28 @@ in Home Assistant automatically through the MQTT integration. The following enti
 ![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha3.png "Home Assistant sensors")
 ![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha4.png "Home Assistant configuration")
 
+## Known issues
+
+* Some ventilation units sometimes trip the "TE20 Huoneilma kuuma" alarm when Modbus is used and a room temperature 
+  sensor has not been connected to the main board. This can be alleviated by reducing the polling interval from 10 
+  seconds to something like 30 seconds, or fixed permanently by either connecting an NTC10 temperature sensor or a 10 
+  kiloohm resistor to the sensor input terminals (not tested, but confirmed by Enervent).
+
+* It is not possible to adjust the ventilation level when the unit is operating in normal mode. Enervent has confirmed 
+  that this is a limitation in the protocol and there is no direct solution. A workaround is to repurpose one of the 
+  modes, e.g. "long away", to be a "manual control" mode, since the ventilation level can be adjusted for all non-
+  normal modes of operation. A slight caveat with this is that the temperature target is also reduced, and the 
+  temperature target reduction setting doesn't always seem to accept values below 2 degrees Celsius. Experiment with 
+  these values to find something that suits your use case, or trust the built-in automation in the ventilation unit to 
+  do its job.
+
 ## License
 
 GNU GENERAL PUBLIC LICENSE 3.0
+
+Some documentation under `docs/` is proprietary. 
+
+## Credits
+
+Credits to Jaakko Ala-Paavola for creating https://web.archive.org/web/20201020102005/http://ala-paavola.fi/jaakko/doku.php?id=pingvin 
+and self-hosting a copy of the relatively hard to find EDA modbus register PDF document.
