@@ -1,8 +1,9 @@
 # Change log
 
-## future release
+## 2.3.0
 
-* Add initial support for MD automation units (https://github.com/Jalle19/eda-modbus-bridge/issues/58)
+* Add initial support for MD automation units (https://github.com/Jalle19/eda-modbus-bridge/issues/58), mainly "eco mode"
+* Add a "known issues" section to the README
 
 ## 2.2.0
 
