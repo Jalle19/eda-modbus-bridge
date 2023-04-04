@@ -1,5 +1,9 @@
 # Change log
 
+## future release
+
+* Fix automatic reconnect to MQTT broker when initial connection attempt fails (https://github.com/Jalle19/eda-modbus-bridge/issues/61)
+
 ## 2.3.0
 
 * Add initial support for MD automation units (https://github.com/Jalle19/eda-modbus-bridge/issues/58), mainly "eco mode"
