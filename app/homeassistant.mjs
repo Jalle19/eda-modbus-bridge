@@ -246,7 +246,7 @@ const createTemperatureSensorConfiguration = (configurationBase, readingName, en
 const createHumiditySensorConfiguration = (configurationBase, readingName, entityName) => {
     return createSensorConfiguration(configurationBase, readingName, entityName, {
         'device_class': 'humidity',
-        'unit_of_measurement': '%H',
+        'unit_of_measurement': '%',
     })
 }
 
