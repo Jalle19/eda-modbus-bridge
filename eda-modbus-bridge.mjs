@@ -165,6 +165,8 @@ const argv = yargs(process.argv.slice(2))
             mqttClient.on('reconnect', () => {
                 console.log(`Attempting to reconnect to ${argv.mqttBrokerUrl}`)
             })
-        } catch (e) {}
+        } catch (e) {
+            console.error(`Unknown exception occurred: ${e.message}`, e.stack)
+        }
     }
 })()
