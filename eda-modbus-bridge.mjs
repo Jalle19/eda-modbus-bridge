@@ -7,6 +7,8 @@ import { getFlagStatus, root, setFlagStatus, setSetting, summary } from './app/h
 import { publishValues, subscribeToChanges, handleMessage, publishDeviceInformation } from './app/mqtt.mjs'
 import { configureMqttDiscovery } from './app/homeassistant.mjs'
 
+const MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS = 5
+
 const argv = yargs(process.argv.slice(2))
     .usage('node $0 [options]')
     .options({
@@ -117,7 +119,25 @@ const argv = yargs(process.argv.slice(2))
                 }
             }
 
-            const mqttClient = await MQTT.connectAsync(argv.mqttBrokerUrl, clientOptions)
+            // The MQTT client handles reconnections automatically, but only after it has connected successfully once.
+            // Retry manually until we get an initial connection.
+            let mqttClient
+            let connectedOnce = false
+            const retryIntervalMs = MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS * 1000
+
+            do {
+                try {
+                    mqttClient = await MQTT.connectAsync(argv.mqttBrokerUrl, clientOptions)
+                    connectedOnce = true
+                    console.log(`Successfully connected to MQTT broker at ${argv.mqttBrokerUrl}`)
+                } catch (e) {
+                    console.error(
+                        `Failed to connect to MQTT broker: ${e.message}. Retrying in ${retryIntervalMs} milliseconds`
+                    )
+
+                    await new Promise((resolve) => setTimeout(resolve, retryIntervalMs))
+                }
+            } while (!connectedOnce)
 
             // Publish device information once only (since it doesn't change)
             await publishDeviceInformation(modbusClient, mqttClient)
@@ -145,8 +165,6 @@ const argv = yargs(process.argv.slice(2))
             mqttClient.on('reconnect', () => {
                 console.log(`Attempting to reconnect to ${argv.mqttBrokerUrl}`)
             })
-        } catch (e) {
-            console.error(`Failed to connect to MQTT broker: ${e.message}`)
-        }
+        } catch (e) {}
     }
 })()
