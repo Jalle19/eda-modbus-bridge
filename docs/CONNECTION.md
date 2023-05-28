@@ -27,3 +27,8 @@ Please read the above documents before continuing!
 If your RS-485 device has a ground terminal, connect the yellow wire to that.
 
 3. Connect the 4P4C connector to the Freeway port on the Enervent computer board.
+
+## Troubleshooting
+
+If you have connected everything but the software is unable to read anything from the ventilation unit (usually 
+manifests as various timeouts), try reversing the A and B (sometimes called RX and TX or + and -).
