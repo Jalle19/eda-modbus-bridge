@@ -53,7 +53,7 @@ The following instructions will install the application to `/opt/eda-modbus-brid
 sudo su -
 git clone https://github.com/Jalle19/eda-modbus-bridge.git /opt/eda-modbus-bridge
 cd /opt/eda-modbus-bridge
-npm install --production
+npm install --omit=dev
 ```
 
 That's it, the application is now installed. You can run it manually with 
