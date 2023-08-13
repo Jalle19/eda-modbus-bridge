@@ -30,6 +30,7 @@ https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See
 * [MQTT support](#mqtt-support)
   * [Home Assistant MQTT discovery](#home-assistant-mqtt-discovery)
 * [Known issues](#known-issues)
+* [Troubleshooting](#troubleshooting)
 * [License](#license)
 * [Credits](#credits)
 
@@ -376,6 +377,10 @@ in Home Assistant automatically through the MQTT integration. The following enti
   temperature target reduction setting doesn't always seem to accept values below 2 degrees Celsius. Experiment with 
   these values to find something that suits your use case, or trust the built-in automation in the ventilation unit to 
   do its job.
+
+## Troubleshooting
+
+See [docs/CONNECTION.md](./docs/CONNECTION.md)
 
 ## License
 
