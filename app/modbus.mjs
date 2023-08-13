@@ -461,6 +461,7 @@ export const parseStateBitField = (state) => {
 
 const tryReadCoils = async (modbusClient, dataAddress, length) => {
     try {
+        logger.debug(`Reading coil address ${dataAddress}, length ${length}`)
         return await modbusClient.readCoils(dataAddress, length)
     } catch (e) {
         logger.error(`Failed to read coil address ${dataAddress}, length ${length}`)
@@ -470,6 +471,7 @@ const tryReadCoils = async (modbusClient, dataAddress, length) => {
 
 const tryWriteCoils = async (modbusClient, dataAddress, value) => {
     try {
+        logger.debug(`Writing ${value} to coil address ${dataAddress}`)
         return await modbusClient.writeCoil(dataAddress, value)
     } catch (e) {
         logger.error(`Failed to write coil address ${dataAddress}, value ${value}`)
@@ -479,6 +481,7 @@ const tryWriteCoils = async (modbusClient, dataAddress, value) => {
 
 const tryReadHoldingRegisters = async (modbusClient, dataAddress, length) => {
     try {
+        logger.debug(`Reading holding register address ${dataAddress}, length ${length}`)
         return await modbusClient.readHoldingRegisters(dataAddress, length)
     } catch (e) {
         logger.error(`Failed to read holding register address ${dataAddress}, length ${length}`)
