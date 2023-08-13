@@ -4,7 +4,13 @@ import MQTT from 'async-mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
 import { getFlagStatus, root, setFlagStatus, setSetting, summary } from './app/http.mjs'
-import { publishValues, subscribeToChanges, handleMessage, publishDeviceInformation } from './app/mqtt.mjs'
+import {
+    publishValues,
+    subscribeToChanges,
+    handleMessage,
+    publishDeviceInformation,
+    validateBrokerUrl,
+} from './app/mqtt.mjs'
 import { configureMqttDiscovery } from './app/homeassistant.mjs'
 
 const MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS = 5
@@ -104,69 +110,73 @@ const argv = yargs(process.argv.slice(2))
 
     // Optionally create MQTT client
     if (argv.mqttBrokerUrl !== undefined) {
-        console.log(`Connecting to MQTT broker at ${argv.mqttBrokerUrl}`)
+        if (!validateBrokerUrl(argv.mqttBrokerUrl)) {
+            console.error(`Malformed MQTT broker URL: ${argv.mqttBrokerUrl}. Should be e.g. tcp://localhost:1883.`)
+        } else {
+            console.log(`Connecting to MQTT broker at ${argv.mqttBrokerUrl}`)
 
-        try {
-            // Handle authentication
-            let clientOptions = {}
+            try {
+                // Handle authentication
+                let clientOptions = {}
 
-            if (argv.mqttUsername && argv.mqttPassword) {
-                console.log('Using MQTT broker authentication')
+                if (argv.mqttUsername && argv.mqttPassword) {
+                    console.log('Using MQTT broker authentication')
 
-                clientOptions = {
-                    'username': argv.mqttUsername,
-                    'password': argv.mqttPassword,
+                    clientOptions = {
+                        'username': argv.mqttUsername,
+                        'password': argv.mqttPassword,
+                    }
                 }
-            }
 
-            // The MQTT client handles reconnections automatically, but only after it has connected successfully once.
-            // Retry manually until we get an initial connection.
-            let mqttClient
-            let connectedOnce = false
-            const retryIntervalMs = MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS * 1000
+                // The MQTT client handles reconnections automatically, but only after it has connected successfully once.
+                // Retry manually until we get an initial connection.
+                let mqttClient
+                let connectedOnce = false
+                const retryIntervalMs = MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS * 1000
 
-            do {
-                try {
-                    mqttClient = await MQTT.connectAsync(argv.mqttBrokerUrl, clientOptions)
-                    connectedOnce = true
-                    console.log(`Successfully connected to MQTT broker at ${argv.mqttBrokerUrl}`)
-                } catch (e) {
-                    console.error(
-                        `Failed to connect to MQTT broker: ${e.message}. Retrying in ${retryIntervalMs} milliseconds`
-                    )
+                do {
+                    try {
+                        mqttClient = await MQTT.connectAsync(argv.mqttBrokerUrl, clientOptions)
+                        connectedOnce = true
+                        console.log(`Successfully connected to MQTT broker at ${argv.mqttBrokerUrl}`)
+                    } catch (e) {
+                        console.error(
+                            `Failed to connect to MQTT broker: ${e.message}. Retrying in ${retryIntervalMs} milliseconds`
+                        )
 
-                    await new Promise((resolve) => setTimeout(resolve, retryIntervalMs))
+                        await new Promise((resolve) => setTimeout(resolve, retryIntervalMs))
+                    }
+                } while (!connectedOnce)
+
+                // Publish device information once only (since it doesn't change)
+                await publishDeviceInformation(modbusClient, mqttClient)
+
+                // Publish readings/settings/modes/alarms regularly
+                setInterval(async () => {
+                    await publishValues(modbusClient, mqttClient)
+                }, argv.mqttPublishInterval * 1000)
+
+                console.log(`MQTT scheduler started, will publish readings every ${argv.mqttPublishInterval} seconds`)
+
+                // Subscribe to changes and register a handler
+                await subscribeToChanges(modbusClient, mqttClient)
+                mqttClient.on('message', async (topicName, payload) => {
+                    await handleMessage(modbusClient, mqttClient, topicName, payload)
+                })
+
+                // Optionally configure Home Assistant MQTT discovery
+                if (argv.mqttDiscovery) {
+                    await configureMqttDiscovery(modbusClient, mqttClient)
+                    console.log('Finished configuration Home Assistant MQTT discovery')
                 }
-            } while (!connectedOnce)
 
-            // Publish device information once only (since it doesn't change)
-            await publishDeviceInformation(modbusClient, mqttClient)
-
-            // Publish readings/settings/modes/alarms regularly
-            setInterval(async () => {
-                await publishValues(modbusClient, mqttClient)
-            }, argv.mqttPublishInterval * 1000)
-
-            console.log(`MQTT scheduler started, will publish readings every ${argv.mqttPublishInterval} seconds`)
-
-            // Subscribe to changes and register a handler
-            await subscribeToChanges(modbusClient, mqttClient)
-            mqttClient.on('message', async (topicName, payload) => {
-                await handleMessage(modbusClient, mqttClient, topicName, payload)
-            })
-
-            // Optionally configure Home Assistant MQTT discovery
-            if (argv.mqttDiscovery) {
-                await configureMqttDiscovery(modbusClient, mqttClient)
-                console.log('Finished configuration Home Assistant MQTT discovery')
+                // Log reconnection attempts
+                mqttClient.on('reconnect', () => {
+                    console.log(`Attempting to reconnect to ${argv.mqttBrokerUrl}`)
+                })
+            } catch (e) {
+                console.error(`Unknown exception occurred: ${e.message}`, e.stack)
             }
-
-            // Log reconnection attempts
-            mqttClient.on('reconnect', () => {
-                console.log(`Attempting to reconnect to ${argv.mqttBrokerUrl}`)
-            })
-        } catch (e) {
-            console.error(`Unknown exception occurred: ${e.message}`, e.stack)
         }
     }
 })()
