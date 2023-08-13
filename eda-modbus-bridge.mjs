@@ -1,5 +1,5 @@
 import express from 'express'
-import morgan from 'morgan'
+import expressWinston from 'express-winston'
 import MQTT from 'async-mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
@@ -12,6 +12,7 @@ import {
     validateBrokerUrl,
 } from './app/mqtt.mjs'
 import { configureMqttDiscovery } from './app/homeassistant.mjs'
+import { createLogger } from './app/logger.mjs'
 
 const MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS = 5
 
@@ -85,10 +86,12 @@ const argv = yargs(process.argv.slice(2))
 
     // Optionally create HTTP server
     if (argv.http) {
+        // Define middleware
         const httpServer = express()
-        httpServer.use(morgan('tiny'))
+        httpServer.use(expressWinston.logger({ winstonInstance: httpLogger }))
         httpServer.use(express.json())
 
+        // Define routes
         httpServer.get('/', root)
         httpServer.get('/summary', (req, res) => {
             return summary(modbusClient, req, res)
