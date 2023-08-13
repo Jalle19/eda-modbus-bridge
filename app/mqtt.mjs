@@ -149,6 +149,10 @@ export const handleMessage = async (modbusClient, mqttClient, topicName, payload
     }
 }
 
+export const validateBrokerUrl = (brokerUrl) => {
+    return brokerUrl.startsWith('tcp://')
+}
+
 const createBinaryValue = (value) => {
     // Boolean values are exposed as "ON" and "OFF" respectively since those are the
     // defaults for MQTT binary sensors in Home Assistant
