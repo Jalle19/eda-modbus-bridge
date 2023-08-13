@@ -31,4 +31,7 @@ If your RS-485 device has a ground terminal, connect the yellow wire to that.
 ## Troubleshooting
 
 If you have connected everything but the software is unable to read anything from the ventilation unit (usually 
-manifests as various timeouts), try reversing the A and B (sometimes called RX and TX or + and -).
+manifests as various timeouts), try the following:
+
+* try reversing the A and B (sometimes called RX and TX or + and -)
+* try using slave address 0 instead of 1 (`--modbusSlave 0`)
