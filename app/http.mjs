@@ -52,7 +52,7 @@ export const setFlagStatus = async (modbusClient, req, res) => {
         const flag = req.params['flag']
         const status = !!req.body['active']
 
-        console.log(`Setting flag ${flag} to ${status}`)
+        logger.info(`Setting flag ${flag} to ${status}`)
 
         await setFlag(modbusClient, flag, status)
 
@@ -69,7 +69,7 @@ export const setSetting = async (modbusClient, req, res) => {
         const setting = req.params['setting']
         const value = req.params['value']
 
-        console.log(`Setting setting ${setting} to ${value}`)
+        logger.info(`Setting setting ${setting} to ${value}`)
 
         await modbusSetSetting(modbusClient, setting, value)
 

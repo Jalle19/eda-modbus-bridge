@@ -8,6 +8,7 @@ import {
     getAlarmStatuses,
     getDeviceState,
 } from './modbus.mjs'
+import { createLogger } from './logger.mjs'
 
 export const TOPIC_PREFIX = 'eda'
 export const TOPIC_PREFIX_MODE = `${TOPIC_PREFIX}/mode`
@@ -17,6 +18,8 @@ export const TOPIC_PREFIX_ALARM = `${TOPIC_PREFIX}/alarm`
 export const TOPIC_PREFIX_DEVICE_INFORMATION = `${TOPIC_PREFIX}/deviceInformation`
 export const TOPIC_PREFIX_DEVICE_STATE = `${TOPIC_PREFIX}/deviceState`
 export const TOPIC_NAME_STATUS = `${TOPIC_PREFIX}/status`
+
+const logger = createLogger('mqtt', 'debug')
 
 export const publishValues = async (modbusClient, mqttClient) => {
     // Create a map from topic name to value that should be published
@@ -68,6 +71,8 @@ export const publishDeviceInformation = async (modbusClient, mqttClient) => {
         topicMap[topicName] = JSON.stringify(value)
     }
 
+    logger.debug('Publising device information...')
+
     // Retain the values, they never change
     await publishTopics(mqttClient, topicMap, {
         retain: true,
@@ -118,7 +123,7 @@ export const subscribeToChanges = async (modbusClient, mqttClient) => {
     const topicNames = [`${TOPIC_PREFIX_MODE}/+/set`, `${TOPIC_PREFIX_SETTINGS}/+/set`]
 
     for (const topicName of topicNames) {
-        console.log(`Subscribing to topic(s) ${topicName}`)
+        logger.info(`Subscribing to topic(s) ${topicName}`)
 
         await mqttClient.subscribe(topicName)
     }
@@ -129,20 +134,20 @@ export const handleMessage = async (modbusClient, mqttClient, topicName, payload
     // Buffer to a string
     const payloadString = payload.toString()
 
-    console.log(`Received ${payloadString} on topic ${topicName}`)
+    logger.info(`Received ${payloadString} on topic ${topicName}`)
 
     // Handle settings updates
     if (topicName.startsWith(TOPIC_PREFIX_SETTINGS) && topicName.endsWith('/set')) {
         const settingName = topicName.substring(TOPIC_PREFIX_SETTINGS.length + 1, topicName.lastIndexOf('/'))
 
-        console.log(`Updating setting ${settingName} to ${payloadString}`)
+        logger.info(`Updating setting ${settingName} to ${payloadString}`)
 
         await setSetting(modbusClient, settingName, payloadString)
         await publishSettings(modbusClient, mqttClient)
     } else if (topicName.startsWith(TOPIC_PREFIX_MODE) && topicName.endsWith('/set')) {
         const mode = topicName.substring(TOPIC_PREFIX_MODE.length + 1, topicName.lastIndexOf('/'))
 
-        console.log(`Updating mode ${mode} to ${payloadString}`)
+        logger.info(`Updating mode ${mode} to ${payloadString}`)
 
         await setFlag(modbusClient, mode, payloadString === 'ON')
         await publishFlags(modbusClient, mqttClient)
