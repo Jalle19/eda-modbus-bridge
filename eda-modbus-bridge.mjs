@@ -45,7 +45,7 @@ const argv = yargs(process.argv.slice(2))
             alias: 'p',
         },
         'mqttBrokerUrl': {
-            description: 'The URL to the MQTT broker, e.g. tcp://localhost:1883. Omit to disable MQTT support.',
+            description: 'The URL to the MQTT broker, e.g. mqtt://localhost:1883. Omit to disable MQTT support.',
             default: undefined,
             alias: 'm',
         },
@@ -128,7 +128,7 @@ const argv = yargs(process.argv.slice(2))
     // Optionally create MQTT client
     if (argv.mqttBrokerUrl !== undefined) {
         if (!validateBrokerUrl(argv.mqttBrokerUrl)) {
-            logger.error(`Malformed MQTT broker URL: ${argv.mqttBrokerUrl}. Should be e.g. tcp://localhost:1883.`)
+            logger.error(`Malformed MQTT broker URL: ${argv.mqttBrokerUrl}. Should be e.g. mqtt://localhost:1883.`)
         } else {
             logger.info(`Connecting to MQTT broker at ${argv.mqttBrokerUrl}`)
 
