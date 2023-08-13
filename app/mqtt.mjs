@@ -150,7 +150,7 @@ export const handleMessage = async (modbusClient, mqttClient, topicName, payload
 }
 
 export const validateBrokerUrl = (brokerUrl) => {
-    return brokerUrl.startsWith('tcp://')
+    return brokerUrl.startsWith('mqtt://') || brokerUrl.startsWith('mqtts://')
 }
 
 const createBinaryValue = (value) => {

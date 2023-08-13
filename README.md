@@ -100,7 +100,7 @@ Options:
                                                        [boolean] [default: true]
   -a, --httpListenAddress    The address to listen (HTTP)   [default: "0.0.0.0"]
   -p, --httpPort             The port to listen on (HTTP)        [default: 8080]
-  -m, --mqttBrokerUrl        The URL to the MQTT broker, e.g. tcp://localhost:18
+  -m, --mqttBrokerUrl        The URL to the MQTT broker, e.g. mqtt://localhost:18
                              83. Omit to disable MQTT support.
       --mqttUsername         The username to use when connecting to the MQTT bro
                              ker. Omit to disable authentication.
