@@ -112,6 +112,7 @@ Options:
       --mqttDiscovery        Whether to enable Home Assistant MQTT discovery sup
                              port. Only effective when mqttBrokerUrl is defined.
                                                        [boolean] [default: true]
+  -v, --debug                Enable debug logging     [boolean] [default: false]
 ```
 
 ## HTTP endpoints

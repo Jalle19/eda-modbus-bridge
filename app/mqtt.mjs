@@ -19,7 +19,7 @@ export const TOPIC_PREFIX_DEVICE_INFORMATION = `${TOPIC_PREFIX}/deviceInformatio
 export const TOPIC_PREFIX_DEVICE_STATE = `${TOPIC_PREFIX}/deviceState`
 export const TOPIC_NAME_STATUS = `${TOPIC_PREFIX}/status`
 
-const logger = createLogger('mqtt', 'debug')
+const logger = createLogger('mqtt')
 
 export const publishValues = async (modbusClient, mqttClient) => {
     // Create a map from topic name to value that should be published

@@ -12,7 +12,7 @@ import {
     validateBrokerUrl,
 } from './app/mqtt.mjs'
 import { configureMqttDiscovery } from './app/homeassistant.mjs'
-import { createLogger } from './app/logger.mjs'
+import { createLogger, setLogLevel } from './app/logger.mjs'
 
 const MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS = 5
 
@@ -69,12 +69,22 @@ const argv = yargs(process.argv.slice(2))
             type: 'boolean',
             default: true,
         },
+        'debug': {
+            description: 'Enable debug logging',
+            type: 'boolean',
+            default: false,
+            alias: 'v',
+        },
     }).argv
 
 ;(async () => {
-    // Create logger
-    const logger = createLogger('main', 'debug')
-    const httpLogger = createLogger('http', 'debug')
+    // Create logger(s)
+    const logger = createLogger('main')
+    if (argv.debug) {
+        setLogLevel(logger, 'debug')
+    }
+
+    const httpLogger = createLogger('http')
 
     // Create Modbus client
     logger.info(`Opening serial connection to ${argv.device}, slave ID ${argv.modbusSlave}`)

@@ -62,7 +62,7 @@ export let AVAILABLE_ALARMS = {
 }
 
 const mutex = new Mutex()
-const logger = createLogger('modbus', 'debug')
+const logger = createLogger('modbus')
 
 export const parseTemperature = (temperature) => {
     if (temperature > 60000) {
