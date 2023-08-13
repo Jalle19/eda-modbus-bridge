@@ -1,5 +1,9 @@
 # Change log
 
+## future release
+
+* Drastically improve application logging
+
 ## 2.3.2
 
 * Document how to troubleshoot RS-485 connection issues

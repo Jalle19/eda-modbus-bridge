@@ -72,8 +72,10 @@ const argv = yargs(process.argv.slice(2))
     }).argv
 
 ;(async () => {
+    // Create logger
+    const logger = createLogger('main', 'debug')
     // Create Modbus client
-    console.log(`Opening serial connection to ${argv.device}, slave ID ${argv.modbusSlave}`)
+    logger.info(`Opening serial connection to ${argv.device}, slave ID ${argv.modbusSlave}`)
     const modbusClient = new ModbusRTU()
     modbusClient.setID(argv.modbusSlave)
     modbusClient.setTimeout(5000) // 5 seconds
@@ -107,23 +109,23 @@ const argv = yargs(process.argv.slice(2))
         })
 
         httpServer.listen(argv.httpPort, argv.httpListenAddress, () => {
-            console.log(`Listening on http://${argv.httpListenAddress}:${argv.httpPort}`)
+            httpLogger.info(`Listening on http://${argv.httpListenAddress}:${argv.httpPort}`)
         })
     }
 
     // Optionally create MQTT client
     if (argv.mqttBrokerUrl !== undefined) {
         if (!validateBrokerUrl(argv.mqttBrokerUrl)) {
-            console.error(`Malformed MQTT broker URL: ${argv.mqttBrokerUrl}. Should be e.g. tcp://localhost:1883.`)
+            logger.error(`Malformed MQTT broker URL: ${argv.mqttBrokerUrl}. Should be e.g. tcp://localhost:1883.`)
         } else {
-            console.log(`Connecting to MQTT broker at ${argv.mqttBrokerUrl}`)
+            logger.info(`Connecting to MQTT broker at ${argv.mqttBrokerUrl}`)
 
             try {
                 // Handle authentication
                 let clientOptions = {}
 
                 if (argv.mqttUsername && argv.mqttPassword) {
-                    console.log('Using MQTT broker authentication')
+                    logger.info('Using MQTT broker authentication')
 
                     clientOptions = {
                         'username': argv.mqttUsername,
@@ -141,9 +143,9 @@ const argv = yargs(process.argv.slice(2))
                     try {
                         mqttClient = await MQTT.connectAsync(argv.mqttBrokerUrl, clientOptions)
                         connectedOnce = true
-                        console.log(`Successfully connected to MQTT broker at ${argv.mqttBrokerUrl}`)
+                        logger.info(`Successfully connected to MQTT broker at ${argv.mqttBrokerUrl}`)
                     } catch (e) {
-                        console.error(
+                        logger.error(
                             `Failed to connect to MQTT broker: ${e.message}. Retrying in ${retryIntervalMs} milliseconds`
                         )
 
@@ -159,7 +161,7 @@ const argv = yargs(process.argv.slice(2))
                     await publishValues(modbusClient, mqttClient)
                 }, argv.mqttPublishInterval * 1000)
 
-                console.log(`MQTT scheduler started, will publish readings every ${argv.mqttPublishInterval} seconds`)
+                logger.info(`MQTT scheduler started, will publish readings every ${argv.mqttPublishInterval} seconds`)
 
                 // Subscribe to changes and register a handler
                 await subscribeToChanges(modbusClient, mqttClient)
@@ -170,15 +172,15 @@ const argv = yargs(process.argv.slice(2))
                 // Optionally configure Home Assistant MQTT discovery
                 if (argv.mqttDiscovery) {
                     await configureMqttDiscovery(modbusClient, mqttClient)
-                    console.log('Finished configuration Home Assistant MQTT discovery')
+                    logger.info('Finished configuration Home Assistant MQTT discovery')
                 }
 
                 // Log reconnection attempts
                 mqttClient.on('reconnect', () => {
-                    console.log(`Attempting to reconnect to ${argv.mqttBrokerUrl}`)
+                    logger.info(`Attempting to reconnect to ${argv.mqttBrokerUrl}`)
                 })
             } catch (e) {
-                console.error(`Unknown exception occurred: ${e.message}`, e.stack)
+                logger.error(`An exception occurred: ${e.name}: ${e.message}`, e.stack)
             }
         }
     }
