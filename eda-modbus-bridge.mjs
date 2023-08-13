@@ -74,6 +74,8 @@ const argv = yargs(process.argv.slice(2))
 ;(async () => {
     // Create logger
     const logger = createLogger('main', 'debug')
+    const httpLogger = createLogger('http', 'debug')
+
     // Create Modbus client
     logger.info(`Opening serial connection to ${argv.device}, slave ID ${argv.modbusSlave}`)
     const modbusClient = new ModbusRTU()

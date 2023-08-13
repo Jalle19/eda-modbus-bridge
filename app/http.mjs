@@ -9,22 +9,29 @@ import {
     getAlarmHistory,
     getDeviceState,
 } from './modbus.mjs'
+import { createLogger } from './logger.mjs'
+
+const logger = createLogger('http')
 
 export const root = async (req, res) => {
     res.send('eda-modbus-bridge')
 }
 
 export const summary = async (modbusClient, req, res) => {
-    const summary = {
-        'flags': await getFlagSummary(modbusClient),
-        'readings': await getReadings(modbusClient),
-        'settings': await getSettings(modbusClient),
-        'deviceInformation': await getDeviceInformation(modbusClient),
-        'alarmHistory': await getAlarmHistory(modbusClient),
-        'deviceState': await getDeviceState(modbusClient),
-    }
+    try {
+        const summary = {
+            'flags': await getFlagSummary(modbusClient),
+            'readings': await getReadings(modbusClient),
+            'settings': await getSettings(modbusClient),
+            'deviceInformation': await getDeviceInformation(modbusClient),
+            'alarmHistory': await getAlarmHistory(modbusClient),
+            'deviceState': await getDeviceState(modbusClient),
+        }
 
-    res.json(summary)
+        res.json(summary)
+    } catch (e) {
+        handleError(e, res)
+    }
 }
 
 export const getFlagStatus = async (modbusClient, req, res) => {
@@ -36,8 +43,7 @@ export const getFlagStatus = async (modbusClient, req, res) => {
             'active': status,
         })
     } catch (e) {
-        res.status(400)
-        res.send(e.message)
+        handleError(e, res)
     }
 }
 
@@ -54,8 +60,7 @@ export const setFlagStatus = async (modbusClient, req, res) => {
             'active': await getFlag(modbusClient, flag),
         })
     } catch (e) {
-        res.status(400)
-        res.send(e.message)
+        handleError(e, res)
     }
 }
 
@@ -72,7 +77,12 @@ export const setSetting = async (modbusClient, req, res) => {
             'settings': await getSettings(modbusClient),
         })
     } catch (e) {
-        res.status(400)
-        res.send(e.message)
+        handleError(e, res)
     }
+}
+
+const handleError = (e, res) => {
+    logger.error(`An exception occurred: ${e.name}: ${e.message}`, e.stack)
+    res.status(400)
+    res.json(e)
 }
