@@ -1,5 +1,14 @@
 # Change log
 
+## 2.3.2
+
+* Document how to troubleshoot RS-485 connection issues
+* Enable GitHub's Dependabot and bump various dependencies
+* Update `modbus-serial` to 8.0.11 and thus `serialport` to 10.x for better Node.js 18.x support (https://github.com/Jalle19/eda-modbus-bridge/issues/77)
+* Fix bad installation instructions in the README (`--omit=dev` instead of `--production`)
+* Fix bad advice in usage/help (MQTT URLs should be `mqtt://` and `mqtts://`, README said `tcp://`)
+* Validate MQTT broker URLs to prevent confusion if a malformed URL is specified
+
 ## 2.3.1
 
 * Log stack traces for unknown errors (should help debug https://github.com/Jalle19/home-assistant-addon-repository/issues/17)
