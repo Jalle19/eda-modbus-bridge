@@ -1,4 +1,5 @@
 import { Mutex } from 'async-mutex'
+import { createLogger } from './logger.mjs'
 
 const AVAILABLE_FLAGS = {
     'away': 1,
@@ -61,6 +62,7 @@ export let AVAILABLE_ALARMS = {
 }
 
 const mutex = new Mutex()
+const logger = createLogger('modbus')
 
 export const parseTemperature = (temperature) => {
     if (temperature > 60000) {
@@ -71,7 +73,7 @@ export const parseTemperature = (temperature) => {
 }
 
 export const getFlagSummary = async (modbusClient) => {
-    let result = await mutex.runExclusive(async () => modbusClient.readCoils(0, 13))
+    let result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 0, 13))
     let summary = {
         // 'stop': result.data[0], // - Can not return value if stopped.
         'away': result.data[1],
@@ -85,7 +87,7 @@ export const getFlagSummary = async (modbusClient) => {
         'summerNightCooling': result.data[12],
     }
 
-    result = await mutex.runExclusive(async () => modbusClient.readCoils(40, 1))
+    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 40, 1))
     summary = {
         ...summary,
         'eco': result.data[0],
@@ -99,7 +101,7 @@ export const getFlag = async (modbusClient, flag) => {
         throw new Error('Unknown flag')
     }
 
-    const result = await mutex.runExclusive(async () => modbusClient.readCoils(AVAILABLE_FLAGS[flag], 1))
+    const result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, AVAILABLE_FLAGS[flag], 1))
 
     return result.data[0]
 }
@@ -109,7 +111,7 @@ export const setFlag = async (modbusClient, flag, value) => {
         throw new Error('Unknown flag')
     }
 
-    await mutex.runExclusive(async () => modbusClient.writeCoil(AVAILABLE_FLAGS[flag], value))
+    await mutex.runExclusive(async () => tryWriteCoils(modbusClient, AVAILABLE_FLAGS[flag], value))
 
     // Flags are mutually exclusive, disable all others when enabling one
     if (value) {
@@ -123,12 +125,14 @@ const disableAllModesExcept = async (modbusClient, exceptedMode) => {
             continue
         }
 
-        await mutex.runExclusive(async () => modbusClient.writeCoil(AVAILABLE_FLAGS[mode], false))
+        await mutex.runExclusive(async () => tryWriteCoils(modbusClient, AVAILABLE_FLAGS[mode], false))
     }
 }
 
 export const getReadings = async (modbusClient) => {
-    let result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(6, 8))
+    logger.debug('Retrieving device readings...')
+
+    let result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 6, 8))
     let readings = {
         'freshAirTemperature': parseTemperature(result.data[0]),
         'supplyAirTemperatureAfterHeatRecovery': parseTemperature(result.data[1]),
@@ -139,7 +143,7 @@ export const getReadings = async (modbusClient) => {
         'exhaustAirHumidity': result.data[7],
     }
 
-    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(29, 7))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 29, 7))
     readings = {
         ...readings,
         'heatRecoverySupplySide': result.data[0],
@@ -149,7 +153,7 @@ export const getReadings = async (modbusClient) => {
         'mean48HourExhaustHumidity': result.data[6],
     }
 
-    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(47, 3))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 47, 3))
     readings = {
         ...readings,
         'cascadeSp': result.data[0],
@@ -157,13 +161,13 @@ export const getReadings = async (modbusClient) => {
         'cascadeI': result.data[2],
     }
 
-    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(56, 1))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 56, 1))
     readings = {
         ...readings,
         'overPressureTimeLeft': result.data[0],
     }
 
-    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(50, 4))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 50, 4))
     readings = {
         ...readings,
         'ventilationLevelActual': result.data[0],
@@ -174,12 +178,14 @@ export const getReadings = async (modbusClient) => {
 }
 
 export const getSettings = async (modbusClient) => {
-    let result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(57, 1))
+    logger.debug('Retrieving device settings...')
+
+    let result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 57, 1))
     let settings = {
         'overPressureDelay': result.data[0],
     }
 
-    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(100, 4))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 100, 4))
     settings = {
         ...settings,
         'awayVentilationLevel': result.data[0],
@@ -188,7 +194,7 @@ export const getSettings = async (modbusClient) => {
         'longAwayTemperatureReduction': parseTemperature(result.data[3]),
     }
 
-    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(135, 1))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 135, 1))
     settings = {
         ...settings,
         'temperatureTarget': parseTemperature(result.data[0]),
@@ -236,31 +242,33 @@ export const setSetting = async (modbusClient, setting, value) => {
 }
 
 export const getDeviceInformation = async (modbusClient) => {
-    let result = await mutex.runExclusive(async () => modbusClient.readCoils(16, 1))
+    logger.debug('Retrieving device information...')
+
+    let result = await mutex.runExclusive(async () => await tryReadCoils(modbusClient, 16, 1))
     let deviceInformation = {
         // EC means DC motors
         'fanType': result.data[0] ? 'EC' : 'AC',
     }
 
-    result = await mutex.runExclusive(async () => modbusClient.readCoils(72, 1))
+    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 72, 1))
     const unitType = 0 + result.data[0]
     deviceInformation = {
         ...deviceInformation,
         'unitType': getUnitTypeName(unitType),
     }
-    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(154, 1))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 154, 1))
     deviceInformation = {
         ...deviceInformation,
         'coolingTypeInstalled': getCoolingTypeName(result.data[0]),
     }
 
-    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(171, 1))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 171, 1))
     deviceInformation = {
         ...deviceInformation,
         'heatingTypeInstalled': getAutomationAndHeatingTypeName(result.data[0]),
     }
 
-    result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(597, 3))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 597, 3))
     let model = 'unknown'
     if (unitType == 0) {
         model = getDeviceFamilyName(result.data[0])
@@ -292,7 +300,9 @@ export const getAlarmHistory = async (modbusClient) => {
     const alarmOffset = 7
 
     for (let register = startRegister; register <= endRegister; register += alarmOffset) {
-        const result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(register, alarmOffset))
+        const result = await mutex.runExclusive(async () =>
+            tryReadHoldingRegisters(modbusClient, register, alarmOffset)
+        )
         const code = result.data[0]
         const state = result.data[1]
 
@@ -332,7 +342,7 @@ export const getAlarmStatuses = async (modbusClient) => {
 }
 
 export const getDeviceState = async (modbusClient) => {
-    const result = await mutex.runExclusive(async () => modbusClient.readHoldingRegisters(44, 1))
+    const result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 44, 1))
 
     return parseStateBitField(result.data[0])
 }
@@ -446,5 +456,35 @@ export const parseStateBitField = (state) => {
         'heaterCooldown': Boolean(state & 8192),
         'summerNightCooling': Boolean(state & 16384),
         'defrosting': Boolean(state & 32768),
+    }
+}
+
+const tryReadCoils = async (modbusClient, dataAddress, length) => {
+    try {
+        logger.debug(`Reading coil address ${dataAddress}, length ${length}`)
+        return await modbusClient.readCoils(dataAddress, length)
+    } catch (e) {
+        logger.error(`Failed to read coil address ${dataAddress}, length ${length}`)
+        throw e
+    }
+}
+
+const tryWriteCoils = async (modbusClient, dataAddress, value) => {
+    try {
+        logger.debug(`Writing ${value} to coil address ${dataAddress}`)
+        return await modbusClient.writeCoil(dataAddress, value)
+    } catch (e) {
+        logger.error(`Failed to write coil address ${dataAddress}, value ${value}`)
+        throw e
+    }
+}
+
+const tryReadHoldingRegisters = async (modbusClient, dataAddress, length) => {
+    try {
+        logger.debug(`Reading holding register address ${dataAddress}, length ${length}`)
+        return await modbusClient.readHoldingRegisters(dataAddress, length)
+    } catch (e) {
+        logger.error(`Failed to read holding register address ${dataAddress}, length ${length}`)
+        throw e
     }
 }

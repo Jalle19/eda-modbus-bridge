@@ -7,6 +7,9 @@ import {
     TOPIC_PREFIX_READINGS,
     TOPIC_PREFIX_SETTINGS,
 } from './mqtt.mjs'
+import { createLogger } from './logger.mjs'
+
+const logger = createLogger('homeassistant')
 
 export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
     // Build information about the ventilation unit. The "deviceIdentifier" is used as <node_id> in discovery topic
@@ -228,7 +231,7 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             const configurationTopicName = `homeassistant/${entityType}/${deviceIdentifier}/${entityName}/config`
 
             // "retain" is used so that the entities will be available immediately after a Home Assistant restart
-            console.log(`Publishing Home Assistant auto-discovery configuration for ${entityType} "${entityName}"...`)
+            logger.info(`Publishing Home Assistant auto-discovery configuration for ${entityType} "${entityName}"...`)
             await mqttClient.publish(configurationTopicName, JSON.stringify(configuration), {
                 retain: true,
             })
