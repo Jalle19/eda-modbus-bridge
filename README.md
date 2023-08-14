@@ -379,6 +379,9 @@ in Home Assistant automatically through the MQTT integration. The following enti
   these values to find something that suits your use case, or trust the built-in automation in the ventilation unit to 
   do its job.
 
+* Older firmware (e.g. Pingvin devices with software version 2.01) only support a smaller list of Modbus registers, so 
+  some functionality may be missing. Open an issue if you feel like something isn't working that should be working.
+
 ## Troubleshooting
 
 See [docs/CONNECTION.md](./docs/CONNECTION.md)
