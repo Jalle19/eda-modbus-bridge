@@ -7,6 +7,7 @@
 * Add `-v` option which enables debug logging
 * Start using ESLint, add `no-console` rule to enforce use of logger instances
 * Include the unit's Modbus address in the device information
+* Add a section about older software versions to the README
 
 ## 2.3.2
 

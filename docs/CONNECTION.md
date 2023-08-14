@@ -34,4 +34,6 @@ If you have connected everything but the software is unable to read anything fro
 manifests as various timeouts), try the following:
 
 * try reversing the A and B (sometimes called RX and TX or + and -)
-* try using slave address 0 instead of 1 (`--modbusSlave 0`)
+* verify that you're using the correct slave address by looking up the "Modbus address" from the control panel (see 
+  manual for password)
+* if your unit is set to use slave address 0, change it to 1. The address 0 has special meaning and should not be used.
