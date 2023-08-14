@@ -289,6 +289,12 @@ export const getDeviceInformation = async (modbusClient) => {
         'modelName': createModelNameString(deviceInformation),
     }
 
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 640, 1))
+    deviceInformation = {
+        ...deviceInformation,
+        'modbusAddress': result.data[0],
+    }
+
     return deviceInformation
 }
 
