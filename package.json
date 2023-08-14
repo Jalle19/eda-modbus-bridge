@@ -9,7 +9,8 @@
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "check-prettier": "prettier --check eda-modbus-bridge.mjs app/ tests/",
-    "prettier": "prettier --write eda-modbus-bridge.mjs app/ tests/"
+    "prettier": "prettier --write eda-modbus-bridge.mjs app/ tests/",
+    "lint": "eslint eda-modbus-bridge.mjs 'app/**/*.mjs'"
   },
   "repository": {
     "type": "git",
@@ -31,6 +32,10 @@
     "yargs": "^16.2.0"
   },
   "devDependencies": {
+    "eslint": "^8.47.0",
+    "eslint-plugin-import": "^2.28.0",
+    "eslint-plugin-n": "^16.0.1",
+    "eslint-plugin-promise": "^6.1.1",
     "jest": "^27.4.7",
     "prettier": "^2.5.1"
   }

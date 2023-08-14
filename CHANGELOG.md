@@ -5,6 +5,7 @@
 * Drastically improve application logging
 * Add missing error handling to the `/summary` route, change HTTP error responses to return JSON
 * Add `-v` option which enables debug logging
+* Start using ESLint, add `no-console` rule to enforce use of logger instances
 
 ## 2.3.2
 
