@@ -1,6 +1,6 @@
 # Change log
 
-## future release
+## 2.4.0
 
 * Drastically improve application logging
 * Add missing error handling to the `/summary` route, change HTTP error responses to return JSON
