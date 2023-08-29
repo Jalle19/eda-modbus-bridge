@@ -22,6 +22,9 @@
     "url": "https://github.com/Jalle19/eda-modbus-bridge/issues"
   },
   "homepage": "https://github.com/Jalle19/eda-modbus-bridge#readme",
+  "engines": {
+    "node": ">= 14"
+  },
   "dependencies": {
     "async-mqtt": "^2.6.1",
     "async-mutex": "^0.3.1",
