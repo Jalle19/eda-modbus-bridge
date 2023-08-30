@@ -3,6 +3,7 @@
 ## 2.5.0
 
 * Bump `serialport` to v11.0.1, should fix runtime crash on Raspberry Pi 4 (https://github.com/Jalle19/home-assistant-addon-repository/issues/30)
+* Bump minimum required Node.js version to 14.x
 
 ## 2.4.0
 
