@@ -1,5 +1,9 @@
 # Change log
 
+## 2.5.0
+
+* Bump `serialport` to v11.0.1, should fix runtime crash on Raspberry Pi 4 (https://github.com/Jalle19/home-assistant-addon-repository/issues/30)
+
 ## 2.4.0
 
 * Drastically improve application logging
