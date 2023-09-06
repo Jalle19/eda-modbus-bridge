@@ -465,6 +465,10 @@ export const parseStateBitField = (state) => {
     }
 }
 
+export const validateDevice = (device) => {
+    return device.startsWith('/') || device.startsWith('tcp://')
+}
+
 const tryReadCoils = async (modbusClient, dataAddress, length) => {
     try {
         logger.debug(`Reading coil address ${dataAddress}, length ${length}`)

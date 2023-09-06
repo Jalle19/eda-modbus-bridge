@@ -13,6 +13,7 @@ import {
 } from './app/mqtt.mjs'
 import { configureMqttDiscovery } from './app/homeassistant.mjs'
 import { createLogger, setLogLevel } from './app/logger.mjs'
+import { validateDevice } from './app/modbus.mjs'
 
 const MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS = 5
 
@@ -20,7 +21,7 @@ const argv = yargs(process.argv.slice(2))
     .usage('node $0 [options]')
     .options({
         'device': {
-            description: 'The serial device to use, e.g. /dev/ttyUSB0',
+            description: 'The serial device to use, e.g. /dev/ttyUSB0 or tcp://192.168.1.40:502',
             demand: true,
             alias: 'd',
         },
@@ -86,7 +87,11 @@ const argv = yargs(process.argv.slice(2))
 
     const httpLogger = createLogger('http')
 
-    // Create Modbus client
+    // Create Modbus client. Abort if a malformed device is specified.
+    if (!validateDevice(argv.device)) {
+        logger.error(`Malformed Modbus device ${argv.device} specified, exiting`)
+        process.exit(1)
+    }
     logger.info(`Opening serial connection to ${argv.device}, slave ID ${argv.modbusSlave}`)
     const modbusClient = new ModbusRTU()
     modbusClient.setID(argv.modbusSlave)

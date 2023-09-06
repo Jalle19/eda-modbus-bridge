@@ -5,6 +5,7 @@ import {
     getDeviceFamilyName,
     getAutomationAndHeatingTypeName,
     parseStateBitField,
+    validateDevice,
 } from '../app/modbus.mjs'
 
 test('parse temperature', () => {
@@ -161,4 +162,11 @@ test('parse state bitfield', () => {
         'summerNightCooling': true,
         'defrosting': false,
     })
+})
+
+test('validateDevice', () => {
+    expect(validateDevice('/dev/ttyUSB0')).toEqual(true)
+    expect(validateDevice('dev/ttyUSB0')).toEqual(false)
+    expect(validateDevice('tcp://192.168.1.40:502')).toEqual(true)
+    expect(validateDevice('192.168.1.40:502')).toEqual(false)
 })
