@@ -13,7 +13,7 @@ import {
 } from './app/mqtt.mjs'
 import { configureMqttDiscovery } from './app/homeassistant.mjs'
 import { createLogger, setLogLevel } from './app/logger.mjs'
-import { validateDevice } from './app/modbus.mjs'
+import { MODBUS_DEVICE_TYPE, parseDevice, validateDevice } from './app/modbus.mjs'
 
 const MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS = 5
 
@@ -21,7 +21,8 @@ const argv = yargs(process.argv.slice(2))
     .usage('node $0 [options]')
     .options({
         'device': {
-            description: 'The serial device to use, e.g. /dev/ttyUSB0 or tcp://192.168.1.40:502',
+            description:
+                'The Modbus device to use, e.g. /dev/ttyUSB0 for Modbus RTU or tcp://192.168.1.40:502 for Modbus TCP',
             demand: true,
             alias: 'd',
         },
@@ -92,16 +93,25 @@ const argv = yargs(process.argv.slice(2))
         logger.error(`Malformed Modbus device ${argv.device} specified, exiting`)
         process.exit(1)
     }
-    logger.info(`Opening serial connection to ${argv.device}, slave ID ${argv.modbusSlave}`)
+    logger.info(`Opening Modbus connection to ${argv.device}, slave ID ${argv.modbusSlave}`)
+    const modbusDevice = parseDevice(argv.device)
     const modbusClient = new ModbusRTU()
     modbusClient.setID(argv.modbusSlave)
     modbusClient.setTimeout(5000) // 5 seconds
-    await modbusClient.connectRTUBuffered(argv.device, {
-        baudRate: 19200,
-        dataBits: 8,
-        parity: 'none',
-        stopBits: 1,
-    })
+
+    // Use buffered RTU or TCP depending on device type
+    if (modbusDevice.type === MODBUS_DEVICE_TYPE.RTU) {
+        await modbusClient.connectRTUBuffered(modbusDevice.path, {
+            baudRate: 19200,
+            dataBits: 8,
+            parity: 'none',
+            stopBits: 1,
+        })
+    } else if (modbusDevice.type === MODBUS_DEVICE_TYPE.TCP) {
+        await modbusClient.connectTCP(modbusDevice.hostname, {
+            port: modbusDevice.port,
+        })
+    }
 
     // Optionally create HTTP server
     if (argv.http) {
