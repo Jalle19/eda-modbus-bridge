@@ -61,6 +61,11 @@ export let AVAILABLE_ALARMS = {
     21: { name: 'ExtractFanPressureError', description: 'Waste fan pressure' },
 }
 
+export const MODBUS_DEVICE_TYPE = {
+    'RTU': 'rtu',
+    'TCP': 'tcp',
+}
+
 const mutex = new Mutex()
 const logger = createLogger('modbus')
 
@@ -462,6 +467,28 @@ export const parseStateBitField = (state) => {
         'heaterCooldown': Boolean(state & 8192),
         'summerNightCooling': Boolean(state & 16384),
         'defrosting': Boolean(state & 32768),
+    }
+}
+
+export const validateDevice = (device) => {
+    return device.startsWith('/') || device.startsWith('tcp://')
+}
+
+export const parseDevice = (device) => {
+    if (device.startsWith('/')) {
+        // Serial device
+        return {
+            type: MODBUS_DEVICE_TYPE.RTU,
+            path: device,
+        }
+    } else {
+        // TCP URL
+        const deviceUrl = new URL(device)
+        return {
+            type: MODBUS_DEVICE_TYPE.TCP,
+            hostname: deviceUrl.hostname,
+            port: parseInt(deviceUrl.port, 10),
+        }
     }
 }
 

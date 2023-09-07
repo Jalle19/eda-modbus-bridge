@@ -1,5 +1,9 @@
 # Change log
 
+## future release
+
+* Add Modbus TCP support (https://github.com/Jalle19/eda-modbus-bridge/issues/86)
+
 ## 2.5.0
 
 * Bump `serialport` to v11.0.1, should fix runtime crash on Raspberry Pi 4 (https://github.com/Jalle19/home-assistant-addon-repository/issues/30)
