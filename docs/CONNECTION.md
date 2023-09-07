@@ -1,5 +1,16 @@
 # Connecting to an Enervent unit
 
+There are two ways to communicate with your ventilation unit:
+
+* Modbus RTU
+* Modbus TCP
+
+If your ventilation unit has an RJ45 port you can use Modbus TCP. Connect the unit to your local network and take note 
+of what IP address it has.
+
+If your ventilation unit does not have an RJ45 port (very common), read on. The rest of this document focuses on how
+to communicate using Modbus RTU.
+
 These instructions are based on:
 
 * https://doc.enervent.com/op/op.ViewOnline.php?documentid=999&version=1 (Freeway WEB-väyläsovitin - Asennus- ja käyttöohjeet)

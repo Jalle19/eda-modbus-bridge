@@ -9,7 +9,7 @@ settings), as well as an MQTT client which can publish readings/settings regular
 ventilation unit.
 
 Communication happens over RS-485 (Modbus RTU) by connecting a serial device to the "Freeway" port on the ventilation 
-unit's computer board.
+unit's computer board, or alternatively using Modbus TCP for newer units that can be connected to the local network.
 
 The REST endpoints for enabling/disabling the various modes are designed to be consumed by 
 https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See examples in the `docs/` directory.
@@ -45,7 +45,8 @@ https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See
 * Node.js 14.x or newer
 * An Enervent ventilation unit with EDA or MD automation (Pingvin, Pandion, Pelican and LTR-3 confirmed working)
 * An RS-485 device (e.g. `/dev/ttyUSB0`) connected to the Enervent unit's Freeway port (see 
-  [docs/CONNECTION.md](./docs/CONNECTION.md) for details on how to connect to the unit)
+  [docs/CONNECTION.md](./docs/CONNECTION.md) for details on how to connect to the unit). Newer units that can be
+  connected directly to the local network don't need this.
 
 ## Installation
 
