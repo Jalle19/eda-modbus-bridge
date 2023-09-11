@@ -3,6 +3,7 @@
 ## future release
 
 * Add Modbus TCP support (https://github.com/Jalle19/eda-modbus-bridge/issues/86)
+* Expose "room temperature average" if available (https://github.com/Jalle19/eda-modbus-bridge/issues/88)
 
 ## 2.5.0
 

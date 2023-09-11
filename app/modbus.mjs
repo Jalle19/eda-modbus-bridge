@@ -158,6 +158,16 @@ export const getReadings = async (modbusClient) => {
         'mean48HourExhaustHumidity': result.data[6],
     }
 
+    // Room temperature average is not always available, it depends on optional sensors. Don't include if
+    // raw value is zero.
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 46, 1))
+    if (result.data !== 0) {
+        readings = {
+            ...readings,
+            'roomTemperatureAvg': parseTemperature(result.data[0]),
+        }
+    }
+
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 47, 3))
     readings = {
         ...readings,
