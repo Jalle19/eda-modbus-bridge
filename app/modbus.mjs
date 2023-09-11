@@ -61,6 +61,28 @@ export let AVAILABLE_ALARMS = {
     21: { name: 'ExtractFanPressureError', description: 'Waste fan pressure' },
 }
 
+const SENSOR_TYPE_NONE = 'NONE'
+const SENSOR_TYPE_CO2 = 'CO2'
+const SENSOR_TYPE_RH = 'RH'
+const SENSOR_TYPE_ROOM_TEMP = 'ROOM_TEMP'
+
+// 0=NA, 1=CO2_1, 2=CO2_2, 3=CO2_3, 4=RH_1, 5=RH_2, 6=RH_3, 7=OUT_TERM, 8=ROOM_TERM_1,
+// 9=ROOM_TERM_2, 10=ROOM_TERM_3, 11=TEMP_SP, 12=Time relay, 13=External heating disable, 14=External cooling disable,
+// 15=PDE10, 16=PDE30
+const ANALOG_INPUT_SENSOR_TYPES = {
+    // Skip sensor types we can't handle
+    0: { type: SENSOR_TYPE_NONE },
+    1: { type: SENSOR_TYPE_CO2, name: 'analogInputCo21', description: 'CO2 #1' },
+    2: { type: SENSOR_TYPE_CO2, name: 'analogInputCo22', description: 'CO2 #1' },
+    3: { type: SENSOR_TYPE_CO2, name: 'analogInputCo23', description: 'CO2 #1' },
+    4: { type: SENSOR_TYPE_RH, name: 'analogInputHumidity1', description: 'RH #1' },
+    5: { type: SENSOR_TYPE_RH, name: 'analogInputHumidity2', description: 'RH #1' },
+    6: { type: SENSOR_TYPE_RH, name: 'analogInputHumidity3', description: 'RH #1' },
+    8: { type: SENSOR_TYPE_ROOM_TEMP, name: 'analogInputRoomTemperature1', description: 'Room temperature #1' },
+    9: { type: SENSOR_TYPE_ROOM_TEMP, name: 'analogInputRoomTemperature2', description: 'Room temperature #1' },
+    10: { type: SENSOR_TYPE_ROOM_TEMP, name: 'analogInputRoomTemperature3', description: 'Room temperature #1' },
+}
+
 export const MODBUS_DEVICE_TYPE = {
     'RTU': 'rtu',
     'TCP': 'tcp',
@@ -187,6 +209,18 @@ export const getReadings = async (modbusClient) => {
         ...readings,
         'ventilationLevelActual': result.data[0],
         'ventilationLevelTarget': result.data[3],
+    }
+
+    // Analog input sensors. We need to query for the type of sensor in order to parse the data correctly. An
+    // analog input can be configured but not present - in this case we trust the user and simply report 0 for the
+    // value.
+    const sensorTypesResult = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 104, 6))
+    const sensorValuesResult = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 23, 6))
+    const sensorReadings = parseAnalogSensors(sensorTypesResult, sensorValuesResult)
+
+    readings = {
+        ...readings,
+        ...sensorReadings,
     }
 
     return readings
@@ -478,6 +512,28 @@ export const parseStateBitField = (state) => {
         'summerNightCooling': Boolean(state & 16384),
         'defrosting': Boolean(state & 32768),
     }
+}
+
+export const parseAnalogSensors = (sensorTypesResult, sensorValuesResult) => {
+    const sensorReadings = {}
+
+    for (let i = 0; i < 6; i++) {
+        const sensorType = ANALOG_INPUT_SENSOR_TYPES[sensorTypesResult.data[i]]
+
+        switch (sensorType.type) {
+            // Use raw value
+            case SENSOR_TYPE_CO2:
+            case SENSOR_TYPE_RH:
+                sensorReadings[sensorType.name] = sensorValuesResult.data[i]
+                break
+            // Parse as temperature
+            case SENSOR_TYPE_ROOM_TEMP:
+                sensorReadings[sensorType.name] = parseTemperature(sensorValuesResult.data[i])
+                break
+        }
+    }
+
+    return sensorReadings
 }
 
 export const validateDevice = (device) => {
