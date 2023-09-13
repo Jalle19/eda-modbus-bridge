@@ -1,4 +1,4 @@
-import { AVAILABLE_ALARMS, createModelNameString, getDeviceInformation } from './modbus.mjs'
+import { createModelNameString, getDeviceInformation } from './modbus.mjs'
 import {
     TOPIC_NAME_STATUS,
     TOPIC_PREFIX_ALARM,
@@ -8,6 +8,7 @@ import {
     TOPIC_PREFIX_SETTINGS,
 } from './mqtt.mjs'
 import { createLogger } from './logger.mjs'
+import { AVAILABLE_ALARMS } from './enervent.mjs'
 
 const logger = createLogger('homeassistant')
 
