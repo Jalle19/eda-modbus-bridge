@@ -255,7 +255,6 @@ export const getDeviceInformation = async (modbusClient) => {
 
     deviceInformation = {
         ...deviceInformation,
-        'familyType': getDeviceFamilyName(result.data[0]),
         'modelType': model,
         'serialNumber': result.data[1],
         'softwareVersion': result.data[2] / 100,
@@ -399,7 +398,7 @@ export const getAutomationAndHeatingTypeName = (heatingTypeInt) => {
 
 export const createModelNameString = (deviceInformation) => {
     // E.g. LTR-3 eco EDE/MDE - CG
-    let modelName = deviceInformation.familyType
+    let modelName = deviceInformation.modelType
 
     if (deviceInformation.fanType === 'EC') {
         modelName += ' eco'

@@ -22,7 +22,7 @@ test('create model name from device information', () => {
     // Heating, no cooling, DC fan
     expect(
         createModelNameString({
-            familyType: 'Pingvin',
+            modelType: 'Pingvin',
             fanType: 'EC',
             heatingTypeInstalled: 'EDE',
             coolingTypeInstalled: null,
@@ -32,7 +32,7 @@ test('create model name from device information', () => {
     // Heating, cooling, DC fan
     expect(
         createModelNameString({
-            familyType: 'Pegasus',
+            modelType: 'Pegasus',
             fanType: 'EC',
             heatingTypeInstalled: 'EDE',
             coolingTypeInstalled: 'CG',
@@ -42,12 +42,22 @@ test('create model name from device information', () => {
     // No heating, no cooling, AC fan
     expect(
         createModelNameString({
-            familyType: 'Pandion',
+            modelType: 'Pandion',
             fanType: 'AC',
             heatingTypeInstalled: null,
             coolingTypeInstalled: null,
         })
     ).toEqual('Pandion')
+
+    // Random pro model, may not be totally correct
+    expect(
+        createModelNameString({
+            modelType: 'RS',
+            fanType: 'EC',
+            heatingTypeInstalled: null,
+            coolingTypeInstalled: null,
+        })
+    ).toEqual('RS eco')
 })
 
 test('parse alarm timestamp', () => {
