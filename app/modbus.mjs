@@ -1,15 +1,22 @@
 import { Mutex } from 'async-mutex'
 import { createLogger } from './logger.mjs'
 import {
-    ANALOG_INPUT_SENSOR_TYPES,
     AVAILABLE_ALARMS,
     AVAILABLE_FLAGS,
     AVAILABLE_SETTINGS,
+    createModelNameString,
+    getAutomationAndHeatingTypeName,
+    getCoolingTypeName,
+    getDeviceFamilyName,
+    getDeviceProName,
     getProSize,
+    getUnitTypeName,
+    hasRoomTemperatureSensor,
     MUTUALLY_EXCLUSIVE_MODES,
-    SENSOR_TYPE_CO2,
-    SENSOR_TYPE_RH,
-    SENSOR_TYPE_ROOM_TEMP,
+    parseAlarmTimestamp,
+    parseAnalogSensors,
+    parseStateBitField,
+    parseTemperature,
     UNIT_TYPE_FAMILY,
     UNIT_TYPE_PRO,
 } from './enervent.mjs'
@@ -21,14 +28,6 @@ export const MODBUS_DEVICE_TYPE = {
 
 const mutex = new Mutex()
 const logger = createLogger('modbus')
-
-export const parseTemperature = (temperature) => {
-    if (temperature > 60000) {
-        temperature = (65536 - temperature) * -1
-    }
-
-    return temperature / 10
-}
 
 export const getFlagSummary = async (modbusClient) => {
     let result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 0, 13))
@@ -333,151 +332,6 @@ export const getDeviceState = async (modbusClient) => {
     const result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 44, 1))
 
     return parseStateBitField(result.data[0])
-}
-
-export const getUnitTypeName = (unitType) => {
-    return unitType === true ? UNIT_TYPE_PRO : UNIT_TYPE_FAMILY
-}
-
-export const getDeviceFamilyName = (familyTypeInt) => {
-    return (
-        [
-            'Pingvin', // prettier-hack
-            'Pandion',
-            'Pelican',
-            'Pegasos',
-            'Pegasos XL',
-            'LTR-3',
-            'LTR-6',
-            'LTR-7',
-            'LTR-7 XL',
-        ][familyTypeInt] || 'unknown'
-    )
-}
-
-export const getDeviceProName = (proTypeInt) => {
-    return (
-        [
-            'RS', // prettier-hack
-            'RSC',
-            'LTR',
-            'LTC',
-            'LTT',
-            'LTP',
-        ][proTypeInt] || 'unknown'
-    )
-}
-
-const getCoolingTypeName = (coolingTypeInt) => {
-    // 0=Ei jäähdytintä, 1=CW, 2=HP, 3=CG, 4=CX, 5=CX_INV, 6=X2CX, 7=CXBIN, 8=Cooler
-    return [
-        null,
-        'CW', // prettier-hack
-        'HP',
-        'CG',
-        'CX',
-        'CX_INV',
-        'X2CX',
-        'CXBIN',
-        'Cooler',
-    ][coolingTypeInt]
-}
-
-export const getAutomationAndHeatingTypeName = (heatingTypeInt) => {
-    // 0=Ei lämmitintä, 1=VPK, 2=HP, 3=SLP, 4=SLP PWM
-    // E prefix is used for units with EDA automation
-    // M prefix is used for units with MD automation
-    return (
-        [
-            'ED/MD', // prettier-hack
-            'EDW/MDW',
-            'EDX/MDX',
-            'EDE/MDE',
-        ][heatingTypeInt] || 'unknown'
-    )
-}
-
-export const createModelNameString = (deviceInformation) => {
-    // E.g. LTR-3 eco EDE/MDE - CG or RS 25 eco
-    let modelName = deviceInformation.modelType
-
-    if (deviceInformation.unitType === UNIT_TYPE_PRO) {
-        modelName += ` ${deviceInformation.proSize}`
-    }
-
-    if (deviceInformation.fanType === 'EC') {
-        modelName += ' eco'
-    }
-
-    if (deviceInformation.heatingTypeInstalled !== null) {
-        modelName += ` ${deviceInformation.heatingTypeInstalled}`
-    }
-
-    if (deviceInformation.coolingTypeInstalled !== null) {
-        modelName += ` - ${deviceInformation.coolingTypeInstalled}`
-    }
-
-    return modelName
-}
-
-export const parseAlarmTimestamp = (result) => {
-    return new Date(result.data[2] + 2000, result.data[3] - 1, result.data[4], result.data[5], result.data[6])
-}
-
-export const parseStateBitField = (state) => {
-    return {
-        'normal': state === 0,
-        'maxCooling': Boolean(state & 1),
-        'maxHeating': Boolean(state & 2),
-        'emergencyStop': Boolean(state & 4),
-        'stop': Boolean(state & 8),
-        'away': Boolean(state & 16),
-        'longAway': Boolean(state & 32),
-        'temperatureBoost': Boolean(state & 64),
-        'co2Boost': Boolean(state & 128),
-        'humidityBoost': Boolean(state & 256),
-        'manualBoost': Boolean(state & 512),
-        'overPressure': Boolean(state & 1024),
-        'cookerHood': Boolean(state & 2048),
-        'centralVacuumCleaner': Boolean(state & 4096),
-        'heaterCooldown': Boolean(state & 8192),
-        'summerNightCooling': Boolean(state & 16384),
-        'defrosting': Boolean(state & 32768),
-    }
-}
-
-const hasRoomTemperatureSensor = (sensorTypesResult) => {
-    for (let i = 0; i < 6; i++) {
-        const sensorType = ANALOG_INPUT_SENSOR_TYPES[sensorTypesResult.data[i]]
-
-        if (sensorType.type === SENSOR_TYPE_ROOM_TEMP) {
-            return true
-        }
-    }
-
-    return false
-}
-
-export const parseAnalogSensors = (sensorTypesResult, sensorValuesResult) => {
-    const sensorReadings = {}
-
-    for (let i = 0; i < 6; i++) {
-        const sensorType = ANALOG_INPUT_SENSOR_TYPES[sensorTypesResult.data[i]]
-
-        switch (sensorType.type) {
-            // Use raw value
-            case SENSOR_TYPE_CO2:
-            case SENSOR_TYPE_RH:
-                sensorReadings[sensorType.name] = sensorValuesResult.data[i]
-                break
-            // Parse as temperature
-            case SENSOR_TYPE_ROOM_TEMP:
-                sensorReadings[sensorType.name] = parseTemperature(sensorValuesResult.data[i])
-                break
-        }
-    }
-
-    return sensorReadings
 }
 
 export const validateDevice = (device) => {
