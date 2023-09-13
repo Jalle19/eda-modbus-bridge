@@ -5,10 +5,13 @@ import {
     AVAILABLE_ALARMS,
     AVAILABLE_FLAGS,
     AVAILABLE_SETTINGS,
+    getProSize,
     MUTUALLY_EXCLUSIVE_MODES,
     SENSOR_TYPE_CO2,
     SENSOR_TYPE_RH,
     SENSOR_TYPE_ROOM_TEMP,
+    UNIT_TYPE_FAMILY,
+    UNIT_TYPE_PRO,
 } from './enervent.mjs'
 
 export const MODBUS_DEVICE_TYPE = {
@@ -228,10 +231,10 @@ export const getDeviceInformation = async (modbusClient) => {
     }
 
     result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 72, 1))
-    const unitType = 0 + result.data[0]
+    const unitType = getUnitTypeName(result.data[0])
     deviceInformation = {
         ...deviceInformation,
-        'unitType': getUnitTypeName(unitType),
+        'unitType': unitType,
     }
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 154, 1))
     deviceInformation = {
@@ -245,19 +248,22 @@ export const getDeviceInformation = async (modbusClient) => {
         'heatingTypeInstalled': getAutomationAndHeatingTypeName(result.data[0]),
     }
 
-    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 597, 3))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 596, 4))
     let model = 'unknown'
-    if (unitType == 0) {
-        model = getDeviceFamilyName(result.data[0])
-    } else if (unitType == 1) {
-        model = getDeviceProName(result.data[0])
+    if (unitType === UNIT_TYPE_FAMILY) {
+        model = getDeviceFamilyName(result.data[1])
+    } else if (unitType === UNIT_TYPE_PRO) {
+        model = getDeviceProName(result.data[1])
     }
+
+    const proSize = getProSize(unitType, model, result.data[0])
 
     deviceInformation = {
         ...deviceInformation,
         'modelType': model,
-        'serialNumber': result.data[1],
-        'softwareVersion': result.data[2] / 100,
+        'proSize': proSize,
+        'serialNumber': result.data[2],
+        'softwareVersion': result.data[3] / 100,
     }
 
     deviceInformation = {
@@ -329,13 +335,8 @@ export const getDeviceState = async (modbusClient) => {
     return parseStateBitField(result.data[0])
 }
 
-export const getUnitTypeName = (unitTypeInt) => {
-    return (
-        [
-            'Family', // prettier-hack
-            'PRO',
-        ][unitTypeInt] || 'unknown'
-    )
+export const getUnitTypeName = (unitType) => {
+    return unitType === true ? UNIT_TYPE_PRO : UNIT_TYPE_FAMILY
 }
 
 export const getDeviceFamilyName = (familyTypeInt) => {
@@ -397,8 +398,12 @@ export const getAutomationAndHeatingTypeName = (heatingTypeInt) => {
 }
 
 export const createModelNameString = (deviceInformation) => {
-    // E.g. LTR-3 eco EDE/MDE - CG
+    // E.g. LTR-3 eco EDE/MDE - CG or RS 25 eco
     let modelName = deviceInformation.modelType
+
+    if (deviceInformation.unitType === UNIT_TYPE_PRO) {
+        modelName += ` ${deviceInformation.proSize}`
+    }
 
     if (deviceInformation.fanType === 'EC') {
         modelName += ' eco'

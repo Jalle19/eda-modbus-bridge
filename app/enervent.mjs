@@ -58,6 +58,9 @@ export const AVAILABLE_ALARMS = {
     21: { name: 'ExtractFanPressureError', description: 'Waste fan pressure' },
 }
 
+export const UNIT_TYPE_FAMILY = 'Family'
+export const UNIT_TYPE_PRO = 'PRO'
+
 export const SENSOR_TYPE_NONE = 'NONE'
 export const SENSOR_TYPE_CO2 = 'CO2'
 export const SENSOR_TYPE_RH = 'RH'
@@ -78,4 +81,17 @@ export const ANALOG_INPUT_SENSOR_TYPES = {
     8: { type: SENSOR_TYPE_ROOM_TEMP, name: 'analogInputRoomTemperature1', description: 'Room temperature #1' },
     9: { type: SENSOR_TYPE_ROOM_TEMP, name: 'analogInputRoomTemperature2', description: 'Room temperature #1' },
     10: { type: SENSOR_TYPE_ROOM_TEMP, name: 'analogInputRoomTemperature3', description: 'Room temperature #1' },
+}
+
+export const getProSize = (unitType, modelType, sizeValue) => {
+    const proSizesR = [12, 20, 25]
+    const proSizesL = [10, 20, 25, 35, 50, 70, 90, 120, 150, 180]
+
+    if (unitType !== UNIT_TYPE_PRO) {
+        return 0
+    } else if (modelType === 'RS' || modelType === 'RSC') {
+        return proSizesR[sizeValue]
+    } else {
+        return proSizesL[sizeValue]
+    }
 }

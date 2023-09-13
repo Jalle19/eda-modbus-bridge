@@ -10,6 +10,7 @@ import {
     MODBUS_DEVICE_TYPE,
     parseAnalogSensors,
 } from '../app/modbus.mjs'
+import { UNIT_TYPE_PRO } from '../app/enervent.mjs'
 
 test('parse temperature', () => {
     // Positive, float
@@ -52,12 +53,14 @@ test('create model name from device information', () => {
     // Random pro model, may not be totally correct
     expect(
         createModelNameString({
+            unitType: UNIT_TYPE_PRO,
             modelType: 'RS',
+            proSize: 25,
             fanType: 'EC',
             heatingTypeInstalled: null,
             coolingTypeInstalled: null,
         })
-    ).toEqual('RS eco')
+    ).toEqual('RS 25 eco')
 })
 
 test('parse alarm timestamp', () => {
