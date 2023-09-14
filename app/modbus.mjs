@@ -180,16 +180,6 @@ export const getReadings = async (modbusClient) => {
         'mean48HourExhaustHumidity': result.data[6],
     }
 
-    // Room temperature average is not always available, it depends on optional sensors. Don't include if
-    // raw value is zero.
-    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 46, 1))
-    if (result.data !== 0) {
-        readings = {
-            ...readings,
-            'roomTemperatureAvg': parseTemperature(result.data[0]),
-        }
-    }
-
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 47, 3))
     readings = {
         ...readings,
@@ -221,6 +211,16 @@ export const getReadings = async (modbusClient) => {
     readings = {
         ...readings,
         ...sensorReadings,
+    }
+
+    // Room temperature average is always available, but its value is always zero unless one or more optional
+    // room temperature sensor are installed
+    if (hasRoomTemperatureSensor(sensorTypesResult)) {
+        result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 46, 1))
+        readings = {
+            ...readings,
+            'roomTemperatureAvg': parseTemperature(result.data[0]),
+        }
     }
 
     return readings
@@ -512,6 +512,18 @@ export const parseStateBitField = (state) => {
         'summerNightCooling': Boolean(state & 16384),
         'defrosting': Boolean(state & 32768),
     }
+}
+
+const hasRoomTemperatureSensor = (sensorTypesResult) => {
+    for (let i = 0; i < 6; i++) {
+        const sensorType = ANALOG_INPUT_SENSOR_TYPES[sensorTypesResult.data[i]]
+
+        if (sensorType.type === SENSOR_TYPE_ROOM_TEMP) {
+            return true
+        }
+    }
+
+    return false
 }
 
 export const parseAnalogSensors = (sensorTypesResult, sensorValuesResult) => {
