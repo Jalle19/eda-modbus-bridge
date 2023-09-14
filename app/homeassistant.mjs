@@ -239,17 +239,27 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
     }
 }
 
-const createTemperatureSensorConfiguration = (configurationBase, readingName, entityName) => {
+const createTemperatureSensorConfiguration = (configurationBase, readingName, entityName, extraProperties) => {
+    if (!extraProperties) {
+        extraProperties = {}
+    }
+
     return createSensorConfiguration(configurationBase, readingName, entityName, {
         'device_class': 'temperature',
         'unit_of_measurement': '°C',
+        ...extraProperties,
     })
 }
 
-const createHumiditySensorConfiguration = (configurationBase, readingName, entityName) => {
+const createHumiditySensorConfiguration = (configurationBase, readingName, entityName, extraProperties) => {
+    if (!extraProperties) {
+        extraProperties = {}
+    }
+
     return createSensorConfiguration(configurationBase, readingName, entityName, {
         'device_class': 'humidity',
         'unit_of_measurement': '%',
+        ...extraProperties,
     })
 }
 
