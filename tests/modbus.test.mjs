@@ -8,6 +8,7 @@ import {
     validateDevice,
     parseDevice,
     MODBUS_DEVICE_TYPE,
+    parseAnalogSensors,
 } from '../app/modbus.mjs'
 
 test('parse temperature', () => {
@@ -163,6 +164,32 @@ test('parse state bitfield', () => {
         'heaterCooldown': false,
         'summerNightCooling': true,
         'defrosting': false,
+    })
+})
+
+test('parseAnalogSensors', () => {
+    // No sensors configured
+    let typesResult = { data: [0, 0, 0, 0, 0, 0] }
+    let valuesResult = { data: [0, 0, 0, 0, 0, 0] }
+    expect(parseAnalogSensors(typesResult, valuesResult)).toEqual({})
+
+    // Single CO2 sensor
+    typesResult = { data: [1, 0, 0, 0, 0, 0] }
+    valuesResult = { data: [450, 0, 0, 0, 0, 0] }
+    expect(parseAnalogSensors(typesResult, valuesResult)).toEqual({
+        'analogInputCo21': 450,
+    })
+
+    // Multitude of sensors
+    typesResult = { data: [1, 2, 4, 5, 8, 9] }
+    valuesResult = { data: [450, 481, 45, 46, 192, 201] }
+    expect(parseAnalogSensors(typesResult, valuesResult)).toEqual({
+        'analogInputCo21': 450,
+        'analogInputCo22': 481,
+        'analogInputHumidity1': 45,
+        'analogInputHumidity2': 46,
+        'analogInputRoomTemperature1': 19.2,
+        'analogInputRoomTemperature2': 20.1,
     })
 })
 

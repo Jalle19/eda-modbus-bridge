@@ -108,6 +108,49 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             'Ventilation level (actual)',
             { 'unit_of_measurement': '%' }
         ),
+        // Optional sensors. These are not available for all users, so the entities are disabled by default.
+        'roomTemperatureAvg': createTemperatureSensorConfiguration(
+            configurationBase,
+            'roomTemperatureAvg',
+            'Room temperature (average)',
+            { 'enabled_by_default': false }
+        ),
+        'analogInputCo21': createSensorConfiguration(configurationBase, 'analogInputCo21', 'CO2 #1', {
+            'enabled_by_default': false,
+        }),
+        'analogInputCo22': createSensorConfiguration(configurationBase, 'analogInputCo22', 'CO2 #2', {
+            'enabled_by_default': false,
+        }),
+        'analogInputCo23': createSensorConfiguration(configurationBase, 'analogInputCo23', 'CO2 #3', {
+            'enabled_by_default': false,
+        }),
+        'analogInputHumidity1': createHumiditySensorConfiguration(configurationBase, 'analogInputHumidity1', 'RH #1', {
+            'enabled_by_default': false,
+        }),
+        'analogInputHumidity2': createHumiditySensorConfiguration(configurationBase, 'analogInputHumidity2', 'RH #2', {
+            'enabled_by_default': false,
+        }),
+        'analogInputHumidity3': createHumiditySensorConfiguration(configurationBase, 'analogInputHumidity3', 'RH #3', {
+            'enabled_by_default': false,
+        }),
+        'analogRoomTemperature1': createTemperatureSensorConfiguration(
+            configurationBase,
+            'analogRoomTemperature1',
+            'Room temperature #1',
+            { 'enabled_by_default': false }
+        ),
+        'analogRoomTemperature2': createTemperatureSensorConfiguration(
+            configurationBase,
+            'analogRoomTemperature2',
+            'Room temperature #2',
+            { 'enabled_by_default': false }
+        ),
+        'analogRoomTemperature3': createTemperatureSensorConfiguration(
+            configurationBase,
+            'analogRoomTemperature3',
+            'Room temperature #3',
+            { 'enabled_by_default': false }
+        ),
     }
 
     // Configurable numbers
@@ -239,17 +282,27 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
     }
 }
 
-const createTemperatureSensorConfiguration = (configurationBase, readingName, entityName) => {
+const createTemperatureSensorConfiguration = (configurationBase, readingName, entityName, extraProperties) => {
+    if (!extraProperties) {
+        extraProperties = {}
+    }
+
     return createSensorConfiguration(configurationBase, readingName, entityName, {
         'device_class': 'temperature',
         'unit_of_measurement': '°C',
+        ...extraProperties,
     })
 }
 
-const createHumiditySensorConfiguration = (configurationBase, readingName, entityName) => {
+const createHumiditySensorConfiguration = (configurationBase, readingName, entityName, extraProperties) => {
+    if (!extraProperties) {
+        extraProperties = {}
+    }
+
     return createSensorConfiguration(configurationBase, readingName, entityName, {
         'device_class': 'humidity',
         'unit_of_measurement': '%',
+        ...extraProperties,
     })
 }
 
