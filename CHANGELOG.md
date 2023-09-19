@@ -5,6 +5,8 @@
 * Add Modbus TCP support (https://github.com/Jalle19/eda-modbus-bridge/issues/86)
 * Expose "room temperature average" if available (https://github.com/Jalle19/eda-modbus-bridge/issues/88)
 * Expose optional analog inputs (CO2, RH, and room temperature sensors) if available (https://github.com/Jalle19/eda-modbus-bridge/issues/88)
+* Fix device type (Pro/Family) parsing (https://github.com/Jalle19/eda-modbus-bridge/issues/89)
+* Parse pro unit size correctly
 
 ## 2.5.0
 

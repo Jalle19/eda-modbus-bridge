@@ -1,4 +1,4 @@
-import { AVAILABLE_ALARMS, createModelNameString, getDeviceInformation } from './modbus.mjs'
+import { getDeviceInformation } from './modbus.mjs'
 import {
     TOPIC_NAME_STATUS,
     TOPIC_PREFIX_ALARM,
@@ -8,6 +8,7 @@ import {
     TOPIC_PREFIX_SETTINGS,
 } from './mqtt.mjs'
 import { createLogger } from './logger.mjs'
+import { AVAILABLE_ALARMS, createModelNameString } from './enervent.mjs'
 
 const logger = createLogger('homeassistant')
 
@@ -17,8 +18,7 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
     const modbusDeviceInformation = await getDeviceInformation(modbusClient)
     const softwareVersion = modbusDeviceInformation.softwareVersion
     const modelName = createModelNameString(modbusDeviceInformation)
-    const deviceIdentifier =
-        `enervent-${modbusDeviceInformation.familyType}-${modbusDeviceInformation.fanType}`.toLowerCase()
+    const deviceIdentifier = createDeviceIdentifierString(modbusDeviceInformation)
 
     // The "device" object that is part of each sensor's configuration payload
     const mqttDeviceInformation = {
@@ -280,6 +280,10 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             })
         }
     }
+}
+
+export const createDeviceIdentifierString = (modbusDeviceInformation) => {
+    return `enervent-${modbusDeviceInformation.modelType}-${modbusDeviceInformation.fanType}`.toLowerCase()
 }
 
 const createTemperatureSensorConfiguration = (configurationBase, readingName, entityName, extraProperties) => {
