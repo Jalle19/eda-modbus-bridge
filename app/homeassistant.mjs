@@ -152,6 +152,27 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             'Room temperature #3',
             { 'enabled_by_default': false }
         ),
+        // Optional sensors that are only guaranteed to work on MD automation units
+        'controlPanel1Temperature': createTemperatureSensorConfiguration(
+            configurationBase,
+            'controlPanel1Temperature',
+            'Control panel #1 temperature',
+            { 'enabled_by_default': automationType === AUTOMATION_TYPE_MD }
+        ),
+        'controlPanel2Temperature': createTemperatureSensorConfiguration(
+            configurationBase,
+            'controlPanel2Temperature',
+            'Control panel #2 temperature',
+            { 'enabled_by_default': automationType === AUTOMATION_TYPE_MD }
+        ),
+        'supplyFanSpeed': createSensorConfiguration(configurationBase, 'supplyFanSpeed', 'Supply fan speed', {
+            'unit_of_measurement': '%',
+            'enabled_by_default': automationType === AUTOMATION_TYPE_MD,
+        }),
+        'exhaustFanSpeed': createSensorConfiguration(configurationBase, 'exhaustFanSpeed', 'Exhaust fan speed', {
+            'unit_of_measurement': '%',
+            'enabled_by_default': automationType === AUTOMATION_TYPE_MD,
+        }),
     }
 
     // Configurable numbers

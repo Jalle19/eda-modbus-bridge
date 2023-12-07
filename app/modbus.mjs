@@ -158,6 +158,19 @@ export const getReadings = async (modbusClient) => {
         }
     }
 
+    // Sensors that only work reliably on MD automation devices
+    const deviceInformation = await getDeviceInformation(modbusClient)
+    if (deviceInformation.automationType === AUTOMATION_TYPE_MD) {
+        result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 1, 4))
+        readings = {
+            ...readings,
+            'controlPanel1Temperature': parseTemperature(result.data[0]),
+            'controlPanel2Temperature': parseTemperature(result.data[1]),
+            'supplyFanSpeed': result.data[2],
+            'exhaustFanSpeed': result.data[3],
+        }
+    }
+
     return readings
 }
 
