@@ -89,8 +89,17 @@ const disableAllModesExcept = async (modbusClient, exceptedMode) => {
 export const getReadings = async (modbusClient) => {
     logger.debug('Retrieving device readings...')
 
-    let result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 6, 8))
+    let result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 1, 4))
     let readings = {
+        'controlPanel1Temperature': parseTemperature(result.data[0]),
+        'controlPanel2Temperature': parseTemperature(result.data[1]),
+        'supplyFanSpeed': result.data[2],
+        'exhaustFanSpeed': result.data[3],
+    }
+
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 6, 8))
+    readings = {
+        ...readings,
         'freshAirTemperature': parseTemperature(result.data[0]),
         'supplyAirTemperatureAfterHeatRecovery': parseTemperature(result.data[1]),
         'supplyAirTemperature': parseTemperature(result.data[2]),
