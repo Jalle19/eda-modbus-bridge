@@ -1,5 +1,11 @@
 # Change log
 
+## future release
+
+* Change Home Assistant auto-discovery log level to `debug` (https://github.com/Jalle19/eda-modbus-bridge/issues/93)
+* Add settings switches for cooling/heating allowed (https://github.com/Jalle19/eda-modbus-bridge/issues/98)
+* Publish all MQTT values immediately during startup, don't wait until the first scheduled update
+
 ## 2.6.0
 
 * Add Modbus TCP support (https://github.com/Jalle19/eda-modbus-bridge/issues/86)

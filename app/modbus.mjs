@@ -179,6 +179,24 @@ export const getSettings = async (modbusClient) => {
         'temperatureTarget': parseTemperature(result.data[0]),
     }
 
+    // Heating/cooling/heat recovery enabled in normal/away/long away modes. Note that the register order is swapped
+    // when querying register 18-21 compared to 52-55.
+    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 52, 3))
+    settings = {
+        ...settings,
+        'coolingAllowed': result.data[0],
+        'heatingAllowed': result.data[2],
+    }
+
+    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 18, 4))
+    settings = {
+        ...settings,
+        'awayCoolingAllowed': result.data[1],
+        'awayHeatingAllowed': result.data[0],
+        'longAwayCoolingAllowed': result.data[3],
+        'longAwayHeatingAllowed': result.data[2],
+    }
+
     return settings
 }
 
@@ -187,6 +205,7 @@ export const setSetting = async (modbusClient, setting, value) => {
         throw new Error('Unknown setting')
     }
 
+    let coil = false
     let intValue = parseInt(value, 10)
 
     switch (setting) {
@@ -215,9 +234,22 @@ export const setSetting = async (modbusClient, setting, value) => {
             // No minimum/maximum values specified in the register documentation
             intValue *= 10
             break
+        case 'coolingAllowed':
+        case 'heatingAllowed':
+        case 'awayCoolingAllowed':
+        case 'awayHeatingAllowed':
+        case 'longAwayCoolingAllowed':
+        case 'longAwayHeatingAllowed':
+            coil = true
+            break
     }
 
-    await mutex.runExclusive(async () => modbusClient.writeRegister(AVAILABLE_SETTINGS[setting], intValue))
+    // This isn't very nice, but it's good enough for now
+    if (coil) {
+        await mutex.runExclusive(async () => modbusClient.writeCoil(AVAILABLE_SETTINGS[setting], value))
+    } else {
+        await mutex.runExclusive(async () => modbusClient.writeRegister(AVAILABLE_SETTINGS[setting], intValue))
+    }
 }
 
 export const getDeviceInformation = async (modbusClient) => {
