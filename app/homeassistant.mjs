@@ -209,18 +209,42 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
 
     // Configurable switches
     const switchConfigurationMap = {
-        'away': createSwitchConfiguration(configurationBase, 'away', 'Away'),
-        'longAway': createSwitchConfiguration(configurationBase, 'longAway', 'Long away'),
-        'overPressure': createSwitchConfiguration(configurationBase, 'overPressure', 'Overpressure'),
-        'maxHeating': createSwitchConfiguration(configurationBase, 'maxHeating', 'Max heating'),
-        'maxCooling': createSwitchConfiguration(configurationBase, 'maxCooling', 'Max cooling'),
-        'manualBoost': createSwitchConfiguration(configurationBase, 'manualBoost', 'Manual boost'),
-        'summerNightCooling': createSwitchConfiguration(
+        // Mode switches
+        'away': createModeSwitchConfiguration(configurationBase, 'away', 'Away'),
+        'longAway': createModeSwitchConfiguration(configurationBase, 'longAway', 'Long away'),
+        'overPressure': createModeSwitchConfiguration(configurationBase, 'overPressure', 'Overpressure'),
+        'maxHeating': createModeSwitchConfiguration(configurationBase, 'maxHeating', 'Max heating'),
+        'maxCooling': createModeSwitchConfiguration(configurationBase, 'maxCooling', 'Max cooling'),
+        'manualBoost': createModeSwitchConfiguration(configurationBase, 'manualBoost', 'Manual boost'),
+        'summerNightCooling': createModeSwitchConfiguration(
             configurationBase,
             'summerNightCooling',
             'Summer night cooling'
         ),
-        'eco': createSwitchConfiguration(configurationBase, 'eco', 'Eco'),
+        'eco': createModeSwitchConfiguration(configurationBase, 'eco', 'Eco'),
+        // Settings switches
+        'coolingAllowed': createSettingSwitchConfiguration(configurationBase, 'coolingAllowed', 'Cooling allowed'),
+        'heatingAllowed': createSettingSwitchConfiguration(configurationBase, 'heatingAllowed', 'Heating allowed'),
+        'awayCoolingAllowed': createSettingSwitchConfiguration(
+            configurationBase,
+            'awayCoolingAllowed',
+            'Cooling allowed (away mode)'
+        ),
+        'awayHeatingAllowed': createSettingSwitchConfiguration(
+            configurationBase,
+            'awayHeatingAllowed',
+            'Heating allowed (away mode)'
+        ),
+        'longAwayCoolingAllowed': createSettingSwitchConfiguration(
+            configurationBase,
+            'longAwayCoolingAllowed',
+            'Cooling allowed (long away mode)'
+        ),
+        'longAwayHeatingAllowed': createSettingSwitchConfiguration(
+            configurationBase,
+            'longAwayHeatingAllowed',
+            'Heating allowed (long away mode)'
+        ),
     }
 
     // Binary sensors for alarms
@@ -343,7 +367,7 @@ const createNumberConfiguration = (configurationBase, settingName, entityName, e
     }
 }
 
-const createSwitchConfiguration = (configurationBase, modeName, entityName) => {
+const createModeSwitchConfiguration = (configurationBase, modeName, entityName) => {
     return {
         ...configurationBase,
         'unique_id': `eda-${modeName}`,
@@ -352,6 +376,17 @@ const createSwitchConfiguration = (configurationBase, modeName, entityName) => {
         'icon': 'mdi:fan',
         'state_topic': `${TOPIC_PREFIX_MODE}/${modeName}`,
         'command_topic': `${TOPIC_PREFIX_MODE}/${modeName}/set`,
+    }
+}
+
+const createSettingSwitchConfiguration = (configurationBase, settingName, entityName) => {
+    return {
+        ...configurationBase,
+        'unique_id': `eda-${settingName}`,
+        'name': entityName,
+        'object_id': `eda_${settingName}`,
+        'state_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}`,
+        'command_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}/set`,
     }
 }
 

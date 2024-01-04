@@ -179,6 +179,24 @@ export const getSettings = async (modbusClient) => {
         'temperatureTarget': parseTemperature(result.data[0]),
     }
 
+    // Heating/cooling/heat recovery enabled in normal/away/long away modes. Note that the register order is swapped
+    // when querying register 18-21 compared to 52-55.
+    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 52, 3))
+    settings = {
+        ...settings,
+        'coolingAllowed': result.data[0],
+        'heatingAllowed': result.data[2],
+    }
+
+    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 18, 4))
+    settings = {
+        ...settings,
+        'awayCoolingAllowed': result.data[1],
+        'awayHeatingAllowed': result.data[0],
+        'longAwayCoolingAllowed': result.data[3],
+        'longAwayHeatingAllowed': result.data[2],
+    }
+
     return settings
 }
 
