@@ -29,6 +29,12 @@ export const AVAILABLE_SETTINGS = {
     'longAwayVentilationLevel': 102,
     'longAwayTemperatureReduction': 103,
     'temperatureTarget': 135,
+    'coolingAllowed': 52,
+    'heatingAllowed': 54,
+    'awayCoolingAllowed': 19,
+    'awayHeatingAllowed': 18,
+    'longAwayCoolingAllowed': 21,
+    'longAwayHeatingAllowed': 20,
 }
 
 export const AVAILABLE_ALARMS = {

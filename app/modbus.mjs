@@ -205,6 +205,7 @@ export const setSetting = async (modbusClient, setting, value) => {
         throw new Error('Unknown setting')
     }
 
+    let coil = false
     let intValue = parseInt(value, 10)
 
     switch (setting) {
@@ -233,9 +234,22 @@ export const setSetting = async (modbusClient, setting, value) => {
             // No minimum/maximum values specified in the register documentation
             intValue *= 10
             break
+        case 'coolingAllowed':
+        case 'heatingAllowed':
+        case 'awayCoolingAllowed':
+        case 'awayHeatingAllowed':
+        case 'longAwayCoolingAllowed':
+        case 'longAwayHeatingAllowed':
+            coil = true
+            break
     }
 
-    await mutex.runExclusive(async () => modbusClient.writeRegister(AVAILABLE_SETTINGS[setting], intValue))
+    // This isn't very nice, but it's good enough for now
+    if (coil) {
+        await mutex.runExclusive(async () => modbusClient.writeCoil(AVAILABLE_SETTINGS[setting], value))
+    } else {
+        await mutex.runExclusive(async () => modbusClient.writeRegister(AVAILABLE_SETTINGS[setting], intValue))
+    }
 }
 
 export const getDeviceInformation = async (modbusClient) => {
