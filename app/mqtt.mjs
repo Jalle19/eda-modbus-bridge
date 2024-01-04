@@ -130,27 +130,25 @@ export const subscribeToChanges = async (modbusClient, mqttClient) => {
     }
 }
 
-export const handleMessage = async (modbusClient, mqttClient, topicName, payload) => {
-    // Payload looks like a string when logged, but any comparison with === will equal false unless we convert the
-    // Buffer to a string
-    const payloadString = payload.toString()
+export const handleMessage = async (modbusClient, mqttClient, topicName, rawPayload) => {
+    logger.info(`Received ${rawPayload} on topic ${topicName}`)
 
-    logger.info(`Received ${payloadString} on topic ${topicName}`)
+    const payload = parsePayload(rawPayload)
 
     // Handle settings updates
     if (topicName.startsWith(TOPIC_PREFIX_SETTINGS) && topicName.endsWith('/set')) {
         const settingName = topicName.substring(TOPIC_PREFIX_SETTINGS.length + 1, topicName.lastIndexOf('/'))
 
-        logger.info(`Updating setting ${settingName} to ${payloadString}`)
+        logger.info(`Updating setting ${settingName} to ${payload}`)
 
-        await setSetting(modbusClient, settingName, payloadString)
+        await setSetting(modbusClient, settingName, payload)
         await publishSettings(modbusClient, mqttClient)
     } else if (topicName.startsWith(TOPIC_PREFIX_MODE) && topicName.endsWith('/set')) {
         const mode = topicName.substring(TOPIC_PREFIX_MODE.length + 1, topicName.lastIndexOf('/'))
 
-        logger.info(`Updating mode ${mode} to ${payloadString}`)
+        logger.info(`Updating mode ${mode} to ${payload}`)
 
-        await setFlag(modbusClient, mode, payloadString === 'ON')
+        await setFlag(modbusClient, mode, payload)
         await publishFlags(modbusClient, mqttClient)
     }
 }
@@ -163,4 +161,20 @@ const createBinaryValue = (value) => {
     // Boolean values are exposed as "ON" and "OFF" respectively since those are the
     // defaults for MQTT binary sensors in Home Assistant
     return value ? 'ON' : 'OFF'
+}
+
+const parsePayload = (rawPayload) => {
+    // Payload looks like a string when logged, but any comparison with === will equal false unless we convert the
+    // Buffer to a string
+    let payload = rawPayload.toString()
+
+    // Convert "ON"/"OFF" booleans to real booleans
+    if (payload === 'ON') {
+        payload = true
+    }
+    if (payload === 'OFF') {
+        payload = false
+    }
+
+    return payload
 }
