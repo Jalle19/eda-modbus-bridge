@@ -1,5 +1,9 @@
 # Change log
 
+## future release
+
+* Change Home Assistant auto-discovery log level to `debug` (https://github.com/Jalle19/eda-modbus-bridge/issues/93)
+
 ## 2.6.0
 
 * Add Modbus TCP support (https://github.com/Jalle19/eda-modbus-bridge/issues/86)
