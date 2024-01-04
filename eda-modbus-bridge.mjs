@@ -183,7 +183,9 @@ const argv = yargs(process.argv.slice(2))
                 // Publish device information once only (since it doesn't change)
                 await publishDeviceInformation(modbusClient, mqttClient)
 
-                // Publish readings/settings/modes/alarms regularly
+                // Publish readings/settings/modes/alarms once immediately, then regularly according to the configured
+                // interval.
+                await publishValues(modbusClient, mqttClient)
                 setInterval(async () => {
                     await publishValues(modbusClient, mqttClient)
                 }, argv.mqttPublishInterval * 1000)
