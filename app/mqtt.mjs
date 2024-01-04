@@ -100,9 +100,10 @@ const publishSettings = async (modbusClient, mqttClient) => {
     let topicMap = {}
     const settings = await getSettings(modbusClient)
 
-    for (const [setting, value] of Object.entries(settings)) {
+    for (let [setting, value] of Object.entries(settings)) {
         const topicName = `${TOPIC_PREFIX_SETTINGS}/${setting}`
-        topicMap[topicName] = JSON.stringify(value)
+
+        topicMap[topicName] = typeof value === 'boolean' ? createBinaryValue(value) : JSON.stringify(value)
     }
 
     await publishTopics(mqttClient, topicMap)
