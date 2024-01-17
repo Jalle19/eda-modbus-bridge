@@ -1,5 +1,9 @@
 # Change log
 
+## future release
+
+* Fix reading from unit type from wrong register (https://github.com/Jalle19/eda-modbus-bridge/issues/100)
+
 ## 2.7.0
 
 * Change Home Assistant auto-discovery log level to `debug` (https://github.com/Jalle19/eda-modbus-bridge/issues/93)
