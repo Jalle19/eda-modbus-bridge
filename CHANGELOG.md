@@ -1,6 +1,6 @@
 # Change log
 
-## future release
+## 2.7.1
 
 * Fix reading from unit type from wrong register (https://github.com/Jalle19/eda-modbus-bridge/issues/100)
 
