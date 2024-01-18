@@ -1,6 +1,6 @@
 import express from 'express'
 import expressWinston from 'express-winston'
-import MQTT from 'async-mqtt'
+import mqtt from 'mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
 import { getFlagStatus, root, setFlagStatus, setSetting, summary } from './app/http.mjs'
@@ -168,7 +168,7 @@ const argv = yargs(process.argv.slice(2))
 
                 do {
                     try {
-                        mqttClient = await MQTT.connectAsync(argv.mqttBrokerUrl, clientOptions)
+                        mqttClient = await mqtt.connectAsync(argv.mqttBrokerUrl, clientOptions)
                         connectedOnce = true
                         logger.info(`Successfully connected to MQTT broker at ${argv.mqttBrokerUrl}`)
                     } catch (e) {
