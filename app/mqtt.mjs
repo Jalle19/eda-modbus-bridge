@@ -113,7 +113,7 @@ const publishTopics = async (mqttClient, topicMap, publishOptions = {}) => {
     const publishPromises = []
 
     for (const [topic, value] of Object.entries(topicMap)) {
-        publishPromises.push(mqttClient.publish(topic, value, publishOptions))
+        publishPromises.push(mqttClient.publishAsync(topic, value, publishOptions))
     }
 
     await Promise.all(publishPromises)
@@ -126,7 +126,7 @@ export const subscribeToChanges = async (modbusClient, mqttClient) => {
     for (const topicName of topicNames) {
         logger.info(`Subscribing to topic(s) ${topicName}`)
 
-        await mqttClient.subscribe(topicName)
+        await mqttClient.subscribeAsync(topicName)
     }
 }
 

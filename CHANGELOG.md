@@ -1,5 +1,9 @@
 # Change log
 
+## future release
+
+* Upgrade `mqtt` to get rid of `async-mqtt` (https://github.com/Jalle19/eda-modbus-bridge/issues/95)
+
 ## 2.7.1
 
 * Fix reading from unit type from wrong register (https://github.com/Jalle19/eda-modbus-bridge/issues/100)
