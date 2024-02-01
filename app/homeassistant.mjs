@@ -8,7 +8,7 @@ import {
     TOPIC_PREFIX_SETTINGS,
 } from './mqtt.mjs'
 import { createLogger } from './logger.mjs'
-import { AVAILABLE_ALARMS, createModelNameString } from './enervent.mjs'
+import { AUTOMATION_TYPE_LEGACY_EDA, AVAILABLE_ALARMS, createModelNameString } from './enervent.mjs'
 
 const logger = createLogger('homeassistant')
 
@@ -17,6 +17,7 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
     // names, so it must match [a-zA-Z0-9_-].
     const modbusDeviceInformation = await getDeviceInformation(modbusClient)
     const softwareVersion = modbusDeviceInformation.softwareVersion
+    const automationType = modbusDeviceInformation.automationType
     const modelName = createModelNameString(modbusDeviceInformation)
     const deviceIdentifier = createDeviceIdentifierString(modbusDeviceInformation)
 
@@ -223,28 +224,44 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         ),
         'eco': createModeSwitchConfiguration(configurationBase, 'eco', 'Eco'),
         // Settings switches
-        'coolingAllowed': createSettingSwitchConfiguration(configurationBase, 'coolingAllowed', 'Cooling allowed'),
-        'heatingAllowed': createSettingSwitchConfiguration(configurationBase, 'heatingAllowed', 'Heating allowed'),
         'awayCoolingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'awayCoolingAllowed',
-            'Cooling allowed (away mode)'
+            'Cooling allowed (away mode)',
+            // Not supported by some units
+            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
         ),
         'awayHeatingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'awayHeatingAllowed',
-            'Heating allowed (away mode)'
+            'Heating allowed (away mode)',
+            // Not supported by some units
+            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
         ),
         'longAwayCoolingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'longAwayCoolingAllowed',
-            'Cooling allowed (long away mode)'
+            'Cooling allowed (long away mode)',
+            // Not supported by some units
+            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
         ),
         'longAwayHeatingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'longAwayHeatingAllowed',
-            'Heating allowed (long away mode)'
+            'Heating allowed (long away mode)',
+            // Not supported by some units
+            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
         ),
+    }
+
+    // Optional switches depending on automation type
+    if (automationType !== AUTOMATION_TYPE_LEGACY_EDA) {
+        switchConfigurationMap = {
+            ...switchConfigurationMap,
+            // Settings switches
+            'coolingAllowed': createSettingSwitchConfiguration(configurationBase, 'coolingAllowed', 'Cooling allowed'),
+            'heatingAllowed': createSettingSwitchConfiguration(configurationBase, 'heatingAllowed', 'Heating allowed'),
+        }
     }
 
     // Binary sensors for alarms
