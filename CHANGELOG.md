@@ -6,6 +6,7 @@
 * Remove flaky support for "PRO" unit naming scheme
 * Add rudimentary way of differentiating between different automation types
 * Disable "heating/cooling allowed" on legacy EDA units, fixes crash (https://github.com/Jalle19/eda-modbus-bridge/issues/105)
+* Disable "eco" mode switch on older units (https://github.com/Jalle19/eda-modbus-bridge/issues/104)
 
 ## 2.7.1
 

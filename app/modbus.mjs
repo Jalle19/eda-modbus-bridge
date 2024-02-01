@@ -2,6 +2,7 @@ import { Mutex } from 'async-mutex'
 import { createLogger } from './logger.mjs'
 import {
     AUTOMATION_TYPE_LEGACY_EDA,
+    AUTOMATION_TYPE_MD,
     AVAILABLE_ALARMS,
     AVAILABLE_FLAGS,
     AVAILABLE_SETTINGS,
@@ -44,10 +45,14 @@ export const getFlagSummary = async (modbusClient) => {
         'summerNightCooling': result.data[12],
     }
 
-    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 40, 1))
-    summary = {
-        ...summary,
-        'eco': result.data[0],
+    // "eco" is a newfangled thing only available on newer units
+    const deviceInformation = await getDeviceInformation(modbusClient)
+    if (deviceInformation.automationType === AUTOMATION_TYPE_MD) {
+        result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 40, 1))
+        summary = {
+            ...summary,
+            'eco': result.data[0],
+        }
     }
 
     return summary

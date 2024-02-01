@@ -8,7 +8,7 @@ import {
     TOPIC_PREFIX_SETTINGS,
 } from './mqtt.mjs'
 import { createLogger } from './logger.mjs'
-import { AUTOMATION_TYPE_LEGACY_EDA, AVAILABLE_ALARMS, createModelNameString } from './enervent.mjs'
+import { AUTOMATION_TYPE_LEGACY_EDA, AUTOMATION_TYPE_MD, AVAILABLE_ALARMS, createModelNameString } from './enervent.mjs'
 
 const logger = createLogger('homeassistant')
 
@@ -222,7 +222,6 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             'summerNightCooling',
             'Summer night cooling'
         ),
-        'eco': createModeSwitchConfiguration(configurationBase, 'eco', 'Eco'),
         // Settings switches
         'awayCoolingAllowed': createSettingSwitchConfiguration(
             configurationBase,
@@ -255,6 +254,13 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
     }
 
     // Optional switches depending on automation type
+    if (automationType === AUTOMATION_TYPE_MD) {
+        switchConfigurationMap = {
+            ...switchConfigurationMap,
+            'eco': createModeSwitchConfiguration(configurationBase, 'eco', 'Eco'),
+        }
+    }
+
     if (automationType !== AUTOMATION_TYPE_LEGACY_EDA) {
         switchConfigurationMap = {
             ...switchConfigurationMap,
