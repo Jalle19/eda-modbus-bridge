@@ -25,6 +25,9 @@ export const MODBUS_DEVICE_TYPE = {
 const mutex = new Mutex()
 const logger = createLogger('modbus')
 
+// Runtime cache for device information (retrieved once per run only since the information doesn't change)
+let CACHED_DEVICE_INFORMATION
+
 export const getFlagSummary = async (modbusClient) => {
     let result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 0, 13))
     let summary = {
@@ -249,6 +252,10 @@ export const setSetting = async (modbusClient, setting, value) => {
 }
 
 export const getDeviceInformation = async (modbusClient) => {
+    if (CACHED_DEVICE_INFORMATION) {
+        return CACHED_DEVICE_INFORMATION
+    }
+
     logger.debug('Retrieving device information...')
 
     // Start by reading the firmware version and determining the firmware type
@@ -296,6 +303,7 @@ export const getDeviceInformation = async (modbusClient) => {
         'modbusAddress': result.data[0],
     }
 
+    CACHED_DEVICE_INFORMATION = deviceInformation
     return deviceInformation
 }
 
