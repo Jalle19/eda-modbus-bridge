@@ -1,5 +1,9 @@
 import {
     createModelNameString,
+    determineAutomationType,
+    AUTOMATION_TYPE_EDA,
+    AUTOMATION_TYPE_LEGACY_EDA,
+    AUTOMATION_TYPE_MD,
     getAutomationAndHeatingTypeName,
     getDeviceFamilyName,
     parseAlarmTimestamp,
@@ -188,4 +192,15 @@ test('parseAnalogSensors', () => {
         'analogInputRoomTemperature1': 19.2,
         'analogInputRoomTemperature2': 20.1,
     })
+})
+
+test('determineAutomationType', () => {
+    // https://github.com/Jalle19/eda-modbus-bridge/issues/104#issuecomment-1917709559
+    expect(determineAutomationType(217)).toEqual(AUTOMATION_TYPE_EDA)
+    expect(determineAutomationType(142)).toEqual(AUTOMATION_TYPE_MD)
+    expect(determineAutomationType(118)).toEqual(AUTOMATION_TYPE_MD)
+    expect(determineAutomationType(201)).toEqual(AUTOMATION_TYPE_LEGACY_EDA)
+    expect(determineAutomationType(554)).toEqual(AUTOMATION_TYPE_EDA)
+    expect(determineAutomationType(197)).toEqual(AUTOMATION_TYPE_LEGACY_EDA)
+    expect(determineAutomationType(194)).toEqual(AUTOMATION_TYPE_LEGACY_EDA)
 })

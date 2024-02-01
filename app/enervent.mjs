@@ -86,6 +86,20 @@ export const ANALOG_INPUT_SENSOR_TYPES = {
     10: { type: SENSOR_TYPE_ROOM_TEMP, name: 'analogInputRoomTemperature3', description: 'Room temperature #1' },
 }
 
+export const AUTOMATION_TYPE_LEGACY_EDA = 'LEGACY_EDA'
+export const AUTOMATION_TYPE_EDA = 'EDA'
+export const AUTOMATION_TYPE_MD = 'MD'
+
+export const determineAutomationType = (versionInt) => {
+    if (versionInt > 190 && versionInt <= 201) {
+        return AUTOMATION_TYPE_LEGACY_EDA
+    } else if (versionInt < 190) {
+        return AUTOMATION_TYPE_MD
+    } else {
+        return AUTOMATION_TYPE_EDA
+    }
+}
+
 export const parseTemperature = (temperature) => {
     if (temperature > 60000) {
         temperature = (65536 - temperature) * -1

@@ -5,6 +5,7 @@ import {
     AVAILABLE_FLAGS,
     AVAILABLE_SETTINGS,
     createModelNameString,
+    determineAutomationType,
     getAutomationAndHeatingTypeName,
     getCoolingTypeName,
     getDeviceFamilyName,
@@ -250,11 +251,11 @@ export const setSetting = async (modbusClient, setting, value) => {
 export const getDeviceInformation = async (modbusClient) => {
     logger.debug('Retrieving device information...')
 
-    // Start by reading the firmware version
+    // Start by reading the firmware version and determining the firmware type
     let result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 599, 1))
     let deviceInformation = {
         'softwareVersion': result.data[0] / 100,
-        'softwareVersionInt': result.data[0],
+        'automationType': determineAutomationType(result.data[0]),
     }
 
     // Motor type
