@@ -2,20 +2,11 @@ import {
     createModelNameString,
     getAutomationAndHeatingTypeName,
     getDeviceFamilyName,
-    getProSize,
     parseAlarmTimestamp,
     parseAnalogSensors,
     parseStateBitField,
     parseTemperature,
-    UNIT_TYPE_FAMILY,
-    UNIT_TYPE_PRO,
 } from '../app/enervent.mjs'
-
-test('getProSize', () => {
-    expect(getProSize(UNIT_TYPE_FAMILY, 'Pingvin', 0)).toEqual(0)
-    expect(getProSize(UNIT_TYPE_PRO, 'RS', 2)).toEqual(25)
-    expect(getProSize(UNIT_TYPE_PRO, 'LTT', 6)).toEqual(90)
-})
 
 test('parse temperature', () => {
     // Positive, float
@@ -54,18 +45,6 @@ test('create model name from device information', () => {
             coolingTypeInstalled: null,
         })
     ).toEqual('Pandion')
-
-    // Random pro model, may not be totally correct
-    expect(
-        createModelNameString({
-            unitType: UNIT_TYPE_PRO,
-            modelType: 'RS',
-            proSize: 25,
-            fanType: 'EC',
-            heatingTypeInstalled: null,
-            coolingTypeInstalled: null,
-        })
-    ).toEqual('RS 25 eco')
 })
 
 test('parse alarm timestamp', () => {

@@ -8,17 +8,12 @@ import {
     getAutomationAndHeatingTypeName,
     getCoolingTypeName,
     getDeviceFamilyName,
-    getDeviceProName,
-    getProSize,
-    getUnitTypeName,
     hasRoomTemperatureSensor,
     MUTUALLY_EXCLUSIVE_MODES,
     parseAlarmTimestamp,
     parseAnalogSensors,
     parseStateBitField,
     parseTemperature,
-    UNIT_TYPE_FAMILY,
-    UNIT_TYPE_PRO,
 } from './enervent.mjs'
 
 export const MODBUS_DEVICE_TYPE = {
@@ -270,12 +265,6 @@ export const getDeviceInformation = async (modbusClient) => {
         'fanType': result.data[0] ? 'EC' : 'AC',
     }
 
-    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 51, 1))
-    const unitType = getUnitTypeName(result.data[0])
-    deviceInformation = {
-        ...deviceInformation,
-        'unitType': unitType,
-    }
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 154, 1))
     deviceInformation = {
         ...deviceInformation,
@@ -289,19 +278,9 @@ export const getDeviceInformation = async (modbusClient) => {
     }
 
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 596, 3))
-    let model = 'unknown'
-    if (unitType === UNIT_TYPE_FAMILY) {
-        model = getDeviceFamilyName(result.data[1])
-    } else if (unitType === UNIT_TYPE_PRO) {
-        model = getDeviceProName(result.data[1])
-    }
-
-    const proSize = getProSize(unitType, model, result.data[0])
-
     deviceInformation = {
         ...deviceInformation,
-        'modelType': model,
-        'proSize': proSize,
+        'modelType': getDeviceFamilyName(result.data[1]),
         'serialNumber': result.data[2],
     }
 
