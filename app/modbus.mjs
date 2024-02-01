@@ -255,8 +255,17 @@ export const setSetting = async (modbusClient, setting, value) => {
 export const getDeviceInformation = async (modbusClient) => {
     logger.debug('Retrieving device information...')
 
-    let result = await mutex.runExclusive(async () => await tryReadCoils(modbusClient, 16, 1))
+    // Start by reading the firmware version
+    let result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 599, 1))
     let deviceInformation = {
+        'softwareVersion': result.data[0] / 100,
+        'softwareVersionInt': result.data[0],
+    }
+
+    // Motor type
+    result = await mutex.runExclusive(async () => await tryReadCoils(modbusClient, 16, 1))
+    deviceInformation = {
+        ...deviceInformation,
         // EC means DC motors
         'fanType': result.data[0] ? 'EC' : 'AC',
     }
@@ -279,7 +288,7 @@ export const getDeviceInformation = async (modbusClient) => {
         'heatingTypeInstalled': getAutomationAndHeatingTypeName(result.data[0]),
     }
 
-    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 596, 4))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 596, 3))
     let model = 'unknown'
     if (unitType === UNIT_TYPE_FAMILY) {
         model = getDeviceFamilyName(result.data[1])
@@ -294,7 +303,6 @@ export const getDeviceInformation = async (modbusClient) => {
         'modelType': model,
         'proSize': proSize,
         'serialNumber': result.data[2],
-        'softwareVersion': result.data[3] / 100,
     }
 
     deviceInformation = {
