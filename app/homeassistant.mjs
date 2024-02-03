@@ -222,7 +222,28 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             'summerNightCooling',
             'Summer night cooling'
         ),
+        'eco': createModeSwitchConfiguration(
+            configurationBase,
+            'eco',
+            'Eco',
+            // Not supported by some units
+            { 'enabled_by_default': automationType === AUTOMATION_TYPE_MD }
+        ),
         // Settings switches
+        'coolingAllowed': createSettingSwitchConfiguration(
+            configurationBase,
+            'coolingAllowed',
+            'Cooling allowed',
+            // Not supported by some units
+            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
+        ),
+        'heatingAllowed': createSettingSwitchConfiguration(
+            configurationBase,
+            'heatingAllowed',
+            'Heating allowed',
+            // Not supported by some units
+            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
+        ),
         'awayCoolingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'awayCoolingAllowed',
@@ -251,23 +272,6 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             // Not supported by some units
             { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
         ),
-    }
-
-    // Optional switches depending on automation type
-    if (automationType === AUTOMATION_TYPE_MD) {
-        switchConfigurationMap = {
-            ...switchConfigurationMap,
-            'eco': createModeSwitchConfiguration(configurationBase, 'eco', 'Eco'),
-        }
-    }
-
-    if (automationType !== AUTOMATION_TYPE_LEGACY_EDA) {
-        switchConfigurationMap = {
-            ...switchConfigurationMap,
-            // Settings switches
-            'coolingAllowed': createSettingSwitchConfiguration(configurationBase, 'coolingAllowed', 'Cooling allowed'),
-            'heatingAllowed': createSettingSwitchConfiguration(configurationBase, 'heatingAllowed', 'Heating allowed'),
-        }
     }
 
     // Binary sensors for alarms
@@ -390,7 +394,11 @@ const createNumberConfiguration = (configurationBase, settingName, entityName, e
     }
 }
 
-const createModeSwitchConfiguration = (configurationBase, modeName, entityName) => {
+const createModeSwitchConfiguration = (configurationBase, modeName, entityName, extraProperties) => {
+    if (!extraProperties) {
+        extraProperties = {}
+    }
+
     return {
         ...configurationBase,
         'unique_id': `eda-${modeName}`,
@@ -399,10 +407,15 @@ const createModeSwitchConfiguration = (configurationBase, modeName, entityName) 
         'icon': 'mdi:fan',
         'state_topic': `${TOPIC_PREFIX_MODE}/${modeName}`,
         'command_topic': `${TOPIC_PREFIX_MODE}/${modeName}/set`,
+        ...extraProperties,
     }
 }
 
-const createSettingSwitchConfiguration = (configurationBase, settingName, entityName) => {
+const createSettingSwitchConfiguration = (configurationBase, settingName, entityName, extraProperties) => {
+    if (!extraProperties) {
+        extraProperties = {}
+    }
+
     return {
         ...configurationBase,
         'unique_id': `eda-${settingName}`,
@@ -410,6 +423,7 @@ const createSettingSwitchConfiguration = (configurationBase, settingName, entity
         'object_id': `eda_${settingName}`,
         'state_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}`,
         'command_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}/set`,
+        ...extraProperties,
     }
 }
 
