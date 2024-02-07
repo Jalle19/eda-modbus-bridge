@@ -3,6 +3,11 @@
 ## future release
 
 * Upgrade `mqtt` to get rid of `async-mqtt` (https://github.com/Jalle19/eda-modbus-bridge/issues/95)
+* Remove flaky support for "PRO" unit naming scheme
+* Add rudimentary way of differentiating between different automation types
+* Disable "heating/cooling allowed" on legacy EDA units, fixes crash (https://github.com/Jalle19/eda-modbus-bridge/issues/105)
+* Disable "eco" mode switch on older units (https://github.com/Jalle19/eda-modbus-bridge/issues/104)
+* Add optional sensors for control panel temperature, supply fan speed and exhaust fan speed (https://github.com/Jalle19/eda-modbus-bridge/issues/96)
 
 ## 2.7.1
 

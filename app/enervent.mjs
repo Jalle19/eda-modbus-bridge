@@ -64,9 +64,6 @@ export const AVAILABLE_ALARMS = {
     21: { name: 'ExtractFanPressureError', description: 'Waste fan pressure' },
 }
 
-export const UNIT_TYPE_FAMILY = 'Family'
-export const UNIT_TYPE_PRO = 'PRO'
-
 export const SENSOR_TYPE_NONE = 'NONE'
 export const SENSOR_TYPE_CO2 = 'CO2'
 export const SENSOR_TYPE_RH = 'RH'
@@ -89,29 +86,26 @@ export const ANALOG_INPUT_SENSOR_TYPES = {
     10: { type: SENSOR_TYPE_ROOM_TEMP, name: 'analogInputRoomTemperature3', description: 'Room temperature #1' },
 }
 
+export const AUTOMATION_TYPE_LEGACY_EDA = 'LEGACY_EDA'
+export const AUTOMATION_TYPE_EDA = 'EDA'
+export const AUTOMATION_TYPE_MD = 'MD'
+
+export const determineAutomationType = (versionInt) => {
+    if (versionInt > 190 && versionInt <= 201) {
+        return AUTOMATION_TYPE_LEGACY_EDA
+    } else if (versionInt < 190) {
+        return AUTOMATION_TYPE_MD
+    } else {
+        return AUTOMATION_TYPE_EDA
+    }
+}
+
 export const parseTemperature = (temperature) => {
     if (temperature > 60000) {
         temperature = (65536 - temperature) * -1
     }
 
     return temperature / 10
-}
-
-export const getProSize = (unitType, modelType, sizeValue) => {
-    const proSizesR = [12, 20, 25]
-    const proSizesL = [10, 20, 25, 35, 50, 70, 90, 120, 150, 180]
-
-    if (unitType !== UNIT_TYPE_PRO) {
-        return 0
-    } else if (modelType === 'RS' || modelType === 'RSC') {
-        return proSizesR[sizeValue]
-    } else {
-        return proSizesL[sizeValue]
-    }
-}
-
-export const getUnitTypeName = (unitType) => {
-    return unitType === true ? UNIT_TYPE_PRO : UNIT_TYPE_FAMILY
 }
 
 export const getDeviceFamilyName = (familyTypeInt) => {
@@ -127,19 +121,6 @@ export const getDeviceFamilyName = (familyTypeInt) => {
             'LTR-7',
             'LTR-7 XL',
         ][familyTypeInt] || 'unknown'
-    )
-}
-
-export const getDeviceProName = (proTypeInt) => {
-    return (
-        [
-            'RS', // prettier-hack
-            'RSC',
-            'LTR',
-            'LTC',
-            'LTT',
-            'LTP',
-        ][proTypeInt] || 'unknown'
     )
 }
 
@@ -173,12 +154,8 @@ export const getAutomationAndHeatingTypeName = (heatingTypeInt) => {
 }
 
 export const createModelNameString = (deviceInformation) => {
-    // E.g. LTR-3 eco EDE/MDE - CG or RS 25 eco
+    // E.g. LTR-3 eco EDE/MDE - CG
     let modelName = deviceInformation.modelType
-
-    if (deviceInformation.unitType === UNIT_TYPE_PRO) {
-        modelName += ` ${deviceInformation.proSize}`
-    }
 
     if (deviceInformation.fanType === 'EC') {
         modelName += ' eco'

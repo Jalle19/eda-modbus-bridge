@@ -1,21 +1,16 @@
 import {
     createModelNameString,
+    determineAutomationType,
+    AUTOMATION_TYPE_EDA,
+    AUTOMATION_TYPE_LEGACY_EDA,
+    AUTOMATION_TYPE_MD,
     getAutomationAndHeatingTypeName,
     getDeviceFamilyName,
-    getProSize,
     parseAlarmTimestamp,
     parseAnalogSensors,
     parseStateBitField,
     parseTemperature,
-    UNIT_TYPE_FAMILY,
-    UNIT_TYPE_PRO,
 } from '../app/enervent.mjs'
-
-test('getProSize', () => {
-    expect(getProSize(UNIT_TYPE_FAMILY, 'Pingvin', 0)).toEqual(0)
-    expect(getProSize(UNIT_TYPE_PRO, 'RS', 2)).toEqual(25)
-    expect(getProSize(UNIT_TYPE_PRO, 'LTT', 6)).toEqual(90)
-})
 
 test('parse temperature', () => {
     // Positive, float
@@ -54,18 +49,6 @@ test('create model name from device information', () => {
             coolingTypeInstalled: null,
         })
     ).toEqual('Pandion')
-
-    // Random pro model, may not be totally correct
-    expect(
-        createModelNameString({
-            unitType: UNIT_TYPE_PRO,
-            modelType: 'RS',
-            proSize: 25,
-            fanType: 'EC',
-            heatingTypeInstalled: null,
-            coolingTypeInstalled: null,
-        })
-    ).toEqual('RS 25 eco')
 })
 
 test('parse alarm timestamp', () => {
@@ -209,4 +192,15 @@ test('parseAnalogSensors', () => {
         'analogInputRoomTemperature1': 19.2,
         'analogInputRoomTemperature2': 20.1,
     })
+})
+
+test('determineAutomationType', () => {
+    // https://github.com/Jalle19/eda-modbus-bridge/issues/104#issuecomment-1917709559
+    expect(determineAutomationType(217)).toEqual(AUTOMATION_TYPE_EDA)
+    expect(determineAutomationType(142)).toEqual(AUTOMATION_TYPE_MD)
+    expect(determineAutomationType(118)).toEqual(AUTOMATION_TYPE_MD)
+    expect(determineAutomationType(201)).toEqual(AUTOMATION_TYPE_LEGACY_EDA)
+    expect(determineAutomationType(554)).toEqual(AUTOMATION_TYPE_EDA)
+    expect(determineAutomationType(197)).toEqual(AUTOMATION_TYPE_LEGACY_EDA)
+    expect(determineAutomationType(194)).toEqual(AUTOMATION_TYPE_LEGACY_EDA)
 })

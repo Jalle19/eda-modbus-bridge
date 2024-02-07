@@ -8,7 +8,7 @@ import {
     TOPIC_PREFIX_SETTINGS,
 } from './mqtt.mjs'
 import { createLogger } from './logger.mjs'
-import { AVAILABLE_ALARMS, createModelNameString } from './enervent.mjs'
+import { AUTOMATION_TYPE_LEGACY_EDA, AUTOMATION_TYPE_MD, AVAILABLE_ALARMS, createModelNameString } from './enervent.mjs'
 
 const logger = createLogger('homeassistant')
 
@@ -17,6 +17,7 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
     // names, so it must match [a-zA-Z0-9_-].
     const modbusDeviceInformation = await getDeviceInformation(modbusClient)
     const softwareVersion = modbusDeviceInformation.softwareVersion
+    const automationType = modbusDeviceInformation.automationType
     const modelName = createModelNameString(modbusDeviceInformation)
     const deviceIdentifier = createDeviceIdentifierString(modbusDeviceInformation)
 
@@ -151,6 +152,27 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             'Room temperature #3',
             { 'enabled_by_default': false }
         ),
+        // Optional sensors that are only guaranteed to work on MD automation units
+        'controlPanel1Temperature': createTemperatureSensorConfiguration(
+            configurationBase,
+            'controlPanel1Temperature',
+            'Control panel #1 temperature',
+            { 'enabled_by_default': automationType === AUTOMATION_TYPE_MD }
+        ),
+        'controlPanel2Temperature': createTemperatureSensorConfiguration(
+            configurationBase,
+            'controlPanel2Temperature',
+            'Control panel #2 temperature',
+            { 'enabled_by_default': automationType === AUTOMATION_TYPE_MD }
+        ),
+        'supplyFanSpeed': createSensorConfiguration(configurationBase, 'supplyFanSpeed', 'Supply fan speed', {
+            'unit_of_measurement': '%',
+            'enabled_by_default': automationType === AUTOMATION_TYPE_MD,
+        }),
+        'exhaustFanSpeed': createSensorConfiguration(configurationBase, 'exhaustFanSpeed', 'Exhaust fan speed', {
+            'unit_of_measurement': '%',
+            'enabled_by_default': automationType === AUTOMATION_TYPE_MD,
+        }),
     }
 
     // Configurable numbers
@@ -221,29 +243,55 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             'summerNightCooling',
             'Summer night cooling'
         ),
-        'eco': createModeSwitchConfiguration(configurationBase, 'eco', 'Eco'),
+        'eco': createModeSwitchConfiguration(
+            configurationBase,
+            'eco',
+            'Eco',
+            // Not supported by some units
+            { 'enabled_by_default': automationType === AUTOMATION_TYPE_MD }
+        ),
         // Settings switches
-        'coolingAllowed': createSettingSwitchConfiguration(configurationBase, 'coolingAllowed', 'Cooling allowed'),
-        'heatingAllowed': createSettingSwitchConfiguration(configurationBase, 'heatingAllowed', 'Heating allowed'),
+        'coolingAllowed': createSettingSwitchConfiguration(
+            configurationBase,
+            'coolingAllowed',
+            'Cooling allowed',
+            // Not supported by some units
+            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
+        ),
+        'heatingAllowed': createSettingSwitchConfiguration(
+            configurationBase,
+            'heatingAllowed',
+            'Heating allowed',
+            // Not supported by some units
+            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
+        ),
         'awayCoolingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'awayCoolingAllowed',
-            'Cooling allowed (away mode)'
+            'Cooling allowed (away mode)',
+            // Not supported by some units
+            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
         ),
         'awayHeatingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'awayHeatingAllowed',
-            'Heating allowed (away mode)'
+            'Heating allowed (away mode)',
+            // Not supported by some units
+            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
         ),
         'longAwayCoolingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'longAwayCoolingAllowed',
-            'Cooling allowed (long away mode)'
+            'Cooling allowed (long away mode)',
+            // Not supported by some units
+            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
         ),
         'longAwayHeatingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'longAwayHeatingAllowed',
-            'Heating allowed (long away mode)'
+            'Heating allowed (long away mode)',
+            // Not supported by some units
+            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
         ),
     }
 
@@ -367,7 +415,11 @@ const createNumberConfiguration = (configurationBase, settingName, entityName, e
     }
 }
 
-const createModeSwitchConfiguration = (configurationBase, modeName, entityName) => {
+const createModeSwitchConfiguration = (configurationBase, modeName, entityName, extraProperties) => {
+    if (!extraProperties) {
+        extraProperties = {}
+    }
+
     return {
         ...configurationBase,
         'unique_id': `eda-${modeName}`,
@@ -376,10 +428,15 @@ const createModeSwitchConfiguration = (configurationBase, modeName, entityName) 
         'icon': 'mdi:fan',
         'state_topic': `${TOPIC_PREFIX_MODE}/${modeName}`,
         'command_topic': `${TOPIC_PREFIX_MODE}/${modeName}/set`,
+        ...extraProperties,
     }
 }
 
-const createSettingSwitchConfiguration = (configurationBase, settingName, entityName) => {
+const createSettingSwitchConfiguration = (configurationBase, settingName, entityName, extraProperties) => {
+    if (!extraProperties) {
+        extraProperties = {}
+    }
+
     return {
         ...configurationBase,
         'unique_id': `eda-${settingName}`,
@@ -387,6 +444,7 @@ const createSettingSwitchConfiguration = (configurationBase, settingName, entity
         'object_id': `eda_${settingName}`,
         'state_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}`,
         'command_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}/set`,
+        ...extraProperties,
     }
 }
 

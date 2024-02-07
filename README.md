@@ -127,58 +127,92 @@ Returns a JSON object like this:
 
 ```json
 {
-    "flags": {
-        "away": false,
-        "longAway": false,
-        "overPressure": false,
-        "maxHeating": false,
-        "maxCooling": false,
-        "manualBoost": false,
-        "summerNightCooling": false
+  "flags": {
+    "away": false,
+    "longAway": false,
+    "overPressure": false,
+    "cookerHood": false,
+    "centralVacuumCleaner": false,
+    "maxHeating": false,
+    "maxCooling": false,
+    "manualBoost": false,
+    "summerNightCooling": false
+  },
+  "readings": {
+    "freshAirTemperature": -2.9,
+    "supplyAirTemperatureAfterHeatRecovery": 16.8,
+    "supplyAirTemperature": 17,
+    "wasteAirTemperature": 0.3,
+    "exhaustAirTemperature": 19.3,
+    "exhaustAirTemperatureBeforeHeatRecovery": -40,
+    "exhaustAirHumidity": 51,
+    "heatRecoverySupplySide": 88,
+    "heatRecoveryExhaustSide": 85,
+    "heatRecoveryTemperatureDifferenceSupplySide": 19.8,
+    "heatRecoveryTemperatureDifferenceExhaustSide": 19,
+    "mean48HourExhaustHumidity": 37,
+    "cascadeSp": 170,
+    "cascadeP": 0,
+    "cascadeI": 130,
+    "overPressureTimeLeft": 0,
+    "ventilationLevelActual": 75,
+    "ventilationLevelTarget": 65
+  },
+  "settings": {
+    "overPressureDelay": 5,
+    "awayVentilationLevel": 30,
+    "awayTemperatureReduction": 2,
+    "longAwayVentilationLevel": 49,
+    "longAwayTemperatureReduction": 0,
+    "temperatureTarget": 17,
+    "coolingAllowed": true,
+    "heatingAllowed": true,
+    "awayCoolingAllowed": true,
+    "awayHeatingAllowed": false,
+    "longAwayCoolingAllowed": true,
+    "longAwayHeatingAllowed": false
+  },
+  "deviceInformation": {
+    "softwareVersion": 2.17,
+    "automationType": "EDA",
+    "fanType": "EC",
+    "coolingTypeInstalled": null,
+    "heatingTypeInstalled": "EDE/MDE",
+    "modelType": "Pingvin",
+    "serialNumber": 0,
+    "modelName": "Pingvin eco EDE/MDE",
+    "modbusAddress": 1
+  },
+  "alarmHistory": [
+    {
+      "name": "TE30ExtractAirCold",
+      "description": "TE30 Extract air cold",
+      "state": 0,
+      "date": "2024-01-21T06:21:00.000Z"
     },
-    "readings": {
-        "freshAirTemperature": 7.3,
-        "supplyAirTemperatureAfterHeatRecovery": 21.7,
-        "supplyAirTemperature": 21.4,
-        "wasteAirTemperature": 11.2,
-        "exhaustAirTemperature": 22.5,
-        "exhaustAirTemperatureBeforeHeatRecovery": -40.0,
-        "exhaustAirHumidity": 45,
-        "heatRecoverySupplySide": 94,
-        "heatRecoveryExhaustSide": 74,
-        "heatRecoveryTemperatureDifferenceSupplySide": 14.4,
-        "heatRecoveryTemperatureDifferenceExhaustSide": 11.3,
-        "mean48HourExhaustHumidity": 39,
-        "cascadeSp": 170,
-        "cascadeP": 0,
-        "cascadeI": 100,
-        "overPressureTimeLeft": 0,
-        "ventilationLevelActual": 60
-    },
-    "settings": {
-        "overPressureDelay": 60,
-        "awayVentilationLevel": 30,
-        "awayTemperatureReduction": 2,
-        "longAwayVentilationLevel": 60,
-        "longAwayTemperatureReduction": 0,
-        "temperatureTarget": 17
-    },
-    "deviceInformation": {
-        "fanType": true,
-        "heatingConfigurationMode": 1,
-        "familyType": 0,
-        "serialNumber": 0,
-        "softwareVersion": 217
-    },
-    "alarms": [
-        {
-            "name": "ServiceReminder",
-            "description": "Service reminder",
-            "state": 1, // 2 = Active, 1 = Dismissed
-            "date": "2021-10-24T11:28:00.000Z"
-        },...
-    ]
+    ...
+  ],
+  "deviceState": {
+    "normal": true,
+    "maxCooling": false,
+    "maxHeating": false,
+    "emergencyStop": false,
+    "stop": false,
+    "away": false,
+    "longAway": false,
+    "temperatureBoost": false,
+    "co2Boost": false,
+    "humidityBoost": false,
+    "manualBoost": false,
+    "overPressure": false,
+    "cookerHood": false,
+    "centralVacuumCleaner": false,
+    "heaterCooldown": false,
+    "summerNightCooling": false,
+    "defrosting": false
+  }
 }
+
 ```
 
 ### GET /mode/{flag}
@@ -244,74 +278,65 @@ Every topic is prefixed by `eda/`, so to subscribe to everything the application
 The following read-only topics are regularly published:
 
 ```
-eda/status
+eda/alarm/CoolingError
+eda/alarm/EHError
+eda/alarm/EHPDA
+eda/alarm/EmergencyStop
+eda/alarm/ExtractFanPressureError
+eda/alarm/ExtractFilterDirty
+eda/alarm/FireRisk
+eda/alarm/HPError
+eda/alarm/HRError
+eda/alarm/ReturnWaterCold
+eda/alarm/ServiceReminder
+eda/alarm/SupplyFanPressureError
+eda/alarm/SupplyFilterDirty
+eda/alarm/TE10SupplyAirAfterHeaterCold
+eda/alarm/TE10SupplyAirAfterHeaterHot
+eda/alarm/TE20RoomTempHot
+eda/alarm/TE30ExtractAirCold
+eda/alarm/TE30ExtractAirHot
+eda/alarm/TE5SupplyAirAfterHRCold
 eda/mode/away
+eda/mode/centralVacuumCleaner
+eda/mode/cookerHood
 eda/mode/longAway
-eda/mode/overPressure
-eda/mode/maxHeating
-eda/mode/maxCooling
 eda/mode/manualBoost
+eda/mode/maxCooling
+eda/mode/maxHeating
+eda/mode/overPressure
 eda/mode/summerNightCooling
-eda/readings/freshAirTemperature
-eda/readings/supplyAirTemperatureAfterHeatRecovery
-eda/readings/supplyAirTemperature
-eda/readings/wasteAirTemperature
+eda/readings/cascadeI
+eda/readings/cascadeP
+eda/readings/cascadeSp
+eda/readings/exhaustAirHumidity
 eda/readings/exhaustAirTemperature
 eda/readings/exhaustAirTemperatureBeforeHeatRecovery
-eda/readings/exhaustAirHumidity
-eda/readings/heatRecoverySupplySide
+eda/readings/freshAirTemperature
 eda/readings/heatRecoveryExhaustSide
-eda/readings/heatRecoveryTemperatureDifferenceSupplySide
+eda/readings/heatRecoverySupplySide
 eda/readings/heatRecoveryTemperatureDifferenceExhaustSide
+eda/readings/heatRecoveryTemperatureDifferenceSupplySide
 eda/readings/mean48HourExhaustHumidity
-eda/readings/cascadeSp
-eda/readings/cascadeP
-eda/readings/cascadeI
 eda/readings/overPressureTimeLeft
+eda/readings/supplyAirTemperature
+eda/readings/supplyAirTemperatureAfterHeatRecovery
 eda/readings/ventilationLevelActual
 eda/readings/ventilationLevelTarget
-eda/settings/overPressureDelay
-eda/settings/awayVentilationLevel
+eda/readings/wasteAirTemperature
+eda/settings/awayCoolingAllowed
+eda/settings/awayHeatingAllowed
 eda/settings/awayTemperatureReduction
-eda/settings/longAwayVentilationLevel
+eda/settings/awayVentilationLevel
+eda/settings/coolingAllowed
+eda/settings/heatingAllowed
+eda/settings/longAwayCoolingAllowed
+eda/settings/longAwayHeatingAllowed
 eda/settings/longAwayTemperatureReduction
+eda/settings/longAwayVentilationLevel
+eda/settings/overPressureDelay
 eda/settings/temperatureTarget
-eda/alarm/TE5InletAfterHeatExchangerCold
-eda/alarm/TE10InletAfterHeaterCold
-eda/alarm/TE10InletAfterHeaterHot
-eda/alarm/TE20RoomHot
-eda/alarm/TE30OutletCold
-eda/alarm/TE30OutletHot
-eda/alarm/HPFault
-eda/alarm/HeaterFault
-eda/alarm/ReturnWaterCold
-eda/alarm/LTOFault
-eda/alarm/CoolingFault
-eda/alarm/EmergencyStop
-eda/alarm/FireRisk
-eda/alarm/ServiceReminder
-eda/alarm/HeaterPressureSwitch
-eda/alarm/InletFilterDirty
-eda/alarm/OutletFilterDirty
-eda/alarm/InletFanPressureAbnomaly
-eda/alarm/OutletFanPressureAbnomaly
-eda/deviceState/normal
-eda/deviceState/maxCooling
-eda/deviceState/maxHeating
-eda/deviceState/emergencyStop
-eda/deviceState/stop
-eda/deviceState/away
-eda/deviceState/longAway
-eda/deviceState/temperatureBoost
-eda/deviceState/co2Boost
-eda/deviceState/humidityBoost
-eda/deviceState/manualBoost
-eda/deviceState/overPressure
-eda/deviceState/cookerHood
-eda/deviceState/centralVacuumCleaner
-eda/deviceState/heaterCooldown
-eda/deviceState/summerNightCooling
-eda/deviceState/defrosting
+eda/status
 ```
 
 Boolean values are expressed as `ON` or `OFF`.
@@ -319,37 +344,28 @@ Boolean values are expressed as `ON` or `OFF`.
 The following topics are published to once during application startup:
 
 ```
-eda/deviceInformation/fanType
-eda/deviceInformation/unitType
+eda/deviceInformation/automationType
 eda/deviceInformation/coolingTypeInstalled
-eda/deviceInformation/heatingTypeInstalled
 eda/deviceInformation/familyType
+eda/deviceInformation/fanType
+eda/deviceInformation/heatingTypeInstalled
+eda/deviceInformation/modbusAddress
+eda/deviceInformation/modelName
 eda/deviceInformation/modelType
 eda/deviceInformation/serialNumber
 eda/deviceInformation/softwareVersion
-eda/deviceInformation/modelName
+eda/deviceInformation/softwareVersionInt
 ```
 
 The following topics can be written to in order to control the operation of the ventilation unit:
 
 ```
-eda/mode/away/set
-eda/mode/longAway/set
-eda/mode/overPressure/set
-eda/mode/maxHeating/set
-eda/mode/maxCooling/set
-eda/mode/manualBoost/set
-eda/mode/summerNightCooling/set
-eda/settings/overPressureDelay/set
-eda/settings/awayVentilationLevel/set
-eda/settings/awayTemperatureReduction/set
-eda/settings/longAwayVentilationLevel/set
-eda/settings/longAwayTemperatureReduction/set
-eda/settings/temperatureTarget/set
+eda/mode/+/set
+eda/settings/+/set
 ```
 
-* `eda/mode/` topics take the values `ON` or `OFF`
-* `eda/settings/` topics take integer values
+* `eda/mode/` topics take the boolean values (`ON` or `OFF`)
+* `eda/settings/` topics take integer or boolean values
 
 ### Home Assistant MQTT discovery
 
@@ -358,7 +374,7 @@ in Home Assistant automatically through the MQTT integration. The following enti
 
 * sensors for all readings
 * numbers (configurable) for settings
-* switches for the ventilation modes
+* switches for the ventilation modes and settings
 * binary sensors for the alarms
 
 ![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha1.png "Home Assistant device info")
@@ -382,7 +398,9 @@ in Home Assistant automatically through the MQTT integration. The following enti
   do its job.
 
 * Older firmware (e.g. Pingvin devices with software version 2.01) only support a smaller list of Modbus registers, so 
-  some functionality may be missing. Open an issue if you feel like something isn't working that should be working.
+  some functionality may be missing. Open an issue if you feel like something isn't working that should be working. 
+  Unsupported functionality is indicated by the corresponding sensor being disabled in Home Assistant, and the readings 
+  missing from the `/summary` HTTP endpoint.
 
 ## Troubleshooting
 

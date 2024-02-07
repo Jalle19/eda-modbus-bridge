@@ -1,24 +1,22 @@
 import { Mutex } from 'async-mutex'
 import { createLogger } from './logger.mjs'
 import {
+    AUTOMATION_TYPE_LEGACY_EDA,
+    AUTOMATION_TYPE_MD,
     AVAILABLE_ALARMS,
     AVAILABLE_FLAGS,
     AVAILABLE_SETTINGS,
     createModelNameString,
+    determineAutomationType,
     getAutomationAndHeatingTypeName,
     getCoolingTypeName,
     getDeviceFamilyName,
-    getDeviceProName,
-    getProSize,
-    getUnitTypeName,
     hasRoomTemperatureSensor,
     MUTUALLY_EXCLUSIVE_MODES,
     parseAlarmTimestamp,
     parseAnalogSensors,
     parseStateBitField,
     parseTemperature,
-    UNIT_TYPE_FAMILY,
-    UNIT_TYPE_PRO,
 } from './enervent.mjs'
 
 export const MODBUS_DEVICE_TYPE = {
@@ -28,6 +26,9 @@ export const MODBUS_DEVICE_TYPE = {
 
 const mutex = new Mutex()
 const logger = createLogger('modbus')
+
+// Runtime cache for device information (retrieved once per run only since the information doesn't change)
+let CACHED_DEVICE_INFORMATION
 
 export const getFlagSummary = async (modbusClient) => {
     let result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 0, 13))
@@ -44,10 +45,14 @@ export const getFlagSummary = async (modbusClient) => {
         'summerNightCooling': result.data[12],
     }
 
-    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 40, 1))
-    summary = {
-        ...summary,
-        'eco': result.data[0],
+    // "eco" is a newfangled thing only available on newer units
+    const deviceInformation = await getDeviceInformation(modbusClient)
+    if (deviceInformation.automationType === AUTOMATION_TYPE_MD) {
+        result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 40, 1))
+        summary = {
+            ...summary,
+            'eco': result.data[0],
+        }
     }
 
     return summary
@@ -153,6 +158,19 @@ export const getReadings = async (modbusClient) => {
         }
     }
 
+    // Sensors that only work reliably on MD automation devices
+    const deviceInformation = await getDeviceInformation(modbusClient)
+    if (deviceInformation.automationType === AUTOMATION_TYPE_MD) {
+        result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 1, 4))
+        readings = {
+            ...readings,
+            'controlPanel1Temperature': parseTemperature(result.data[0]),
+            'controlPanel2Temperature': parseTemperature(result.data[1]),
+            'supplyFanSpeed': result.data[2],
+            'exhaustFanSpeed': result.data[3],
+        }
+    }
+
     return readings
 }
 
@@ -179,22 +197,25 @@ export const getSettings = async (modbusClient) => {
         'temperatureTarget': parseTemperature(result.data[0]),
     }
 
-    // Heating/cooling/heat recovery enabled in normal/away/long away modes. Note that the register order is swapped
-    // when querying register 18-21 compared to 52-55.
-    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 52, 3))
-    settings = {
-        ...settings,
-        'coolingAllowed': result.data[0],
-        'heatingAllowed': result.data[2],
-    }
+    // Heating/cooling/heat recovery enabled in normal/away/long away modes (not available on some devices).
+    // Note that the register order is swapped when querying register 18-21 compared to 52-55.
+    const deviceInformation = await getDeviceInformation(modbusClient)
+    if (deviceInformation.automationType !== AUTOMATION_TYPE_LEGACY_EDA) {
+        result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 52, 3))
+        settings = {
+            ...settings,
+            'coolingAllowed': result.data[0],
+            'heatingAllowed': result.data[2],
+        }
 
-    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 18, 4))
-    settings = {
-        ...settings,
-        'awayCoolingAllowed': result.data[1],
-        'awayHeatingAllowed': result.data[0],
-        'longAwayCoolingAllowed': result.data[3],
-        'longAwayHeatingAllowed': result.data[2],
+        result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 18, 4))
+        settings = {
+            ...settings,
+            'awayCoolingAllowed': result.data[1],
+            'awayHeatingAllowed': result.data[0],
+            'longAwayCoolingAllowed': result.data[3],
+            'longAwayHeatingAllowed': result.data[2],
+        }
     }
 
     return settings
@@ -253,20 +274,27 @@ export const setSetting = async (modbusClient, setting, value) => {
 }
 
 export const getDeviceInformation = async (modbusClient) => {
+    if (CACHED_DEVICE_INFORMATION) {
+        return CACHED_DEVICE_INFORMATION
+    }
+
     logger.debug('Retrieving device information...')
 
-    let result = await mutex.runExclusive(async () => await tryReadCoils(modbusClient, 16, 1))
+    // Start by reading the firmware version and determining the firmware type
+    let result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 599, 1))
     let deviceInformation = {
+        'softwareVersion': result.data[0] / 100,
+        'automationType': determineAutomationType(result.data[0]),
+    }
+
+    // Motor type
+    result = await mutex.runExclusive(async () => await tryReadCoils(modbusClient, 16, 1))
+    deviceInformation = {
+        ...deviceInformation,
         // EC means DC motors
         'fanType': result.data[0] ? 'EC' : 'AC',
     }
 
-    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 51, 1))
-    const unitType = getUnitTypeName(result.data[0])
-    deviceInformation = {
-        ...deviceInformation,
-        'unitType': unitType,
-    }
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 154, 1))
     deviceInformation = {
         ...deviceInformation,
@@ -279,22 +307,11 @@ export const getDeviceInformation = async (modbusClient) => {
         'heatingTypeInstalled': getAutomationAndHeatingTypeName(result.data[0]),
     }
 
-    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 596, 4))
-    let model = 'unknown'
-    if (unitType === UNIT_TYPE_FAMILY) {
-        model = getDeviceFamilyName(result.data[1])
-    } else if (unitType === UNIT_TYPE_PRO) {
-        model = getDeviceProName(result.data[1])
-    }
-
-    const proSize = getProSize(unitType, model, result.data[0])
-
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 596, 3))
     deviceInformation = {
         ...deviceInformation,
-        'modelType': model,
-        'proSize': proSize,
+        'modelType': getDeviceFamilyName(result.data[1]),
         'serialNumber': result.data[2],
-        'softwareVersion': result.data[3] / 100,
     }
 
     deviceInformation = {
@@ -308,6 +325,7 @@ export const getDeviceInformation = async (modbusClient) => {
         'modbusAddress': result.data[0],
     }
 
+    CACHED_DEVICE_INFORMATION = deviceInformation
     return deviceInformation
 }
 
