@@ -13,11 +13,11 @@ import { createLogger } from './logger.mjs'
 
 const logger = createLogger('http')
 
-export const root = async (req, res) => {
+const root = async (req, res) => {
     res.send('eda-modbus-bridge')
 }
 
-export const summary = async (modbusClient, req, res) => {
+const summary = async (modbusClient, req, res) => {
     try {
         let modeSummary = await getModeSummary(modbusClient)
         const summary = {
@@ -37,7 +37,7 @@ export const summary = async (modbusClient, req, res) => {
     }
 }
 
-export const getMode = async (modbusClient, req, res) => {
+const getMode = async (modbusClient, req, res) => {
     try {
         const mode = req.params['mode']
         const status = await modbusGetMode(modbusClient, mode)
@@ -50,7 +50,7 @@ export const getMode = async (modbusClient, req, res) => {
     }
 }
 
-export const setMode = async (modbusClient, req, res) => {
+const setMode = async (modbusClient, req, res) => {
     try {
         const mode = req.params['mode']
         const status = !!req.body['active']
@@ -67,7 +67,7 @@ export const setMode = async (modbusClient, req, res) => {
     }
 }
 
-export const setSetting = async (modbusClient, req, res) => {
+const setSetting = async (modbusClient, req, res) => {
     try {
         const setting = req.params['setting']
         const value = req.params['value']
@@ -82,6 +82,22 @@ export const setSetting = async (modbusClient, req, res) => {
     } catch (e) {
         handleError(e, res)
     }
+}
+
+export const configureRoutes = (httpServer, modbusClient) => {
+    httpServer.get('/', root)
+    httpServer.get('/summary', (req, res) => {
+        return summary(modbusClient, req, res)
+    })
+    httpServer.get('/mode/:mode', (req, res) => {
+        return getMode(modbusClient, req, res)
+    })
+    httpServer.post('/mode/:mode', (req, res) => {
+        return setMode(modbusClient, req, res)
+    })
+    httpServer.post('/setting/:setting/:value', (req, res) => {
+        return setSetting(modbusClient, req, res)
+    })
 }
 
 const handleError = (e, res) => {

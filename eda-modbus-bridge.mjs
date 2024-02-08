@@ -3,7 +3,7 @@ import expressWinston from 'express-winston'
 import mqtt from 'mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
-import { getMode, root, setMode, setSetting, summary } from './app/http.mjs'
+import { configureRoutes } from './app/http.mjs'
 import {
     publishValues,
     subscribeToChanges,
@@ -121,19 +121,7 @@ const argv = yargs(process.argv.slice(2))
         httpServer.use(express.json())
 
         // Define routes
-        httpServer.get('/', root)
-        httpServer.get('/summary', (req, res) => {
-            return summary(modbusClient, req, res)
-        })
-        httpServer.get('/mode/:mode', (req, res) => {
-            return getMode(modbusClient, req, res)
-        })
-        httpServer.post('/mode/:mode', (req, res) => {
-            return setMode(modbusClient, req, res)
-        })
-        httpServer.post('/setting/:setting/:value', (req, res) => {
-            return setSetting(modbusClient, req, res)
-        })
+        configureRoutes(httpServer, modbusClient)
 
         httpServer.listen(argv.httpPort, argv.httpListenAddress, () => {
             httpLogger.info(`Listening on http://${argv.httpListenAddress}:${argv.httpPort}`)
