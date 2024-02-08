@@ -73,7 +73,7 @@ export const setFlag = async (modbusClient, flag, value) => {
         throw new Error('Unknown flag')
     }
 
-    await mutex.runExclusive(async () => tryWriteCoils(modbusClient, AVAILABLE_FLAGS[flag], value))
+    await mutex.runExclusive(async () => tryWriteCoil(modbusClient, AVAILABLE_FLAGS[flag], value))
 
     // Flags are mutually exclusive, disable all others when enabling one
     if (value) {
@@ -87,7 +87,7 @@ const disableAllModesExcept = async (modbusClient, exceptedMode) => {
             continue
         }
 
-        await mutex.runExclusive(async () => tryWriteCoils(modbusClient, AVAILABLE_FLAGS[mode], false))
+        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, AVAILABLE_FLAGS[mode], false))
     }
 }
 
@@ -267,7 +267,7 @@ export const setSetting = async (modbusClient, setting, value) => {
 
     // This isn't very nice, but it's good enough for now
     if (coil) {
-        await mutex.runExclusive(async () => modbusClient.writeCoil(AVAILABLE_SETTINGS[setting], value))
+        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, AVAILABLE_SETTINGS[setting], value))
     } else {
         await mutex.runExclusive(async () => modbusClient.writeRegister(AVAILABLE_SETTINGS[setting], intValue))
     }
@@ -416,7 +416,7 @@ const tryReadCoils = async (modbusClient, dataAddress, length) => {
     }
 }
 
-const tryWriteCoils = async (modbusClient, dataAddress, value) => {
+const tryWriteCoil = async (modbusClient, dataAddress, value) => {
     try {
         logger.debug(`Writing ${value} to coil address ${dataAddress}`)
         return await modbusClient.writeCoil(dataAddress, value)
