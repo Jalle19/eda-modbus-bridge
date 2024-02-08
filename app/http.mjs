@@ -80,7 +80,11 @@ const setSetting = async (modbusClient, req, res) => {
             'settings': await getSettings(modbusClient),
         })
     } catch (e) {
-        handleError(e, res)
+        if (e instanceof RangeError) {
+            handleError(e, res, 400)
+        } else {
+            handleError(e, res)
+        }
     }
 }
 
@@ -100,8 +104,9 @@ export const configureRoutes = (httpServer, modbusClient) => {
     })
 }
 
-const handleError = (e, res) => {
+const handleError = (e, res, statusCode = undefined) => {
     logger.error(`An exception occurred: ${e.name}: ${e.message}`, e.stack)
-    res.status(400)
+    // Use HTTP 500 if no status code has been set
+    res.status(statusCode ?? 500)
     res.json(e)
 }

@@ -263,7 +263,7 @@ The response is identical to that of `GET /mode/{mode}`.
 
 ### POST /setting/{setting}/{value}
 
-Changes the setting to the specified value. HTTP 400 is thrown if the value specified is out of range or invalid.
+Changes the setting to the specified value. HTTP 400 is returned if the value specified is out of range or invalid.
 
 Returns the new setting values, like this:
 
