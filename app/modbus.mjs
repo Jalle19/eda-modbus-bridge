@@ -1,6 +1,8 @@
 import { Mutex } from 'async-mutex'
 import { createLogger } from './logger.mjs'
 import {
+    ALARM_REGISTERS_END,
+    ALARM_REGISTERS_START,
     AUTOMATION_TYPE_LEGACY_EDA,
     AUTOMATION_TYPE_MD,
     AVAILABLE_ALARMS,
@@ -332,8 +334,8 @@ export const getDeviceInformation = async (modbusClient) => {
 export const getAlarmHistory = async (modbusClient) => {
     let alarmHistory = []
 
-    const startRegister = 385
-    const endRegister = 518
+    const startRegister = ALARM_REGISTERS_START
+    const endRegister = ALARM_REGISTERS_END
     const alarmOffset = 7
 
     for (let register = startRegister; register <= endRegister; register += alarmOffset) {
