@@ -1,10 +1,10 @@
 import {
     getDeviceInformation,
-    getFlag,
-    getFlagSummary,
+    getMode as modbusGetMode,
+    getModeSummary,
     getReadings,
     getSettings,
-    setFlag,
+    setMode as modbusSetMode,
     setSetting as modbusSetSetting,
     getAlarmHistory,
     getDeviceState,
@@ -19,8 +19,11 @@ export const root = async (req, res) => {
 
 export const summary = async (modbusClient, req, res) => {
     try {
+        let modeSummary = await getModeSummary(modbusClient)
         const summary = {
-            'flags': await getFlagSummary(modbusClient),
+            // TODO: Remove in next major version
+            'flags': modeSummary,
+            'modes': modeSummary,
             'readings': await getReadings(modbusClient),
             'settings': await getSettings(modbusClient),
             'deviceInformation': await getDeviceInformation(modbusClient),
@@ -34,10 +37,10 @@ export const summary = async (modbusClient, req, res) => {
     }
 }
 
-export const getFlagStatus = async (modbusClient, req, res) => {
+export const getMode = async (modbusClient, req, res) => {
     try {
-        const flag = req.params['flag']
-        const status = await getFlag(modbusClient, flag)
+        const mode = req.params['mode']
+        const status = await modbusGetMode(modbusClient, mode)
 
         res.json({
             'active': status,
@@ -47,17 +50,17 @@ export const getFlagStatus = async (modbusClient, req, res) => {
     }
 }
 
-export const setFlagStatus = async (modbusClient, req, res) => {
+export const setMode = async (modbusClient, req, res) => {
     try {
-        const flag = req.params['flag']
+        const mode = req.params['mode']
         const status = !!req.body['active']
 
-        logger.info(`Setting flag ${flag} to ${status}`)
+        logger.info(`Setting mode ${mode} to ${status}`)
 
-        await setFlag(modbusClient, flag, status)
+        await modbusSetMode(modbusClient, mode, status)
 
         res.json({
-            'active': await getFlag(modbusClient, flag),
+            'active': await modbusGetMode(modbusClient, mode),
         })
     } catch (e) {
         handleError(e, res)

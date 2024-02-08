@@ -1,4 +1,4 @@
-export const AVAILABLE_FLAGS = {
+export const AVAILABLE_MODES = {
     'away': 1,
     'longAway': 2,
     'overPressure': 3,

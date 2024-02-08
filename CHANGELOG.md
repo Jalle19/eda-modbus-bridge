@@ -8,6 +8,7 @@
 * Disable "heating/cooling allowed" on legacy EDA units, fixes crash (https://github.com/Jalle19/eda-modbus-bridge/issues/105)
 * Disable "eco" mode switch on older units (https://github.com/Jalle19/eda-modbus-bridge/issues/104)
 * Add optional sensors for control panel temperature, supply fan speed and exhaust fan speed (https://github.com/Jalle19/eda-modbus-bridge/issues/96)
+* Remove references to "flags", use "modes" everywhere instead
 
 ## 2.7.1
 

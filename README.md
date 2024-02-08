@@ -24,9 +24,9 @@ https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See
 * [Usage](#usage)
 * [HTTP endpoints](#http-endpoints)
   * [GET /summary](#get-summary)
-  * [GET /mode/{flag}](#get-modeflag)
+  * [GET /mode/{mode}](#get-modemode)
   * [GET /alarms](#get-alarms)
-  * [POST /mode/{flag}](#post-modeflag)
+  * [POST /mode/{mode}](#post-modemode)
   * [POST /setting/{setting}/{value}](#post-settingsettingvalue)
 * [MQTT support](#mqtt-support)
   * [Home Assistant MQTT discovery](#home-assistant-mqtt-discovery)
@@ -138,6 +138,17 @@ Returns a JSON object like this:
     "manualBoost": false,
     "summerNightCooling": false
   },
+  "modes": {
+    "away": false,
+    "longAway": false,
+    "overPressure": false,
+    "cookerHood": false,
+    "centralVacuumCleaner": false,
+    "maxHeating": false,
+    "maxCooling": false,
+    "manualBoost": false,
+    "summerNightCooling": false
+  },
   "readings": {
     "freshAirTemperature": -2.9,
     "supplyAirTemperatureAfterHeatRecovery": 16.8,
@@ -215,9 +226,9 @@ Returns a JSON object like this:
 
 ```
 
-### GET /mode/{flag}
+### GET /mode/{mode}
 
-Returns the status of the specified mode/flag. The response looks like this:
+Returns the status of the specified mode. The response looks like this:
 
 ```json
 {"active":false}
@@ -240,15 +251,15 @@ Returns the active or dismissed alarms. The response looks like this:
 }
 ```
 
-### POST /mode/{flag}
+### POST /mode/{mode}
 
-Enables/disables the specified mode/flag depending on the boolean value in the following request body:
+Enables/disables the specified mode depending on the boolean value in the following request body:
 
 ```json
 {"active":false}
 ```
 
-The response is identical to that of `GET /mode/{flag}`.
+The response is identical to that of `GET /mode/{mode}`.
 
 ### POST /setting/{setting}/{value}
 

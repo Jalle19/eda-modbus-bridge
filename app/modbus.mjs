@@ -6,7 +6,7 @@ import {
     AUTOMATION_TYPE_LEGACY_EDA,
     AUTOMATION_TYPE_MD,
     AVAILABLE_ALARMS,
-    AVAILABLE_FLAGS,
+    AVAILABLE_MODES,
     AVAILABLE_SETTINGS,
     createModelNameString,
     determineAutomationType,
@@ -32,7 +32,7 @@ const logger = createLogger('modbus')
 // Runtime cache for device information (retrieved once per run only since the information doesn't change)
 let CACHED_DEVICE_INFORMATION
 
-export const getFlagSummary = async (modbusClient) => {
+export const getModeSummary = async (modbusClient) => {
     let result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 0, 13))
     let summary = {
         // 'stop': result.data[0], // - Can not return value if stopped.
@@ -60,26 +60,26 @@ export const getFlagSummary = async (modbusClient) => {
     return summary
 }
 
-export const getFlag = async (modbusClient, flag) => {
-    if (AVAILABLE_FLAGS[flag] === undefined) {
-        throw new Error('Unknown flag')
+export const getMode = async (modbusClient, mode) => {
+    if (AVAILABLE_MODES[mode] === undefined) {
+        throw new Error('Unknown mode')
     }
 
-    const result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, AVAILABLE_FLAGS[flag], 1))
+    const result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, AVAILABLE_MODES[mode], 1))
 
     return result.data[0]
 }
 
-export const setFlag = async (modbusClient, flag, value) => {
-    if (AVAILABLE_FLAGS[flag] === undefined) {
-        throw new Error('Unknown flag')
+export const setMode = async (modbusClient, mode, value) => {
+    if (AVAILABLE_MODES[mode] === undefined) {
+        throw new Error('Unknown mode')
     }
 
-    await mutex.runExclusive(async () => tryWriteCoil(modbusClient, AVAILABLE_FLAGS[flag], value))
+    await mutex.runExclusive(async () => tryWriteCoil(modbusClient, AVAILABLE_MODES[mode], value))
 
-    // Flags are mutually exclusive, disable all others when enabling one
+    // Modes are mutually exclusive, disable all others when enabling one
     if (value) {
-        await disableAllModesExcept(modbusClient, flag)
+        await disableAllModesExcept(modbusClient, mode)
     }
 }
 
@@ -89,7 +89,7 @@ const disableAllModesExcept = async (modbusClient, exceptedMode) => {
             continue
         }
 
-        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, AVAILABLE_FLAGS[mode], false))
+        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, AVAILABLE_MODES[mode], false))
     }
 }
 
