@@ -108,5 +108,8 @@ const handleError = (e, res, statusCode = undefined) => {
     logger.error(`An exception occurred: ${e.name}: ${e.message}`, e.stack)
     // Use HTTP 500 if no status code has been set
     res.status(statusCode ?? 500)
-    res.json(e)
+    res.json({
+        error: e.name,
+        message: e.message,
+    })
 }
