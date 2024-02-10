@@ -1,10 +1,10 @@
 import {
     getDeviceInformation,
-    getFlag,
-    getFlagSummary,
+    getMode as modbusGetMode,
+    getModeSummary,
     getReadings,
     getSettings,
-    setFlag,
+    setMode as modbusSetMode,
     setSetting as modbusSetSetting,
     getAlarmHistory,
     getDeviceState,
@@ -13,14 +13,17 @@ import { createLogger } from './logger.mjs'
 
 const logger = createLogger('http')
 
-export const root = async (req, res) => {
+const root = async (req, res) => {
     res.send('eda-modbus-bridge')
 }
 
-export const summary = async (modbusClient, req, res) => {
+const summary = async (modbusClient, req, res) => {
     try {
+        let modeSummary = await getModeSummary(modbusClient)
         const summary = {
-            'flags': await getFlagSummary(modbusClient),
+            // TODO: Remove in next major version
+            'flags': modeSummary,
+            'modes': modeSummary,
             'readings': await getReadings(modbusClient),
             'settings': await getSettings(modbusClient),
             'deviceInformation': await getDeviceInformation(modbusClient),
@@ -34,10 +37,10 @@ export const summary = async (modbusClient, req, res) => {
     }
 }
 
-export const getFlagStatus = async (modbusClient, req, res) => {
+const getMode = async (modbusClient, req, res) => {
     try {
-        const flag = req.params['flag']
-        const status = await getFlag(modbusClient, flag)
+        const mode = req.params['mode']
+        const status = await modbusGetMode(modbusClient, mode)
 
         res.json({
             'active': status,
@@ -47,24 +50,24 @@ export const getFlagStatus = async (modbusClient, req, res) => {
     }
 }
 
-export const setFlagStatus = async (modbusClient, req, res) => {
+const setMode = async (modbusClient, req, res) => {
     try {
-        const flag = req.params['flag']
+        const mode = req.params['mode']
         const status = !!req.body['active']
 
-        logger.info(`Setting flag ${flag} to ${status}`)
+        logger.info(`Setting mode ${mode} to ${status}`)
 
-        await setFlag(modbusClient, flag, status)
+        await modbusSetMode(modbusClient, mode, status)
 
         res.json({
-            'active': await getFlag(modbusClient, flag),
+            'active': await modbusGetMode(modbusClient, mode),
         })
     } catch (e) {
         handleError(e, res)
     }
 }
 
-export const setSetting = async (modbusClient, req, res) => {
+const setSetting = async (modbusClient, req, res) => {
     try {
         const setting = req.params['setting']
         const value = req.params['value']
@@ -77,12 +80,36 @@ export const setSetting = async (modbusClient, req, res) => {
             'settings': await getSettings(modbusClient),
         })
     } catch (e) {
-        handleError(e, res)
+        if (e instanceof RangeError) {
+            handleError(e, res, 400)
+        } else {
+            handleError(e, res)
+        }
     }
 }
 
-const handleError = (e, res) => {
+export const configureRoutes = (httpServer, modbusClient) => {
+    httpServer.get('/', root)
+    httpServer.get('/summary', (req, res) => {
+        return summary(modbusClient, req, res)
+    })
+    httpServer.get('/mode/:mode', (req, res) => {
+        return getMode(modbusClient, req, res)
+    })
+    httpServer.post('/mode/:mode', (req, res) => {
+        return setMode(modbusClient, req, res)
+    })
+    httpServer.post('/setting/:setting/:value', (req, res) => {
+        return setSetting(modbusClient, req, res)
+    })
+}
+
+const handleError = (e, res, statusCode = undefined) => {
     logger.error(`An exception occurred: ${e.name}: ${e.message}`, e.stack)
-    res.status(400)
-    res.json(e)
+    // Use HTTP 500 if no status code has been set
+    res.status(statusCode ?? 500)
+    res.json({
+        error: e.name,
+        message: e.message,
+    })
 }

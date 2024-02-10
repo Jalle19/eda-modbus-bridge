@@ -3,8 +3,8 @@ import {
     getDeviceInformation,
     getSettings,
     setSetting,
-    getFlagSummary,
-    setFlag,
+    getModeSummary,
+    setMode,
     getAlarmStatuses,
     getDeviceState,
 } from './modbus.mjs'
@@ -27,8 +27,8 @@ export const publishValues = async (modbusClient, mqttClient) => {
         [TOPIC_NAME_STATUS]: 'online',
     }
 
-    // Publish state for each mode.
-    await publishFlags(modbusClient, mqttClient)
+    // Publish mode summary
+    await publishModeSummary(modbusClient, mqttClient)
 
     // Publish each reading
     const readings = await getReadings(modbusClient)
@@ -79,12 +79,12 @@ export const publishDeviceInformation = async (modbusClient, mqttClient) => {
     })
 }
 
-const publishFlags = async (modbusClient, mqttClient) => {
+const publishModeSummary = async (modbusClient, mqttClient) => {
     // Create a map from topic name to value that should be published
     let topicMap = {}
 
     // Publish state for each mode.
-    const modeSummary = await getFlagSummary(modbusClient)
+    const modeSummary = await getModeSummary(modbusClient)
 
     for (const [mode, state] of Object.entries(modeSummary)) {
         const topicName = `${TOPIC_PREFIX_MODE}/${mode}`
@@ -148,8 +148,8 @@ export const handleMessage = async (modbusClient, mqttClient, topicName, rawPayl
 
         logger.info(`Updating mode ${mode} to ${payload}`)
 
-        await setFlag(modbusClient, mode, payload)
-        await publishFlags(modbusClient, mqttClient)
+        await setMode(modbusClient, mode, payload)
+        await publishModeSummary(modbusClient, mqttClient)
     }
 }
 
