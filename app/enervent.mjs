@@ -35,6 +35,7 @@ export const AVAILABLE_SETTINGS = {
     'awayHeatingAllowed': 18,
     'longAwayCoolingAllowed': 21,
     'longAwayHeatingAllowed': 20,
+    'defrostingAllowed': 55,
 }
 
 export const ALARM_REGISTERS_START = 385

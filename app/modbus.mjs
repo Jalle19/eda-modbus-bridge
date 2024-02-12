@@ -220,6 +220,13 @@ export const getSettings = async (modbusClient) => {
         }
     }
 
+    // Defrosting allowed
+    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 55, 1))
+    settings = {
+        ...settings,
+        'defrostingAllowed': result.data[0],
+    }
+
     return settings
 }
 
@@ -263,6 +270,7 @@ export const setSetting = async (modbusClient, setting, value) => {
         case 'awayHeatingAllowed':
         case 'longAwayCoolingAllowed':
         case 'longAwayHeatingAllowed':
+        case 'defrostingAllowed':
             coil = true
             break
     }
