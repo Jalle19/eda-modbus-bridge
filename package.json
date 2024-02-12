@@ -1,6 +1,6 @@
 {
   "name": "eda-modbus-bridge",
-  "version": "2.7.1",
+  "version": "2.8.0",
   "description": "An HTTP/MQTT bridge for Enervent ventilation units with EDA automation",
   "main": "eda-modbus-bridge.mjs",
   "directories": {
