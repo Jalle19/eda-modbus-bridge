@@ -10,6 +10,7 @@
 * Add optional sensors for control panel temperature, supply fan speed and exhaust fan speed (https://github.com/Jalle19/eda-modbus-bridge/issues/96)
 * Remove references to "flags", use "modes" everywhere instead
 * Use HTTP 500 instead of HTTP 400 for generic errors
+* Add settings switch for defrosting allowed (https://github.com/Jalle19/eda-modbus-bridge/issues/109)
 
 ## 2.7.1
 

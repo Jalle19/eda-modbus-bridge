@@ -293,6 +293,11 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             // Not supported by some units
             { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
         ),
+        'defrostingAllowed': createSettingSwitchConfiguration(
+            configurationBase,
+            'defrostingAllowed',
+            'Defrosting allowed'
+        ),
     }
 
     // Binary sensors for alarms
