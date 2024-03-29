@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "async-mutex": "^0.3.1",
-    "express": "^4.18.2",
+    "express": "^4.19.2",
     "express-winston": "^4.2.0",
     "modbus-serial": "^8.0.11",
     "mqtt": "^5.3.4",
