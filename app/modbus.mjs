@@ -136,6 +136,8 @@ export const getReadings = async (modbusClient) => {
         ...readings,
         'ventilationLevelActual': result.data[0],
         'ventilationLevelTarget': result.data[3],
+        'supplyFanSpeed': result.data[1],
+        'exhaustFanSpeed': result.data[2],
     }
 
     // Analog input sensors. We need to query for the type of sensor in order to parse the data correctly. An
