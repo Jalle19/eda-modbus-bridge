@@ -1,0 +1,9 @@
+{
+  "extends": "@tsconfig/node14/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "allowJs": true
+  },
+  "include": [
+    "./eda-modbus-bridge.ts", "./src/**/*.ts"]
+}

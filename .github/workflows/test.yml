@@ -25,5 +25,7 @@ jobs:
         run: npm ci
       - name: Run tests
         run: npm test
+      - name: Build
+        run: npm run build
       - name: Verify program runs correctly
-        run: node eda-modbus-bridge.mjs --help
+        run: node dist/eda-modbus-bridge.js --help

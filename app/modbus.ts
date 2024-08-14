@@ -1,5 +1,5 @@
 import { Mutex } from 'async-mutex'
-import { createLogger } from './logger.mjs'
+import { createLogger } from './logger'
 import {
     AUTOMATION_HEATING_TYPE_EDW,
     AUTOMATION_TYPE_LEGACY_EDA,
@@ -18,7 +18,7 @@ import {
     parseAnalogSensors,
     parseStateBitField,
     parseTemperature,
-} from './enervent.mjs'
+} from './enervent'
 
 export const MODBUS_DEVICE_TYPE = {
     'RTU': 'rtu',

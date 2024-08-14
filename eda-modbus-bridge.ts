@@ -3,17 +3,17 @@ import expressWinston from 'express-winston'
 import mqtt from 'mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
-import { configureRoutes } from './app/http.mjs'
+import { configureRoutes } from './app/http.js'
 import {
     publishValues,
     subscribeToChanges,
     handleMessage,
     publishDeviceInformation,
     validateBrokerUrl,
-} from './app/mqtt.mjs'
-import { configureMqttDiscovery } from './app/homeassistant.mjs'
-import { createLogger, setLogLevel } from './app/logger.mjs'
-import { MODBUS_DEVICE_TYPE, parseDevice, validateDevice } from './app/modbus.mjs'
+} from './app/mqtt.js'
+import { configureMqttDiscovery } from './app/homeassistant.js'
+import { createLogger, setLogLevel } from './app/logger.js'
+import { MODBUS_DEVICE_TYPE, parseDevice, validateDevice } from './app/modbus.js'
 
 const MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS = 5
 

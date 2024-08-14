@@ -10,8 +10,8 @@ import {
     getDeviceState,
     getNewestAlarm,
     getAlarmSummary,
-} from './modbus.mjs'
-import { createLogger } from './logger.mjs'
+} from './modbus'
+import { createLogger } from './logger'
 
 const logger = createLogger('http')
 

@@ -10,7 +10,7 @@ import {
     parseAnalogSensors,
     parseStateBitField,
     parseTemperature,
-} from '../app/enervent.mjs'
+} from '../app/enervent'
 
 test('parse temperature', () => {
     // Positive, float

@@ -8,8 +8,8 @@ import {
     getAlarmSummary,
     getDeviceState,
     acknowledgeAlarm,
-} from './modbus.mjs'
-import { createLogger } from './logger.mjs'
+} from './modbus'
+import { createLogger } from './logger'
 
 export const TOPIC_PREFIX = 'eda'
 export const TOPIC_PREFIX_MODE = `${TOPIC_PREFIX}/mode`
