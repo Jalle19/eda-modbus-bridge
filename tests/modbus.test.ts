@@ -1,4 +1,4 @@
-import { validateDevice, parseDevice, MODBUS_DEVICE_TYPE } from '../app/modbus.mjs'
+import { validateDevice, parseDevice, MODBUS_DEVICE_TYPE } from '../app/modbus'
 
 test('validateDevice', () => {
     expect(validateDevice('/dev/ttyUSB0')).toEqual(true)

@@ -1,4 +1,4 @@
-import { validateBrokerUrl } from '../app/mqtt.mjs'
+import { validateBrokerUrl } from '../app/mqtt'
 
 test('validateMqttUrl', () => {
     expect(validateBrokerUrl('mqtt://localhost:1883')).toEqual(true)
