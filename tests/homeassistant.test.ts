@@ -1,4 +1,4 @@
-import { createDeviceIdentifierString } from '../app/homeassistant.mjs'
+import { createDeviceIdentifierString } from '../app/homeassistant'
 
 test('createDeviceIdentifierString', () => {
     const deviceInformation = {
