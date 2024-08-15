@@ -229,7 +229,8 @@ export const getSettings = async (modbusClient) => {
 }
 
 export const setSetting = async (modbusClient, setting, value) => {
-    if (AVAILABLE_SETTINGS[setting] === undefined) {
+    const dataAddress = AVAILABLE_SETTINGS[setting]
+    if (dataAddress === undefined) {
         throw new Error('Unknown setting')
     }
 
@@ -275,9 +276,9 @@ export const setSetting = async (modbusClient, setting, value) => {
 
     // This isn't very nice, but it's good enough for now
     if (coil) {
-        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, AVAILABLE_SETTINGS[setting], value))
+        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, dataAddress, value))
     } else {
-        await mutex.runExclusive(async () => modbusClient.writeRegister(AVAILABLE_SETTINGS[setting], intValue))
+        await mutex.runExclusive(async () => tryWriteHoldingRegister(modbusClient, dataAddress, intValue))
     }
 }
 
@@ -427,6 +428,16 @@ const tryReadHoldingRegisters = async (modbusClient, dataAddress, length) => {
         return await modbusClient.readHoldingRegisters(dataAddress, length)
     } catch (e) {
         logger.error(`Failed to read holding register address ${dataAddress}, length ${length}`)
+        throw e
+    }
+}
+
+const tryWriteHoldingRegister = async (modbusClient, dataAddress, value) => {
+    try {
+        logger.debug(`Writing ${value} to holding register address ${dataAddress}`)
+        return await modbusClient.writeRegister(dataAddress, value)
+    } catch (e) {
+        logger.error(`Failed to write holding register address ${dataAddress}, value ${value}`)
         throw e
     }
 }
