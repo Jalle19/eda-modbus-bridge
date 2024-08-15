@@ -5,7 +5,7 @@ import {
     setSetting,
     getModeSummary,
     setMode,
-    getAlarmStatuses,
+    getAlarmSummary,
     getDeviceState,
 } from './modbus.mjs'
 import { createLogger } from './logger.mjs'
@@ -41,9 +41,10 @@ export const publishValues = async (modbusClient, mqttClient) => {
     // Publish each setting
     await publishSettings(modbusClient, mqttClient)
 
-    const alarmStatuses = await getAlarmStatuses(modbusClient)
+    // Publish alarm summary
+    const alarmSummary = await getAlarmSummary(modbusClient)
 
-    for (const [, alarm] of Object.entries(alarmStatuses)) {
+    for (const [, alarm] of Object.entries(alarmSummary)) {
         const topicName = `${TOPIC_PREFIX_ALARM}/${alarm.name}`
 
         topicMap[topicName] = createBinaryValue(alarm.state === 2)

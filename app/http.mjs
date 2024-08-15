@@ -6,8 +6,9 @@ import {
     getSettings,
     setMode as modbusSetMode,
     setSetting as modbusSetSetting,
-    getAlarmHistory,
     getDeviceState,
+    getNewestAlarm,
+    getAlarmSummary,
 } from './modbus.mjs'
 import { createLogger } from './logger.mjs'
 
@@ -20,6 +21,8 @@ const root = async (req, res) => {
 const summary = async (modbusClient, req, res) => {
     try {
         let modeSummary = await getModeSummary(modbusClient)
+        const newestAlarm = await getNewestAlarm(modbusClient)
+
         const summary = {
             // TODO: Remove in next major version
             'flags': modeSummary,
@@ -27,8 +30,9 @@ const summary = async (modbusClient, req, res) => {
             'readings': await getReadings(modbusClient),
             'settings': await getSettings(modbusClient),
             'deviceInformation': await getDeviceInformation(modbusClient),
-            'alarmHistory': await getAlarmHistory(modbusClient),
             'deviceState': await getDeviceState(modbusClient),
+            'alarmSummary': await getAlarmSummary(modbusClient),
+            'activeAlarm': newestAlarm?.state === 2 ? newestAlarm : null,
         }
 
         res.json(summary)

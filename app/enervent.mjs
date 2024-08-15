@@ -38,8 +38,6 @@ export const AVAILABLE_SETTINGS = {
     'defrostingAllowed': 55,
 }
 
-export const ALARM_REGISTERS_START = 385
-export const ALARM_REGISTERS_END = 518
 export const AVAILABLE_ALARMS = {
     // Alarm number
     // Name and descr based on Enervent EN EDA Modbus regirsters: 3x0385
