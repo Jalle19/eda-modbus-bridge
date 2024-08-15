@@ -337,12 +337,22 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         'defrosting': createDeviceStateConfiguration(configurationBase, 'defrosting', 'Defrosting'),
     }
 
+    // Button for acknowledging alarms
+    const buttonConfigurationMap = {
+        'acknowledgeAlarm': createButtonConfiguration(
+            configurationBase,
+            'acknowledgeAlarm',
+            'Acknowledge newest alarm'
+        ),
+    }
+
     // Final map that describes everything we want to be auto-discovered
     const configurationMap = {
         'sensor': sensorConfigurationMap,
         'number': numberConfigurationMap,
         'switch': switchConfigurationMap,
         'binary_sensor': binarySensorConfigurationMap,
+        'button': buttonConfigurationMap,
     }
 
     // Publish configurations
@@ -474,5 +484,15 @@ const createDeviceStateConfiguration = (configurationBase, stateName, entityName
         'object_id': `eda_state_${stateName}`,
         'state_topic': `${TOPIC_PREFIX_DEVICE_STATE}/${stateName}`,
         'entity_category': 'diagnostic',
+    }
+}
+
+const createButtonConfiguration = (configurationBase, buttonName, entityName) => {
+    return {
+        ...configurationBase,
+        'unique_id': `eda-button-${buttonName}`,
+        'name': entityName,
+        'object_id': `eda_button_${buttonName}`,
+        'command_topic': `${TOPIC_PREFIX_ALARM}/acknowledge`,
     }
 }

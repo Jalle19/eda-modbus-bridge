@@ -374,6 +374,10 @@ export const getNewestAlarm = async (modbusClient) => {
     }
 }
 
+export const acknowledgeAlarm = async (modbusClient) => {
+    await tryWriteHoldingRegister(modbusClient, 386, 1)
+}
+
 export const getDeviceState = async (modbusClient) => {
     const result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 44, 1))
 

@@ -6,6 +6,7 @@ import {
     getSettings,
     setMode as modbusSetMode,
     setSetting as modbusSetSetting,
+    acknowledgeAlarm as modbusAcknowledgeAlarm,
     getDeviceState,
     getNewestAlarm,
     getAlarmSummary,
@@ -92,6 +93,16 @@ const setSetting = async (modbusClient, req, res) => {
     }
 }
 
+const acknowledgeAlarm = async (modbusClient, req, res) => {
+    try {
+        logger.info('Acknowledging currently active alarm (if any)')
+
+        await modbusAcknowledgeAlarm(modbusClient)
+    } catch (e) {
+        handleError(e, res)
+    }
+}
+
 export const configureRoutes = (httpServer, modbusClient) => {
     httpServer.get('/', root)
     httpServer.get('/summary', (req, res) => {
@@ -105,6 +116,9 @@ export const configureRoutes = (httpServer, modbusClient) => {
     })
     httpServer.post('/setting/:setting/:value', (req, res) => {
         return setSetting(modbusClient, req, res)
+    })
+    httpServer.post('/alarm/acknowledge', (req, res) => {
+        return acknowledgeAlarm(modbusClient, req, res)
     })
 }
 
