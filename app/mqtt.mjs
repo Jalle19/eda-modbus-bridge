@@ -5,8 +5,9 @@ import {
     setSetting,
     getModeSummary,
     setMode,
-    getAlarmStatuses,
+    getAlarmSummary,
     getDeviceState,
+    acknowledgeAlarm,
 } from './modbus.mjs'
 import { createLogger } from './logger.mjs'
 
@@ -41,9 +42,10 @@ export const publishValues = async (modbusClient, mqttClient) => {
     // Publish each setting
     await publishSettings(modbusClient, mqttClient)
 
-    const alarmStatuses = await getAlarmStatuses(modbusClient)
+    // Publish alarm summary
+    const alarmSummary = await getAlarmSummary(modbusClient)
 
-    for (const [, alarm] of Object.entries(alarmStatuses)) {
+    for (const [, alarm] of Object.entries(alarmSummary)) {
         const topicName = `${TOPIC_PREFIX_ALARM}/${alarm.name}`
 
         topicMap[topicName] = createBinaryValue(alarm.state === 2)
@@ -120,8 +122,12 @@ const publishTopics = async (mqttClient, topicMap, publishOptions = {}) => {
 }
 
 export const subscribeToChanges = async (modbusClient, mqttClient) => {
-    // Subscribe to settings and mode changes
-    const topicNames = [`${TOPIC_PREFIX_MODE}/+/set`, `${TOPIC_PREFIX_SETTINGS}/+/set`]
+    // Subscribe to writable topics
+    const topicNames = [
+        `${TOPIC_PREFIX_MODE}/+/set`,
+        `${TOPIC_PREFIX_SETTINGS}/+/set`,
+        `${TOPIC_PREFIX_ALARM}/acknowledge`,
+    ]
 
     for (const topicName of topicNames) {
         logger.info(`Subscribing to topic(s) ${topicName}`)
@@ -135,8 +141,8 @@ export const handleMessage = async (modbusClient, mqttClient, topicName, rawPayl
 
     const payload = parsePayload(rawPayload)
 
-    // Handle settings updates
     if (topicName.startsWith(TOPIC_PREFIX_SETTINGS) && topicName.endsWith('/set')) {
+        // Handle settings updates
         const settingName = topicName.substring(TOPIC_PREFIX_SETTINGS.length + 1, topicName.lastIndexOf('/'))
 
         logger.info(`Updating setting ${settingName} to ${payload}`)
@@ -144,12 +150,18 @@ export const handleMessage = async (modbusClient, mqttClient, topicName, rawPayl
         await setSetting(modbusClient, settingName, payload)
         await publishSettings(modbusClient, mqttClient)
     } else if (topicName.startsWith(TOPIC_PREFIX_MODE) && topicName.endsWith('/set')) {
+        // Handle mode changes
         const mode = topicName.substring(TOPIC_PREFIX_MODE.length + 1, topicName.lastIndexOf('/'))
 
         logger.info(`Updating mode ${mode} to ${payload}`)
 
         await setMode(modbusClient, mode, payload)
         await publishModeSummary(modbusClient, mqttClient)
+    } else if (topicName.startsWith(TOPIC_PREFIX_ALARM) && topicName.endsWith('/acknowledge')) {
+        // Acknowledge alarm
+        logger.info('Acknowledging currently active alarm (if any)')
+
+        await acknowledgeAlarm(modbusClient)
     }
 }
 

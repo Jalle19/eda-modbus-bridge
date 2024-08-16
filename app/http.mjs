@@ -6,8 +6,10 @@ import {
     getSettings,
     setMode as modbusSetMode,
     setSetting as modbusSetSetting,
-    getAlarmHistory,
+    acknowledgeAlarm as modbusAcknowledgeAlarm,
     getDeviceState,
+    getNewestAlarm,
+    getAlarmSummary,
 } from './modbus.mjs'
 import { createLogger } from './logger.mjs'
 
@@ -20,6 +22,8 @@ const root = async (req, res) => {
 const summary = async (modbusClient, req, res) => {
     try {
         let modeSummary = await getModeSummary(modbusClient)
+        const newestAlarm = await getNewestAlarm(modbusClient)
+
         const summary = {
             // TODO: Remove in next major version
             'flags': modeSummary,
@@ -27,8 +31,9 @@ const summary = async (modbusClient, req, res) => {
             'readings': await getReadings(modbusClient),
             'settings': await getSettings(modbusClient),
             'deviceInformation': await getDeviceInformation(modbusClient),
-            'alarmHistory': await getAlarmHistory(modbusClient),
             'deviceState': await getDeviceState(modbusClient),
+            'alarmSummary': await getAlarmSummary(modbusClient),
+            'activeAlarm': newestAlarm?.state === 2 ? newestAlarm : null,
         }
 
         res.json(summary)
@@ -88,6 +93,16 @@ const setSetting = async (modbusClient, req, res) => {
     }
 }
 
+const acknowledgeAlarm = async (modbusClient, req, res) => {
+    try {
+        logger.info('Acknowledging currently active alarm (if any)')
+
+        await modbusAcknowledgeAlarm(modbusClient)
+    } catch (e) {
+        handleError(e, res)
+    }
+}
+
 export const configureRoutes = (httpServer, modbusClient) => {
     httpServer.get('/', root)
     httpServer.get('/summary', (req, res) => {
@@ -101,6 +116,9 @@ export const configureRoutes = (httpServer, modbusClient) => {
     })
     httpServer.post('/setting/:setting/:value', (req, res) => {
         return setSetting(modbusClient, req, res)
+    })
+    httpServer.post('/alarm/acknowledge', (req, res) => {
+        return acknowledgeAlarm(modbusClient, req, res)
     })
 }
 

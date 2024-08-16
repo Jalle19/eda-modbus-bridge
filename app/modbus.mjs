@@ -1,8 +1,6 @@
 import { Mutex } from 'async-mutex'
 import { createLogger } from './logger.mjs'
 import {
-    ALARM_REGISTERS_END,
-    ALARM_REGISTERS_START,
     AUTOMATION_TYPE_LEGACY_EDA,
     AUTOMATION_TYPE_MD,
     AVAILABLE_ALARMS,
@@ -231,7 +229,8 @@ export const getSettings = async (modbusClient) => {
 }
 
 export const setSetting = async (modbusClient, setting, value) => {
-    if (AVAILABLE_SETTINGS[setting] === undefined) {
+    const dataAddress = AVAILABLE_SETTINGS[setting]
+    if (dataAddress === undefined) {
         throw new Error('Unknown setting')
     }
 
@@ -277,9 +276,9 @@ export const setSetting = async (modbusClient, setting, value) => {
 
     // This isn't very nice, but it's good enough for now
     if (coil) {
-        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, AVAILABLE_SETTINGS[setting], value))
+        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, dataAddress, value))
     } else {
-        await mutex.runExclusive(async () => modbusClient.writeRegister(AVAILABLE_SETTINGS[setting], intValue))
+        await mutex.runExclusive(async () => tryWriteHoldingRegister(modbusClient, dataAddress, intValue))
     }
 }
 
@@ -339,53 +338,44 @@ export const getDeviceInformation = async (modbusClient) => {
     return deviceInformation
 }
 
-export const getAlarmHistory = async (modbusClient) => {
-    let alarmHistory = []
+export const getAlarmSummary = async (modbusClient) => {
+    let alarmSummary = { ...AVAILABLE_ALARMS }
+    const newestAlarm = await getNewestAlarm(modbusClient)
 
-    const startRegister = ALARM_REGISTERS_START
-    const endRegister = ALARM_REGISTERS_END
-    const alarmOffset = 7
+    for (const type in alarmSummary) {
+        // Use "off" as the default alarm state, most likely to be true
+        alarmSummary[type].state = 0
 
-    for (let register = startRegister; register <= endRegister; register += alarmOffset) {
-        const result = await mutex.runExclusive(async () =>
-            tryReadHoldingRegisters(modbusClient, register, alarmOffset)
-        )
-        const code = result.data[0]
-        const state = result.data[1]
-
-        // Skip unset alarm slots and unknown alarm types
-        if (AVAILABLE_ALARMS[code] === undefined) {
-            continue
+        // Use the state from the newest alarm
+        if (type === newestAlarm.type) {
+            alarmSummary[type].state = newestAlarm.state
         }
-
-        let alarm = Object.assign({}, AVAILABLE_ALARMS[code])
-        alarm.state = state
-        alarm.date = parseAlarmTimestamp(result)
-
-        alarmHistory.push(alarm)
     }
 
-    return alarmHistory
+    return alarmSummary
 }
 
-export const getAlarmStatuses = async (modbusClient) => {
-    let alarms = { ...AVAILABLE_ALARMS }
+export const getNewestAlarm = async (modbusClient) => {
+    const result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 385, 7))
 
-    // Use the alarm history to determine the state of each alarm
-    const alarmHistory = await getAlarmHistory(modbusClient)
+    const type = result.data[0]
+    const state = result.data[1]
+    const timestamp = parseAlarmTimestamp(result)
 
-    for (const code in alarms) {
-        // Use "off" as the default alarm state, most likely to be true
-        alarms[code].state = 0
-
-        for (const historicAlarm of alarmHistory) {
-            if (historicAlarm.name === alarms[code].name && historicAlarm.state > 0) {
-                alarms[code].state = historicAlarm.state
-            }
-        }
+    if (AVAILABLE_ALARMS[type] === undefined) {
+        return null
     }
 
-    return alarms
+    return {
+        ...AVAILABLE_ALARMS[type],
+        type,
+        state,
+        timestamp,
+    }
+}
+
+export const acknowledgeAlarm = async (modbusClient) => {
+    await tryWriteHoldingRegister(modbusClient, 386, 1)
 }
 
 export const getDeviceState = async (modbusClient) => {
@@ -442,6 +432,16 @@ const tryReadHoldingRegisters = async (modbusClient, dataAddress, length) => {
         return await modbusClient.readHoldingRegisters(dataAddress, length)
     } catch (e) {
         logger.error(`Failed to read holding register address ${dataAddress}, length ${length}`)
+        throw e
+    }
+}
+
+const tryWriteHoldingRegister = async (modbusClient, dataAddress, value) => {
+    try {
+        logger.debug(`Writing ${value} to holding register address ${dataAddress}`)
+        return await modbusClient.writeRegister(dataAddress, value)
+    } catch (e) {
+        logger.error(`Failed to write holding register address ${dataAddress}, value ${value}`)
         throw e
     }
 }
