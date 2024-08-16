@@ -38,32 +38,27 @@ export const AVAILABLE_SETTINGS = {
     'defrostingAllowed': 55,
 }
 
-export const AVAILABLE_ALARMS = {
-    // Alarm number
-    // Name and descr based on Enervent EN EDA Modbus regirsters: 3x0385
-    // Waste air is used in some places where we don't care about if it's before (Extract)
-    // or after (Exhaust) the HRC. Filter sits before HRC, and fans after HRC.
-
-    1: { name: 'TE5SupplyAirAfterHRCold', description: 'TE5 Supply air after heat recovery cold' },
-    2: { name: 'TE10SupplyAirAfterHeaterCold', description: 'TE10 Supply air after heater cold' },
-    3: { name: 'TE10SupplyAirAfterHeaterHot', description: 'TE10 Supply air after heater hot' },
-    4: { name: 'TE20RoomTempHot', description: 'TE20 Room temperature hot' },
-    5: { name: 'TE30ExtractAirCold', description: 'TE30 Extract air cold' },
-    6: { name: 'TE30ExtractAirHot', description: 'TE30 Extract air hot' },
-    7: { name: 'HPError', description: 'Heatpump' },
-    8: { name: 'EHError', description: 'Electrical heater' },
-    9: { name: 'ReturnWaterCold', description: 'Return water cold' },
-    10: { name: 'HRError', description: 'Heat recovery' },
-    11: { name: 'CoolingError', description: 'Cooling' },
-    12: { name: 'EmergencyStop', description: 'Emergency stop' },
-    13: { name: 'FireRisk', description: 'Fire risk' },
-    14: { name: 'ServiceReminder', description: 'Service reminder' },
-    15: { name: 'EHPDA', description: 'Electrical heater pressure switch' },
-    16: { name: 'SupplyFilterDirty', description: 'Supply filter dirty' },
-    17: { name: 'ExtractFilterDirty', description: 'Waste filter dirty' },
-    20: { name: 'SupplyFanPressureError', description: 'Supply fan pressure' },
-    21: { name: 'ExtractFanPressureError', description: 'Waste fan pressure' },
-}
+export const AVAILABLE_ALARMS = [
+    { name: 'TE5SupplyAirAfterHRCold', description: 'TE5 Supply air after heat recovery cold', type: 1 },
+    { name: 'TE10SupplyAirAfterHeaterCold', description: 'TE10 Supply air after heater cold', type: 2 },
+    { name: 'TE10SupplyAirAfterHeaterHot', description: 'TE10 Supply air after heater hot', type: 3 },
+    { name: 'TE20RoomTempHot', description: 'TE20 Room temperature hot', type: 4 },
+    { name: 'TE30ExtractAirCold', description: 'TE30 Extract air cold', type: 5 },
+    { name: 'TE30ExtractAirHot', description: 'TE30 Extract air hot', type: 6 },
+    { name: 'HPError', description: 'Heatpump', type: 7 },
+    { name: 'EHError', description: 'Electrical heater', type: 8 },
+    { name: 'ReturnWaterCold', description: 'Return water cold', type: 9 },
+    { name: 'HRError', description: 'Heat recovery', type: 10 },
+    { name: 'CoolingError', description: 'Cooling', type: 11 },
+    { name: 'EmergencyStop', description: 'Emergency stop', type: 12 },
+    { name: 'FireRisk', description: 'Fire risk', type: 13 },
+    { name: 'ServiceReminder', description: 'Service reminder', type: 14 },
+    { name: 'EHPDA', description: 'Electrical heater pressure switch', type: 15 },
+    { name: 'SupplyFilterDirty', description: 'Supply filter dirty', type: 16 },
+    { name: 'ExtractFilterDirty', description: 'Waste filter dirty', type: 17 },
+    { name: 'SupplyFanPressureError', description: 'Supply fan pressure', type: 20 },
+    { name: 'ExtractFanPressureError', description: 'Waste fan pressure', type: 21 },
+]
 
 export const SENSOR_TYPE_NONE = 'NONE'
 export const SENSOR_TYPE_CO2 = 'CO2'
