@@ -181,14 +181,13 @@ test('parseAnalogSensors', () => {
         'analogInputCo21': 450,
     })
 
-    // Multitude of sensors
-    typesResult = { data: [1, 2, 4, 5, 8, 9] }
-    valuesResult = { data: [450, 481, 45, 46, 192, 201] }
+    // Multitude of sensors, including ones we don't support
+    typesResult = { data: [1, 2, 4, 7, 8, 9] }
+    valuesResult = { data: [450, 481, 45, 210, 192, 201] }
     expect(parseAnalogSensors(typesResult, valuesResult)).toEqual({
         'analogInputCo21': 450,
         'analogInputCo22': 481,
         'analogInputHumidity1': 45,
-        'analogInputHumidity2': 46,
         'analogInputRoomTemperature1': 19.2,
         'analogInputRoomTemperature2': 20.1,
     })

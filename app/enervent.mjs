@@ -38,54 +38,61 @@ export const AVAILABLE_SETTINGS = {
     'defrostingAllowed': 55,
 }
 
-export const AVAILABLE_ALARMS = {
-    // Alarm number
-    // Name and descr based on Enervent EN EDA Modbus regirsters: 3x0385
-    // Waste air is used in some places where we don't care about if it's before (Extract)
-    // or after (Exhaust) the HRC. Filter sits before HRC, and fans after HRC.
-
-    1: { name: 'TE5SupplyAirAfterHRCold', description: 'TE5 Supply air after heat recovery cold' },
-    2: { name: 'TE10SupplyAirAfterHeaterCold', description: 'TE10 Supply air after heater cold' },
-    3: { name: 'TE10SupplyAirAfterHeaterHot', description: 'TE10 Supply air after heater hot' },
-    4: { name: 'TE20RoomTempHot', description: 'TE20 Room temperature hot' },
-    5: { name: 'TE30ExtractAirCold', description: 'TE30 Extract air cold' },
-    6: { name: 'TE30ExtractAirHot', description: 'TE30 Extract air hot' },
-    7: { name: 'HPError', description: 'Heatpump' },
-    8: { name: 'EHError', description: 'Electrical heater' },
-    9: { name: 'ReturnWaterCold', description: 'Return water cold' },
-    10: { name: 'HRError', description: 'Heat recovery' },
-    11: { name: 'CoolingError', description: 'Cooling' },
-    12: { name: 'EmergencyStop', description: 'Emergency stop' },
-    13: { name: 'FireRisk', description: 'Fire risk' },
-    14: { name: 'ServiceReminder', description: 'Service reminder' },
-    15: { name: 'EHPDA', description: 'Electrical heater pressure switch' },
-    16: { name: 'SupplyFilterDirty', description: 'Supply filter dirty' },
-    17: { name: 'ExtractFilterDirty', description: 'Waste filter dirty' },
-    20: { name: 'SupplyFanPressureError', description: 'Supply fan pressure' },
-    21: { name: 'ExtractFanPressureError', description: 'Waste fan pressure' },
-}
+export const AVAILABLE_ALARMS = [
+    { name: 'TE5SupplyAirAfterHRCold', description: 'TE5 Supply air after heat recovery cold', type: 1 },
+    { name: 'TE10SupplyAirAfterHeaterCold', description: 'TE10 Supply air after heater cold', type: 2 },
+    { name: 'TE10SupplyAirAfterHeaterHot', description: 'TE10 Supply air after heater hot', type: 3 },
+    { name: 'TE20RoomTempHot', description: 'TE20 Room temperature hot', type: 4 },
+    { name: 'TE30ExtractAirCold', description: 'TE30 Extract air cold', type: 5 },
+    { name: 'TE30ExtractAirHot', description: 'TE30 Extract air hot', type: 6 },
+    { name: 'HPError', description: 'Heatpump', type: 7 },
+    { name: 'EHError', description: 'Electrical heater', type: 8 },
+    { name: 'ReturnWaterCold', description: 'Return water cold', type: 9 },
+    { name: 'HRError', description: 'Heat recovery', type: 10 },
+    { name: 'CoolingError', description: 'Cooling', type: 11 },
+    { name: 'EmergencyStop', description: 'Emergency stop', type: 12 },
+    { name: 'FireRisk', description: 'Fire risk', type: 13 },
+    { name: 'ServiceReminder', description: 'Service reminder', type: 14 },
+    { name: 'EHPDA', description: 'Electrical heater pressure switch', type: 15 },
+    { name: 'SupplyFilterDirty', description: 'Supply filter dirty', type: 16 },
+    { name: 'ExtractFilterDirty', description: 'Waste filter dirty', type: 17 },
+    { name: 'SupplyFanPressureError', description: 'Supply fan pressure', type: 20 },
+    { name: 'ExtractFanPressureError', description: 'Waste fan pressure', type: 21 },
+]
 
 export const SENSOR_TYPE_NONE = 'NONE'
 export const SENSOR_TYPE_CO2 = 'CO2'
 export const SENSOR_TYPE_RH = 'RH'
 export const SENSOR_TYPE_ROOM_TEMP = 'ROOM_TEMP'
 
-// 0=NA, 1=CO2_1, 2=CO2_2, 3=CO2_3, 4=RH_1, 5=RH_2, 6=RH_3, 7=OUT_TERM, 8=ROOM_TERM_1,
-// 9=ROOM_TERM_2, 10=ROOM_TERM_3, 11=TEMP_SP, 12=Time relay, 13=External heating disable, 14=External cooling disable,
-// 15=PDE10, 16=PDE30
-export const ANALOG_INPUT_SENSOR_TYPES = {
+export const ANALOG_INPUT_SENSOR_TYPES = [
     // Skip sensor types we can't handle
-    0: { type: SENSOR_TYPE_NONE },
-    1: { type: SENSOR_TYPE_CO2, name: 'analogInputCo21', description: 'CO2 #1' },
-    2: { type: SENSOR_TYPE_CO2, name: 'analogInputCo22', description: 'CO2 #1' },
-    3: { type: SENSOR_TYPE_CO2, name: 'analogInputCo23', description: 'CO2 #1' },
-    4: { type: SENSOR_TYPE_RH, name: 'analogInputHumidity1', description: 'RH #1' },
-    5: { type: SENSOR_TYPE_RH, name: 'analogInputHumidity2', description: 'RH #1' },
-    6: { type: SENSOR_TYPE_RH, name: 'analogInputHumidity3', description: 'RH #1' },
-    8: { type: SENSOR_TYPE_ROOM_TEMP, name: 'analogInputRoomTemperature1', description: 'Room temperature #1' },
-    9: { type: SENSOR_TYPE_ROOM_TEMP, name: 'analogInputRoomTemperature2', description: 'Room temperature #1' },
-    10: { type: SENSOR_TYPE_ROOM_TEMP, name: 'analogInputRoomTemperature3', description: 'Room temperature #1' },
-}
+    { type: 0, sensorType: SENSOR_TYPE_NONE },
+    { type: 1, sensorType: SENSOR_TYPE_CO2, name: 'analogInputCo21', description: 'CO2 #1' },
+    { type: 2, sensorType: SENSOR_TYPE_CO2, name: 'analogInputCo22', description: 'CO2 #1' },
+    { type: 3, sensorType: SENSOR_TYPE_CO2, name: 'analogInputCo23', description: 'CO2 #1' },
+    { type: 4, sensorType: SENSOR_TYPE_RH, name: 'analogInputHumidity1', description: 'RH #1' },
+    { type: 5, sensorType: SENSOR_TYPE_RH, name: 'analogInputHumidity2', description: 'RH #1' },
+    { type: 6, sensorType: SENSOR_TYPE_RH, name: 'analogInputHumidity3', description: 'RH #1' },
+    {
+        type: 8,
+        sensorType: SENSOR_TYPE_ROOM_TEMP,
+        name: 'analogInputRoomTemperature1',
+        description: 'Room temperature #1',
+    },
+    {
+        type: 9,
+        sensorType: SENSOR_TYPE_ROOM_TEMP,
+        name: 'analogInputRoomTemperature2',
+        description: 'Room temperature #1',
+    },
+    {
+        type: 10,
+        sensorType: SENSOR_TYPE_ROOM_TEMP,
+        name: 'analogInputRoomTemperature3',
+        description: 'Room temperature #1',
+    },
+]
 
 export const AUTOMATION_TYPE_LEGACY_EDA = 'LEGACY_EDA'
 export const AUTOMATION_TYPE_EDA = 'EDA'
@@ -201,9 +208,9 @@ export const parseStateBitField = (state) => {
 
 export const hasRoomTemperatureSensor = (sensorTypesResult) => {
     for (let i = 0; i < 6; i++) {
-        const sensorType = ANALOG_INPUT_SENSOR_TYPES[sensorTypesResult.data[i]]
+        const sensor = ANALOG_INPUT_SENSOR_TYPES.find((sensor) => sensor.type === sensorTypesResult.data[i])
 
-        if (sensorType.type === SENSOR_TYPE_ROOM_TEMP) {
+        if (sensor?.sensorType === SENSOR_TYPE_ROOM_TEMP) {
             return true
         }
     }
@@ -215,17 +222,17 @@ export const parseAnalogSensors = (sensorTypesResult, sensorValuesResult) => {
     const sensorReadings = {}
 
     for (let i = 0; i < 6; i++) {
-        const sensorType = ANALOG_INPUT_SENSOR_TYPES[sensorTypesResult.data[i]]
+        const sensor = ANALOG_INPUT_SENSOR_TYPES.find((sensor) => sensor.type === sensorTypesResult.data[i])
 
-        switch (sensorType.type) {
+        switch (sensor?.sensorType) {
             // Use raw value
             case SENSOR_TYPE_CO2:
             case SENSOR_TYPE_RH:
-                sensorReadings[sensorType.name] = sensorValuesResult.data[i]
+                sensorReadings[sensor.name] = sensorValuesResult.data[i]
                 break
             // Parse as temperature
             case SENSOR_TYPE_ROOM_TEMP:
-                sensorReadings[sensorType.name] = parseTemperature(sensorValuesResult.data[i])
+                sensorReadings[sensor.name] = parseTemperature(sensorValuesResult.data[i])
                 break
         }
     }

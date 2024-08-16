@@ -303,7 +303,7 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
     // Binary sensors for alarms
     let binarySensorConfigurationMap = {}
 
-    for (const [, alarm] of Object.entries(AVAILABLE_ALARMS)) {
+    for (const alarm of AVAILABLE_ALARMS) {
         binarySensorConfigurationMap[alarm.name] = createAlarmConfiguration(configurationBase, alarm)
     }
 

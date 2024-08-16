@@ -339,17 +339,15 @@ export const getDeviceInformation = async (modbusClient) => {
 }
 
 export const getAlarmSummary = async (modbusClient) => {
-    let alarmSummary = { ...AVAILABLE_ALARMS }
+    const alarmSummary = []
     const newestAlarm = await getNewestAlarm(modbusClient)
 
-    for (const type in alarmSummary) {
-        // Use "off" as the default alarm state, most likely to be true
-        alarmSummary[type].state = 0
-
-        // Use the state from the newest alarm
-        if (type === newestAlarm.type) {
-            alarmSummary[type].state = newestAlarm.state
-        }
+    for (const alarm of AVAILABLE_ALARMS) {
+        // Add each available alarm and have the state reflect the currently active alarm's state, if any
+        alarmSummary.push({
+            ...alarm,
+            state: alarm.type === newestAlarm?.type ? newestAlarm?.state : 0,
+        })
     }
 
     return alarmSummary
@@ -362,13 +360,13 @@ export const getNewestAlarm = async (modbusClient) => {
     const state = result.data[1]
     const timestamp = parseAlarmTimestamp(result)
 
-    if (AVAILABLE_ALARMS[type] === undefined) {
+    const alarm = AVAILABLE_ALARMS.find((alarm) => alarm.type === type)
+    if (alarm === undefined) {
         return null
     }
 
     return {
-        ...AVAILABLE_ALARMS[type],
-        type,
+        ...alarm,
         state,
         timestamp,
     }
