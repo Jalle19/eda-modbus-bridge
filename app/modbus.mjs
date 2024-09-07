@@ -373,7 +373,7 @@ export const getNewestAlarm = async (modbusClient) => {
 }
 
 export const acknowledgeAlarm = async (modbusClient) => {
-    await tryWriteHoldingRegister(modbusClient, 386, 1)
+    await tryWriteHoldingRegister(modbusClient, 386, 2)
 }
 
 export const getDeviceState = async (modbusClient) => {
