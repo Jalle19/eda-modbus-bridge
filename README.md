@@ -335,22 +335,36 @@ eda/readings/supplyAirTemperatureAfterHeatRecovery
 eda/readings/ventilationLevelActual
 eda/readings/ventilationLevelTarget
 eda/readings/wasteAirTemperature
-eda/settings/awayCoolingAllowed
-eda/settings/awayHeatingAllowed
 eda/settings/awayTemperatureReduction
 eda/settings/awayVentilationLevel
-eda/settings/coolingAllowed
-eda/settings/heatingAllowed
-eda/settings/longAwayCoolingAllowed
-eda/settings/longAwayHeatingAllowed
 eda/settings/longAwayTemperatureReduction
 eda/settings/longAwayVentilationLevel
 eda/settings/overPressureDelay
 eda/settings/temperatureTarget
+eda/settings/defrostingAllowed
 eda/status
 ```
 
 Boolean values are expressed as `ON` or `OFF`.
+
+The following topics are optional and only published for certain models:
+
+```
+eda/mode/eco
+eda/readings/roomTemperatureAvg
+eda/readings/controlPanel1Temperature
+eda/readings/controlPanel2Temperature
+eda/readings/supplyFanSpeed
+eda/readings/exhaustFanSpeed
+eda/readings/returnWaterTemperature
+eda/readings/exhaustAirTemperatureBeforeHeatRecovery
+eda/settings/coolingAllowed
+eda/settings/heatingAllowed
+eda/settings/awayCoolingAllowed
+eda/settings/awayHeatingAllowed
+eda/settings/longAwayCoolingAllowed
+eda/settings/longAwayHeatingAllowed
+```
 
 The following topics are published to once during application startup:
 
