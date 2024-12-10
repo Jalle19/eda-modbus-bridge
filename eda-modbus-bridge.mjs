@@ -181,7 +181,7 @@ const argv = yargs(process.argv.slice(2))
                 logger.info(`MQTT scheduler started, will publish readings every ${argv.mqttPublishInterval} seconds`)
 
                 // Subscribe to changes and register a handler
-                await subscribeToChanges(modbusClient, mqttClient)
+                await subscribeToChanges(mqttClient)
                 mqttClient.on('message', async (topicName, payload) => {
                     await handleMessage(modbusClient, mqttClient, topicName, payload)
                 })

@@ -97,6 +97,10 @@ export const ANALOG_INPUT_SENSOR_TYPES = [
 export const AUTOMATION_TYPE_LEGACY_EDA = 'LEGACY_EDA'
 export const AUTOMATION_TYPE_EDA = 'EDA'
 export const AUTOMATION_TYPE_MD = 'MD'
+export const AUTOMATION_HEATING_TYPE_ED = 'ED/MD'
+export const AUTOMATION_HEATING_TYPE_EDW = 'EDW/MDW'
+export const AUTOMATION_HEATING_TYPE_EDX = 'EDX/MDX'
+export const AUTOMATION_HEATING_TYPE_EDE = 'EDE/MDE'
 
 export const determineAutomationType = (versionInt) => {
     if (versionInt > 190 && versionInt <= 201) {
@@ -153,10 +157,10 @@ export const getAutomationAndHeatingTypeName = (heatingTypeInt) => {
     // M prefix is used for units with MD automation
     return (
         [
-            'ED/MD', // prettier-hack
-            'EDW/MDW',
-            'EDX/MDX',
-            'EDE/MDE',
+            AUTOMATION_HEATING_TYPE_ED, // prettier-hack
+            AUTOMATION_HEATING_TYPE_EDW,
+            AUTOMATION_HEATING_TYPE_EDX,
+            AUTOMATION_HEATING_TYPE_EDE,
         ][heatingTypeInt] || 'unknown'
     )
 }

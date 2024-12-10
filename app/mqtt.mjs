@@ -121,7 +121,7 @@ const publishTopics = async (mqttClient, topicMap, publishOptions = {}) => {
     await Promise.all(publishPromises)
 }
 
-export const subscribeToChanges = async (modbusClient, mqttClient) => {
+export const subscribeToChanges = async (mqttClient) => {
     // Subscribe to writable topics
     const topicNames = [
         `${TOPIC_PREFIX_MODE}/+/set`,

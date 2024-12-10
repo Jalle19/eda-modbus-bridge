@@ -1,6 +1,7 @@
 import { Mutex } from 'async-mutex'
 import { createLogger } from './logger.mjs'
 import {
+    AUTOMATION_HEATING_TYPE_EDW,
     AUTOMATION_TYPE_LEGACY_EDA,
     AUTOMATION_TYPE_MD,
     AVAILABLE_ALARMS,
@@ -101,7 +102,6 @@ export const getReadings = async (modbusClient) => {
         'supplyAirTemperature': parseTemperature(result.data[2]),
         'wasteAirTemperature': parseTemperature(result.data[3]),
         'exhaustAirTemperature': parseTemperature(result.data[4]),
-        'exhaustAirTemperatureBeforeHeatRecovery': parseTemperature(result.data[5]),
         'exhaustAirHumidity': result.data[7],
     }
 
@@ -168,6 +168,22 @@ export const getReadings = async (modbusClient) => {
             'controlPanel2Temperature': parseTemperature(result.data[1]),
             'supplyFanSpeed': result.data[2],
             'exhaustFanSpeed': result.data[3],
+        }
+    }
+
+    // Register 11 and 12 are mutually exclusive, depending on whether the unit is EDW/MDW or not.
+    // While the value stored in both registers are always identical we publish two separate
+    // sensors to avoid confusion.
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 11, 2))
+    if (deviceInformation.heatingTypeInstalled === AUTOMATION_HEATING_TYPE_EDW) {
+        readings = {
+            ...readings,
+            'returnWaterTemperature': parseTemperature(result.data[1]),
+        }
+    } else {
+        readings = {
+            ...readings,
+            'exhaustAirTemperatureBeforeHeatRecovery': parseTemperature(result.data[0]),
         }
     }
 
