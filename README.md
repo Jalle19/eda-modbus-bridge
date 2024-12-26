@@ -29,8 +29,8 @@ unit's computer board, or alternatively using Modbus TCP for newer units that ca
 
 ## Features
 
-* HTTP API for reading temperatures, modes and settings, as well as changing some settings
-* MQTT support (read and write), including Home Assistant MQTT discovery support 
+* HTTP API for reading temperatures, modes, alarms and settings, as well as changing some settings
+* Full MQTT support, including Home Assistant MQTT discovery support 
 
 ## Requirements
 
@@ -133,6 +133,7 @@ in Home Assistant automatically through the MQTT integration. The following enti
 * numbers (configurable) for settings
 * switches for the ventilation modes and settings
 * binary sensors for the alarms
+* a button for acknowledging the latest alarm
 
 ![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha1.png "Home Assistant device info")
 ![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha2.png "Home Assistant controls")
@@ -158,6 +159,10 @@ in Home Assistant automatically through the MQTT integration. The following enti
   some functionality may be missing. Open an issue if you feel like something isn't working that should be working. 
   Unsupported functionality is indicated by the corresponding sensor being disabled in Home Assistant, and the readings 
   missing from the `/summary` HTTP endpoint.
+
+* While it's possible to acknowledge any active alarm, serious alarms that cause the unit to enter the "emergency stop" 
+  state require a restart of the unit to resume normal operation. However, the unit cannot be restarted via Modbus 
+  (at least not officially), so it's best to acknowledge such alarms manually.
 
 ## Troubleshooting
 

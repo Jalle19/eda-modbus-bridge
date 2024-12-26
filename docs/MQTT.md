@@ -101,7 +101,9 @@ The following topics can be written to in order to control the operation of the 
 ```
 eda/mode/+/set
 eda/settings/+/set
+eda/alarm/acknowledge
 ```
 
 * `eda/mode/` topics take the boolean values (`ON` or `OFF`)
 * `eda/settings/` topics take integer or boolean values
+* publishing to `eda/alarm/acknowledge` acknowledges the most recent active alarm, if any
