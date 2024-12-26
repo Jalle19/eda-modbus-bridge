@@ -23,11 +23,6 @@ https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See
   * [Running as a Home Assistant OS addon](#running-as-a-home-assistant-os-addon)
 * [Usage](#usage)
 * [HTTP endpoints](#http-endpoints)
-  * [GET /summary](#get-summary)
-  * [GET /mode/{mode}](#get-modemode)
-  * [GET /alarms](#get-alarms)
-  * [POST /mode/{mode}](#post-modemode)
-  * [POST /setting/{setting}/{value}](#post-settingsettingvalue)
 * [MQTT support](#mqtt-support)
   * [Home Assistant MQTT discovery](#home-assistant-mqtt-discovery)
 * [Known issues](#known-issues)
@@ -119,171 +114,8 @@ Options:
 
 ## HTTP endpoints
 
-There's a Postman collection under `docs/`.
-
-### GET /summary
-
-Returns a JSON object like this:
-
-```json
-{
-  "flags": {
-    "away": false,
-    "longAway": false,
-    "overPressure": false,
-    "cookerHood": false,
-    "centralVacuumCleaner": false,
-    "maxHeating": false,
-    "maxCooling": false,
-    "manualBoost": false,
-    "summerNightCooling": false
-  },
-  "modes": {
-    "away": false,
-    "longAway": false,
-    "overPressure": false,
-    "cookerHood": false,
-    "centralVacuumCleaner": false,
-    "maxHeating": false,
-    "maxCooling": false,
-    "manualBoost": false,
-    "summerNightCooling": false
-  },
-  "readings": {
-    "freshAirTemperature": -2.9,
-    "supplyAirTemperatureAfterHeatRecovery": 16.8,
-    "supplyAirTemperature": 17,
-    "wasteAirTemperature": 0.3,
-    "exhaustAirTemperature": 19.3,
-    "exhaustAirTemperatureBeforeHeatRecovery": -40,
-    "exhaustAirHumidity": 51,
-    "heatRecoverySupplySide": 88,
-    "heatRecoveryExhaustSide": 85,
-    "heatRecoveryTemperatureDifferenceSupplySide": 19.8,
-    "heatRecoveryTemperatureDifferenceExhaustSide": 19,
-    "mean48HourExhaustHumidity": 37,
-    "cascadeSp": 170,
-    "cascadeP": 0,
-    "cascadeI": 130,
-    "overPressureTimeLeft": 0,
-    "ventilationLevelActual": 75,
-    "ventilationLevelTarget": 65
-  },
-  "settings": {
-    "overPressureDelay": 5,
-    "awayVentilationLevel": 30,
-    "awayTemperatureReduction": 2,
-    "longAwayVentilationLevel": 49,
-    "longAwayTemperatureReduction": 0,
-    "temperatureTarget": 17,
-    "coolingAllowed": true,
-    "heatingAllowed": true,
-    "awayCoolingAllowed": true,
-    "awayHeatingAllowed": false,
-    "longAwayCoolingAllowed": true,
-    "longAwayHeatingAllowed": false
-  },
-  "deviceInformation": {
-    "softwareVersion": 2.17,
-    "automationType": "EDA",
-    "fanType": "EC",
-    "coolingTypeInstalled": null,
-    "heatingTypeInstalled": "EDE/MDE",
-    "modelType": "Pingvin",
-    "serialNumber": 0,
-    "modelName": "Pingvin eco EDE/MDE",
-    "modbusAddress": 1
-  },
-  "deviceState": {
-    "normal": true,
-    "maxCooling": false,
-    "maxHeating": false,
-    "emergencyStop": false,
-    "stop": false,
-    "away": false,
-    "longAway": false,
-    "temperatureBoost": false,
-    "co2Boost": false,
-    "humidityBoost": false,
-    "manualBoost": false,
-    "overPressure": false,
-    "cookerHood": false,
-    "centralVacuumCleaner": false,
-    "heaterCooldown": false,
-    "summerNightCooling": false,
-    "defrosting": false
-  },
-  "alarmSummary": [
-    {
-      "name": "TE5SupplyAirAfterHRCold",
-      "description": "TE5 Supply air after heat recovery cold",
-      "type": 1,
-      "state": 0
-    },
-    {
-      "name": "TE10SupplyAirAfterHeaterCold",
-      "description": "TE10 Supply air after heater cold",
-      "type": 2,
-      "state": 0
-    },
-    ...
-  ],
-  "activeAlarm": null
-}
-
-```
-
-### GET /mode/{mode}
-
-Returns the status of the specified mode. The response looks like this:
-
-```json
-{"active":false}
-```
-
-### GET /alarms
-
-Returns the active or dismissed alarms. The response looks like this:
-
-```json
-{
-    "alarms": [
-        {
-            "name": "ServiceReminder",
-            "description": "Service reminder",
-            "state": 1, // 2 = Active, 1 = Dismissed
-            "date": "2021-10-24T11:28:00.000Z"
-        },...
-    ]
-}
-```
-
-### POST /mode/{mode}
-
-Enables/disables the specified mode depending on the boolean value in the following request body:
-
-```json
-{"active":false}
-```
-
-The response is identical to that of `GET /mode/{mode}`.
-
-### POST /setting/{setting}/{value}
-
-Changes the setting to the specified value. HTTP 400 is returned if the value specified is out of range or invalid.
-
-Returns the new setting values, like this:
-
-```json
-{
-   "overPressureDelay": 60,
-   "awayVentilationLevel": 30,
-   "awayTemperatureReduction": 2,
-   "longAwayVentilationLevel": 60,
-   "longAwayTemperatureReduction": 0,
-   "temperatureTarget": 17
-}
-```
+There's a Postman collection under `docs/`. For more information about the individual endpoints, see
+[docs/HTTP.md](./docs/HTTP.md).
 
 ## MQTT support
 
@@ -293,111 +125,7 @@ in the broker.
 
 Every topic is prefixed by `eda/`, so to subscribe to everything the application sends out, subscribe to `eda/#`
 
-The following read-only topics are regularly published:
-
-```
-eda/alarm/CoolingError
-eda/alarm/EHError
-eda/alarm/EHPDA
-eda/alarm/EmergencyStop
-eda/alarm/ExtractFanPressureError
-eda/alarm/ExtractFilterDirty
-eda/alarm/FireRisk
-eda/alarm/HPError
-eda/alarm/HRError
-eda/alarm/ReturnWaterCold
-eda/alarm/ServiceReminder
-eda/alarm/SupplyFanPressureError
-eda/alarm/SupplyFilterDirty
-eda/alarm/TE10SupplyAirAfterHeaterCold
-eda/alarm/TE10SupplyAirAfterHeaterHot
-eda/alarm/TE20RoomTempHot
-eda/alarm/TE30ExtractAirCold
-eda/alarm/TE30ExtractAirHot
-eda/alarm/TE5SupplyAirAfterHRCold
-eda/mode/away
-eda/mode/centralVacuumCleaner
-eda/mode/cookerHood
-eda/mode/longAway
-eda/mode/manualBoost
-eda/mode/maxCooling
-eda/mode/maxHeating
-eda/mode/overPressure
-eda/mode/summerNightCooling
-eda/readings/cascadeI
-eda/readings/cascadeP
-eda/readings/cascadeSp
-eda/readings/exhaustAirHumidity
-eda/readings/exhaustAirTemperature
-eda/readings/exhaustAirTemperatureBeforeHeatRecovery
-eda/readings/freshAirTemperature
-eda/readings/heatRecoveryExhaustSide
-eda/readings/heatRecoverySupplySide
-eda/readings/heatRecoveryTemperatureDifferenceExhaustSide
-eda/readings/heatRecoveryTemperatureDifferenceSupplySide
-eda/readings/mean48HourExhaustHumidity
-eda/readings/overPressureTimeLeft
-eda/readings/supplyAirTemperature
-eda/readings/supplyAirTemperatureAfterHeatRecovery
-eda/readings/ventilationLevelActual
-eda/readings/ventilationLevelTarget
-eda/readings/wasteAirTemperature
-eda/settings/awayTemperatureReduction
-eda/settings/awayVentilationLevel
-eda/settings/longAwayTemperatureReduction
-eda/settings/longAwayVentilationLevel
-eda/settings/overPressureDelay
-eda/settings/temperatureTarget
-eda/settings/defrostingAllowed
-eda/status
-```
-
-Boolean values are expressed as `ON` or `OFF`.
-
-The following topics are optional and only published for certain models:
-
-```
-eda/mode/eco
-eda/readings/roomTemperatureAvg
-eda/readings/controlPanel1Temperature
-eda/readings/controlPanel2Temperature
-eda/readings/supplyFanSpeed
-eda/readings/exhaustFanSpeed
-eda/readings/returnWaterTemperature
-eda/readings/exhaustAirTemperatureBeforeHeatRecovery
-eda/settings/coolingAllowed
-eda/settings/heatingAllowed
-eda/settings/awayCoolingAllowed
-eda/settings/awayHeatingAllowed
-eda/settings/longAwayCoolingAllowed
-eda/settings/longAwayHeatingAllowed
-```
-
-The following topics are published to once during application startup:
-
-```
-eda/deviceInformation/automationType
-eda/deviceInformation/coolingTypeInstalled
-eda/deviceInformation/familyType
-eda/deviceInformation/fanType
-eda/deviceInformation/heatingTypeInstalled
-eda/deviceInformation/modbusAddress
-eda/deviceInformation/modelName
-eda/deviceInformation/modelType
-eda/deviceInformation/serialNumber
-eda/deviceInformation/softwareVersion
-eda/deviceInformation/softwareVersionInt
-```
-
-The following topics can be written to in order to control the operation of the ventilation unit:
-
-```
-eda/mode/+/set
-eda/settings/+/set
-```
-
-* `eda/mode/` topics take the boolean values (`ON` or `OFF`)
-* `eda/settings/` topics take integer or boolean values
+See [docs/MQTT.md](./docs/MQTT.md) for more detailed information about which topics are published and subscribed to.
 
 ### Home Assistant MQTT discovery
 
@@ -419,7 +147,7 @@ in Home Assistant automatically through the MQTT integration. The following enti
 * Some ventilation units sometimes trip the "TE20 Huoneilma kuuma" alarm when Modbus is used and a room temperature 
   sensor has not been connected to the main board. This can be alleviated by reducing the polling interval from 10 
   seconds to something like 30 seconds, or fixed permanently by either connecting an NTC10 temperature sensor or a 10 
-  kiloohm resistor to the sensor input terminals (not tested, but confirmed by Enervent).
+  kilo-ohm resistor to the sensor input terminals (not tested, but confirmed by Enervent).
 
 * It is not possible to adjust the ventilation level when the unit is operating in normal mode. Enervent has confirmed 
   that this is a limitation in the protocol and there is no direct solution. A workaround is to repurpose one of the 
