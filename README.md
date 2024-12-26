@@ -194,15 +194,6 @@ Returns a JSON object like this:
     "modelName": "Pingvin eco EDE/MDE",
     "modbusAddress": 1
   },
-  "alarmHistory": [
-    {
-      "name": "TE30ExtractAirCold",
-      "description": "TE30 Extract air cold",
-      "state": 0,
-      "date": "2024-01-21T06:21:00.000Z"
-    },
-    ...
-  ],
   "deviceState": {
     "normal": true,
     "maxCooling": false,
