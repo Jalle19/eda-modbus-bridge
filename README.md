@@ -212,7 +212,23 @@ Returns a JSON object like this:
     "heaterCooldown": false,
     "summerNightCooling": false,
     "defrosting": false
-  }
+  },
+  "alarmSummary": [
+    {
+      "name": "TE5SupplyAirAfterHRCold",
+      "description": "TE5 Supply air after heat recovery cold",
+      "type": 1,
+      "state": 0
+    },
+    {
+      "name": "TE10SupplyAirAfterHeaterCold",
+      "description": "TE10 Supply air after heater cold",
+      "type": 2,
+      "state": 0
+    },
+    ...
+  ],
+  "activeAlarm": null
 }
 
 ```
