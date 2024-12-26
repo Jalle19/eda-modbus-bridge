@@ -11,9 +11,6 @@ ventilation unit.
 Communication happens over RS-485 (Modbus RTU) by connecting a serial device to the "Freeway" port on the ventilation 
 unit's computer board, or alternatively using Modbus TCP for newer units that can be connected to the local network.
 
-The REST endpoints for enabling/disabling the various modes are designed to be consumed by 
-https://www.home-assistant.io/integrations/switch.rest/ with minimal effort. See examples in the `docs/` directory.
-
 ## Table of contents
 
 * [Features](#features)
