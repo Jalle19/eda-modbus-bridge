@@ -346,6 +346,16 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         ),
     }
 
+    // Select for changing temperature control mode
+    const selectConfigurationMap = {
+        'temperatureControlMode': createSelectConfiguration(
+            configurationBase,
+            'temperatureControlMode',
+            'Temperature control mode',
+            ['Supply control', 'Exhaust control', 'Room control']
+        ),
+    }
+
     // Final map that describes everything we want to be auto-discovered
     const configurationMap = {
         'sensor': sensorConfigurationMap,
@@ -353,6 +363,7 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
         'switch': switchConfigurationMap,
         'binary_sensor': binarySensorConfigurationMap,
         'button': buttonConfigurationMap,
+        'select': selectConfigurationMap,
     }
 
     // Publish configurations
@@ -494,5 +505,19 @@ const createButtonConfiguration = (configurationBase, buttonName, entityName) =>
         'name': entityName,
         'object_id': `eda_button_${buttonName}`,
         'command_topic': `${TOPIC_PREFIX_ALARM}/acknowledge`,
+    }
+}
+
+const createSelectConfiguration = (configurationBase, selectName, entityName, options) => {
+    return {
+        ...configurationBase,
+        'unique_id': `eda-select-${selectName}`,
+        'name': entityName,
+        'object_id': `eda_Select_${selectName}`,
+        'options': options,
+        'state_topic': `${TOPIC_PREFIX_SETTINGS}/${selectName}`,
+        'command_topic': `${TOPIC_PREFIX_SETTINGS}/${selectName}/set`,
+        'command_template': '{{ this.attributes.options.index(value) + 1 }}',
+        'value_template': '{{ this.attributes.options[(value | int) - 1] }}',
     }
 }
