@@ -1,5 +1,9 @@
 # Change log
 
+## 2.9.1
+
+* Expose a `temperatureControlMode` select sensor (https://github.com/Jalle19/eda-modbus-bridge/issues/131)
+
 ## 2.9.0
 
 * Remove `alarmHistory` from HTTP, expose the same alarm summary as we do for MQTT
