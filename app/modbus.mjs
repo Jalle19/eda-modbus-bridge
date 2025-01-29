@@ -207,10 +207,11 @@ export const getSettings = async (modbusClient) => {
         'longAwayTemperatureReduction': parseTemperature(result.data[3]),
     }
 
-    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 135, 1))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 135, 2))
     settings = {
         ...settings,
         'temperatureTarget': parseTemperature(result.data[0]),
+        'temperatureControlMode': result.data[1],
     }
 
     // Heating/cooling/heat recovery enabled in normal/away/long away modes (not available on some devices).

@@ -28,6 +28,7 @@ export const AVAILABLE_SETTINGS = {
     'awayTemperatureReduction': 101,
     'longAwayVentilationLevel': 102,
     'longAwayTemperatureReduction': 103,
+    'temperatureControlMode': 136,
     'temperatureTarget': 135,
     'coolingAllowed': 52,
     'heatingAllowed': 54,
