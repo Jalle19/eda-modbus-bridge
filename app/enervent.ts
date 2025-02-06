@@ -116,6 +116,7 @@ export type Readings = {
     controlPanel2Temperature?: number
     supplyFanSpeed?: number
     exhaustFanSpeed?: number
+    returnWaterTemperature?: number
 }
 
 export type Settings = {
@@ -125,6 +126,7 @@ export type Settings = {
     longAwayVentilationLevel: number
     longAwayTemperatureReduction: number
     temperatureTarget: number
+    temperatureControlMode: number
     coolingAllowed?: boolean
     heatingAllowed?: boolean
     awayCoolingAllowed?: boolean

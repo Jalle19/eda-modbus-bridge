@@ -116,7 +116,7 @@ export const getReadings = async (modbusClient: ModbusRTU): Promise<Readings> =>
     logger.debug('Retrieving device readings...')
 
     let result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 6, 8))
-    let readings: object = {
+    let readings: Partial<Readings> = {
         'freshAirTemperature': parseTemperature(result.data[0]),
         'supplyAirTemperatureAfterHeatRecovery': parseTemperature(result.data[1]),
         'supplyAirTemperature': parseTemperature(result.data[2]),
@@ -216,7 +216,7 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
     let result: ReadRegisterResult | ReadCoilResult
 
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 57, 1))
-    let settings: object = {
+    let settings: Partial<Settings> = {
         'overPressureDelay': result.data[0],
     }
 
