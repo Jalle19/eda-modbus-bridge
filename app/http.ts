@@ -17,7 +17,7 @@ import ModbusRTU from 'modbus-serial'
 
 const logger = createLogger('http')
 
-const root = async (req: Request, res: Response) => {
+const root = (req: Request, res: Response) => {
     res.send('eda-modbus-bridge')
 }
 
@@ -60,6 +60,7 @@ const getMode = async (modbusClient: ModbusRTU, req: Request, res: Response) => 
 const setMode = async (modbusClient: ModbusRTU, req: Request, res: Response) => {
     try {
         const mode = req.params['mode']
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const status = !!req.body['active']
 
         logger.info(`Setting mode ${mode} to ${status}`)
@@ -106,6 +107,7 @@ const acknowledgeAlarm = async (modbusClient: ModbusRTU, req: Request, res: Resp
 }
 
 export const configureRoutes = (httpServer: Express, modbusClient: ModbusRTU) => {
+    /* eslint-disable @typescript-eslint/no-misused-promises */
     httpServer.get('/', root)
     httpServer.get('/summary', (req, res) => {
         return summary(modbusClient, req, res)

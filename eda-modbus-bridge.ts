@@ -14,6 +14,7 @@ import {
 import { configureMqttDiscovery } from './app/homeassistant'
 import { createLogger, setLogLevel } from './app/logger'
 import { ModbusDeviceType, ModbusRtuDevice, ModbusTcpDevice, parseDevice, validateDevice } from './app/modbus'
+import { setIntervalAsync } from 'set-interval-async'
 
 const MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS = 5
 
@@ -52,6 +53,7 @@ const argv = yargs(process.argv.slice(2))
         },
         'mqttBrokerUrl': {
             description: 'The URL to the MQTT broker, e.g. mqtt://localhost:1883. Omit to disable MQTT support.',
+            type: 'string',
             default: undefined,
             alias: 'm',
         },
@@ -184,7 +186,7 @@ void (async () => {
                 // Publish readings/settings/modes/alarms once immediately, then regularly according to the configured
                 // interval.
                 await publishValues(modbusClient, mqttClient)
-                setInterval(async () => {
+                setIntervalAsync(async () => {
                     await publishValues(modbusClient, mqttClient)
                 }, argv.mqttPublishInterval * 1000)
 
@@ -192,6 +194,7 @@ void (async () => {
 
                 // Subscribe to changes and register a handler
                 await subscribeToChanges(mqttClient)
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 mqttClient.on('message', async (topicName, payload) => {
                     await handleMessage(modbusClient, mqttClient, topicName, payload)
                 })

@@ -146,7 +146,7 @@ export const handleMessage = async (
     topicName: string,
     rawPayload: Buffer
 ) => {
-    logger.info(`Received ${rawPayload} on topic ${topicName}`)
+    logger.info(`Received ${rawPayload.toString()} on topic ${topicName}`)
 
     const payload = parsePayload(rawPayload)
 
