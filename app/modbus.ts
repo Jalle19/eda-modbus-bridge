@@ -245,14 +245,34 @@ export const getSettings = async (modbusClient) => {
     return settings
 }
 
-export const setSetting = async (modbusClient, setting, value) => {
+export const setSetting = async (modbusClient: ModbusRTU, setting: string, value: string | boolean) => {
     const dataAddress = AVAILABLE_SETTINGS[setting]
     if (dataAddress === undefined) {
         throw new Error('Unknown setting')
     }
 
-    let coil = false
-    let intValue = parseInt(value, 10)
+    switch (typeof value) {
+        case 'string':
+            return setIntegerSetting(modbusClient, setting, parseInt(value, 10))
+        case 'boolean':
+            return setBooleanSetting(modbusClient, setting, value)
+    }
+}
+
+const setBooleanSetting = async (modbusClient: ModbusRTU, setting: string, boolValue: boolean) => {
+    const dataAddress = AVAILABLE_SETTINGS[setting]
+    if (dataAddress === undefined) {
+        throw new Error('Unknown setting')
+    }
+
+    await mutex.runExclusive(async () => tryWriteCoil(modbusClient, dataAddress, boolValue))
+}
+
+const setIntegerSetting = async (modbusClient: ModbusRTU, setting: string, intValue: number) => {
+    const dataAddress = AVAILABLE_SETTINGS[setting]
+    if (dataAddress === undefined) {
+        throw new Error('Unknown setting')
+    }
 
     switch (setting) {
         case 'awayVentilationLevel':
@@ -280,23 +300,9 @@ export const setSetting = async (modbusClient, setting, value) => {
             // No minimum/maximum values specified in the register documentation
             intValue *= 10
             break
-        case 'coolingAllowed':
-        case 'heatingAllowed':
-        case 'awayCoolingAllowed':
-        case 'awayHeatingAllowed':
-        case 'longAwayCoolingAllowed':
-        case 'longAwayHeatingAllowed':
-        case 'defrostingAllowed':
-            coil = true
-            break
     }
 
-    // This isn't very nice, but it's good enough for now
-    if (coil) {
-        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, dataAddress, value))
-    } else {
-        await mutex.runExclusive(async () => tryWriteHoldingRegister(modbusClient, dataAddress, intValue))
-    }
+    await mutex.runExclusive(async () => tryWriteHoldingRegister(modbusClient, dataAddress, intValue))
 }
 
 export const getDeviceInformation = async (modbusClient) => {

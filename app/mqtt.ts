@@ -155,7 +155,7 @@ export const handleMessage = async (modbusClient, mqttClient, topicName, rawPayl
 
         logger.info(`Updating mode ${mode} to ${payload}`)
 
-        await setMode(modbusClient, mode, payload)
+        await setMode(modbusClient, mode, Boolean(payload))
         await publishModeSummary(modbusClient, mqttClient)
     } else if (topicName.startsWith(TOPIC_PREFIX_ALARM) && topicName.endsWith('/acknowledge')) {
         // Acknowledge alarm
