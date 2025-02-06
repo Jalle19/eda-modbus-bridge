@@ -10,6 +10,8 @@ import {
     acknowledgeAlarm,
 } from './modbus'
 import { createLogger } from './logger'
+import ModbusRTU from 'modbus-serial'
+import { MqttClient } from 'mqtt'
 
 export const TOPIC_PREFIX = 'eda'
 export const TOPIC_PREFIX_MODE = `${TOPIC_PREFIX}/mode`
@@ -20,11 +22,13 @@ export const TOPIC_PREFIX_DEVICE_INFORMATION = `${TOPIC_PREFIX}/deviceInformatio
 export const TOPIC_PREFIX_DEVICE_STATE = `${TOPIC_PREFIX}/deviceState`
 export const TOPIC_NAME_STATUS = `${TOPIC_PREFIX}/status`
 
+type TopicMap = Record<string, string>
+
 const logger = createLogger('mqtt')
 
-export const publishValues = async (modbusClient, mqttClient) => {
+export const publishValues = async (modbusClient: ModbusRTU, mqttClient: MqttClient) => {
     // Create a map from topic name to value that should be published
-    let topicMap = {
+    const topicMap: TopicMap = {
         [TOPIC_NAME_STATUS]: 'online',
     }
 
@@ -63,8 +67,8 @@ export const publishValues = async (modbusClient, mqttClient) => {
     await publishTopics(mqttClient, topicMap)
 }
 
-export const publishDeviceInformation = async (modbusClient, mqttClient) => {
-    let topicMap = {}
+export const publishDeviceInformation = async (modbusClient: ModbusRTU, mqttClient: MqttClient) => {
+    const topicMap: TopicMap = {}
 
     const deviceInformation = await getDeviceInformation(modbusClient)
 
@@ -81,9 +85,9 @@ export const publishDeviceInformation = async (modbusClient, mqttClient) => {
     })
 }
 
-const publishModeSummary = async (modbusClient, mqttClient) => {
+const publishModeSummary = async (modbusClient: ModbusRTU, mqttClient: MqttClient) => {
     // Create a map from topic name to value that should be published
-    let topicMap = {}
+    const topicMap: TopicMap = {}
 
     // Publish state for each mode.
     const modeSummary = await getModeSummary(modbusClient)
@@ -97,12 +101,12 @@ const publishModeSummary = async (modbusClient, mqttClient) => {
     await publishTopics(mqttClient, topicMap)
 }
 
-const publishSettings = async (modbusClient, mqttClient) => {
+const publishSettings = async (modbusClient: ModbusRTU, mqttClient: MqttClient) => {
     // Create a map from topic name to value that should be published
-    let topicMap = {}
+    const topicMap: TopicMap = {}
     const settings = await getSettings(modbusClient)
 
-    for (let [setting, value] of Object.entries(settings)) {
+    for (const [setting, value] of Object.entries(settings)) {
         const topicName = `${TOPIC_PREFIX_SETTINGS}/${setting}`
 
         topicMap[topicName] = typeof value === 'boolean' ? createBinaryValue(value) : JSON.stringify(value)
@@ -111,7 +115,7 @@ const publishSettings = async (modbusClient, mqttClient) => {
     await publishTopics(mqttClient, topicMap)
 }
 
-const publishTopics = async (mqttClient, topicMap, publishOptions = {}) => {
+const publishTopics = async (mqttClient: MqttClient, topicMap: TopicMap, publishOptions = {}) => {
     const publishPromises = []
 
     for (const [topic, value] of Object.entries(topicMap)) {
@@ -121,7 +125,7 @@ const publishTopics = async (mqttClient, topicMap, publishOptions = {}) => {
     await Promise.all(publishPromises)
 }
 
-export const subscribeToChanges = async (mqttClient) => {
+export const subscribeToChanges = async (mqttClient: MqttClient) => {
     // Subscribe to writable topics
     const topicNames = [
         `${TOPIC_PREFIX_MODE}/+/set`,
@@ -136,7 +140,12 @@ export const subscribeToChanges = async (mqttClient) => {
     }
 }
 
-export const handleMessage = async (modbusClient, mqttClient, topicName, rawPayload) => {
+export const handleMessage = async (
+    modbusClient: ModbusRTU,
+    mqttClient: MqttClient,
+    topicName: string,
+    rawPayload: Buffer
+) => {
     logger.info(`Received ${rawPayload} on topic ${topicName}`)
 
     const payload = parsePayload(rawPayload)
@@ -165,20 +174,20 @@ export const handleMessage = async (modbusClient, mqttClient, topicName, rawPayl
     }
 }
 
-export const validateBrokerUrl = (brokerUrl) => {
+export const validateBrokerUrl = (brokerUrl: string) => {
     return brokerUrl.startsWith('mqtt://') || brokerUrl.startsWith('mqtts://')
 }
 
-const createBinaryValue = (value) => {
+const createBinaryValue = (value: boolean) => {
     // Boolean values are exposed as "ON" and "OFF" respectively since those are the
     // defaults for MQTT binary sensors in Home Assistant
     return value ? 'ON' : 'OFF'
 }
 
-const parsePayload = (rawPayload) => {
+const parsePayload = (rawPayload: Buffer) => {
     // Payload looks like a string when logged, but any comparison with === will equal false unless we convert the
     // Buffer to a string
-    let payload = rawPayload.toString()
+    let payload: string | boolean = rawPayload.toString()
 
     // Convert "ON"/"OFF" booleans to real booleans
     if (payload === 'ON') {

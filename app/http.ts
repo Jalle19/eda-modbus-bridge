@@ -12,16 +12,18 @@ import {
     getAlarmSummary,
 } from './modbus'
 import { createLogger } from './logger'
+import { Express, Request, Response } from 'express'
+import ModbusRTU from 'modbus-serial'
 
 const logger = createLogger('http')
 
-const root = async (req, res) => {
+const root = async (req: Request, res: Response) => {
     res.send('eda-modbus-bridge')
 }
 
-const summary = async (modbusClient, req, res) => {
+const summary = async (modbusClient: ModbusRTU, req: Request, res: Response) => {
     try {
-        let modeSummary = await getModeSummary(modbusClient)
+        const modeSummary = await getModeSummary(modbusClient)
         const newestAlarm = await getNewestAlarm(modbusClient)
 
         const summary = {
@@ -38,11 +40,11 @@ const summary = async (modbusClient, req, res) => {
 
         res.json(summary)
     } catch (e) {
-        handleError(e, res)
+        handleError(e as Error, res)
     }
 }
 
-const getMode = async (modbusClient, req, res) => {
+const getMode = async (modbusClient: ModbusRTU, req: Request, res: Response) => {
     try {
         const mode = req.params['mode']
         const status = await modbusGetMode(modbusClient, mode)
@@ -51,11 +53,11 @@ const getMode = async (modbusClient, req, res) => {
             'active': status,
         })
     } catch (e) {
-        handleError(e, res)
+        handleError(e as Error, res)
     }
 }
 
-const setMode = async (modbusClient, req, res) => {
+const setMode = async (modbusClient: ModbusRTU, req: Request, res: Response) => {
     try {
         const mode = req.params['mode']
         const status = !!req.body['active']
@@ -68,11 +70,11 @@ const setMode = async (modbusClient, req, res) => {
             'active': await modbusGetMode(modbusClient, mode),
         })
     } catch (e) {
-        handleError(e, res)
+        handleError(e as Error, res)
     }
 }
 
-const setSetting = async (modbusClient, req, res) => {
+const setSetting = async (modbusClient: ModbusRTU, req: Request, res: Response) => {
     try {
         const setting = req.params['setting']
         const value = req.params['value']
@@ -86,24 +88,24 @@ const setSetting = async (modbusClient, req, res) => {
         })
     } catch (e) {
         if (e instanceof RangeError) {
-            handleError(e, res, 400)
+            handleError(e as Error, res, 400)
         } else {
-            handleError(e, res)
+            handleError(e as Error, res)
         }
     }
 }
 
-const acknowledgeAlarm = async (modbusClient, req, res) => {
+const acknowledgeAlarm = async (modbusClient: ModbusRTU, req: Request, res: Response) => {
     try {
         logger.info('Acknowledging currently active alarm (if any)')
 
         await modbusAcknowledgeAlarm(modbusClient)
     } catch (e) {
-        handleError(e, res)
+        handleError(e as Error, res)
     }
 }
 
-export const configureRoutes = (httpServer, modbusClient) => {
+export const configureRoutes = (httpServer: Express, modbusClient: ModbusRTU) => {
     httpServer.get('/', root)
     httpServer.get('/summary', (req, res) => {
         return summary(modbusClient, req, res)
@@ -122,7 +124,7 @@ export const configureRoutes = (httpServer, modbusClient) => {
     })
 }
 
-const handleError = (e, res, statusCode = undefined) => {
+const handleError = (e: Error, res: Response, statusCode?: number) => {
     logger.error(`An exception occurred: ${e.name}: ${e.message}`, e.stack)
     // Use HTTP 500 if no status code has been set
     res.status(statusCode ?? 500)

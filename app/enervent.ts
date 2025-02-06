@@ -1,4 +1,6 @@
-export const AVAILABLE_MODES = {
+import { ReadRegisterResult } from 'modbus-serial/ModbusRTU'
+
+export const AVAILABLE_MODES: Record<string, number> = {
     'away': 1,
     'longAway': 2,
     'overPressure': 3,
@@ -12,7 +14,7 @@ export const AVAILABLE_MODES = {
 }
 
 // Modes that can only be true one at a time (mapped to their coil number)
-export const MUTUALLY_EXCLUSIVE_MODES = {
+export const MUTUALLY_EXCLUSIVE_MODES: Record<string, number> = {
     'away': 1,
     'longAway': 2,
     'overPressure': 3,
@@ -22,7 +24,7 @@ export const MUTUALLY_EXCLUSIVE_MODES = {
     'eco': 40,
 }
 
-export const AVAILABLE_SETTINGS = {
+export const AVAILABLE_SETTINGS: Record<string, number> = {
     'overPressureDelay': 57,
     'awayVentilationLevel': 100,
     'awayTemperatureReduction': 101,
@@ -39,7 +41,23 @@ export const AVAILABLE_SETTINGS = {
     'defrostingAllowed': 55,
 }
 
-export const AVAILABLE_ALARMS = [
+export type AlarmDescription = {
+    name: string
+    description: string
+    type: number
+}
+
+export type AlarmIncident = AlarmDescription & {
+    type: number
+    state: number
+    timestamp: Date
+}
+
+export type AlarmStatus = AlarmDescription & {
+    state: number
+}
+
+export const AVAILABLE_ALARMS: AlarmDescription[] = [
     { name: 'TE5SupplyAirAfterHRCold', description: 'TE5 Supply air after heat recovery cold', type: 1 },
     { name: 'TE10SupplyAirAfterHeaterCold', description: 'TE10 Supply air after heater cold', type: 2 },
     { name: 'TE10SupplyAirAfterHeaterHot', description: 'TE10 Supply air after heater hot', type: 3 },
@@ -61,59 +79,142 @@ export const AVAILABLE_ALARMS = [
     { name: 'ExtractFanPressureError', description: 'Waste fan pressure', type: 21 },
 ]
 
-export const SENSOR_TYPE_NONE = 'NONE'
-export const SENSOR_TYPE_CO2 = 'CO2'
-export const SENSOR_TYPE_RH = 'RH'
-export const SENSOR_TYPE_ROOM_TEMP = 'ROOM_TEMP'
+export type ModeSummary = {
+    away: boolean
+    longAway: boolean
+    overPressure: boolean
+    cookerHood: boolean
+    centralVacuumCleaner: boolean
+    maxHeating: boolean
+    maxCooling: boolean
+    manualBoost: boolean
+    summerNightCooling: boolean
+    eco?: boolean
+}
 
-export const ANALOG_INPUT_SENSOR_TYPES = [
+export type Readings = {
+    freshAirTemperature: number
+    supplyAirTemperatureAfterHeatRecovery: number
+    supplyAirTemperature: number
+    wasteAirTemperature: number
+    exhaustAirTemperature: number
+    exhaustAirTemperatureBeforeHeatRecovery: number
+    exhaustAirHumidity: number
+    heatRecoverySupplySide: number
+    heatRecoveryExhaustSide: number
+    heatRecoveryTemperatureDifferenceSupplySide: number
+    heatRecoveryTemperatureDifferenceExhaustSide: number
+    mean48HourExhaustHumidity: number
+    cascadeSp: number
+    cascadeP: number
+    cascadeI: number
+    overPressureTimeLeft: number
+    ventilationLevelActual: number
+    ventilationLevelTarget: number
+    roomTemperatureAvg?: number
+    controlPanel1Temperature?: number
+    controlPanel2Temperature?: number
+    supplyFanSpeed?: number
+    exhaustFanSpeed?: number
+}
+
+export type Settings = {
+    overPressureDelay: number
+    awayVentilationLevel: number
+    awayTemperatureReduction: number
+    longAwayVentilationLevel: number
+    longAwayTemperatureReduction: number
+    temperatureTarget: number
+    coolingAllowed?: boolean
+    heatingAllowed?: boolean
+    awayCoolingAllowed?: boolean
+    awayHeatingAllowed?: boolean
+    longAwayCoolingAllowed?: boolean
+    longAwayHeatingAllowed?: boolean
+    defrostingAllowed: boolean
+}
+
+export type DeviceInformation = {
+    softwareVersion: number
+    automationType: AutomationType
+    fanType: 'EC' | 'AC'
+    coolingTypeInstalled: string | null
+    heatingTypeInstalled: string | null
+    modelType: string
+    serialNumber: number
+    modelName: string
+    modbusAddress: number
+}
+
+export enum SensorType {
+    NONE = 'NONE',
+    CO2 = 'CO2',
+    RH = 'RH',
+    ROOM_TEMP = 'ROOM_TEMP',
+}
+
+type AnalogInput = {
+    type: number
+    sensorType: SensorType
+    name?: string
+    description?: string
+}
+
+export const ANALOG_INPUT_SENSOR_TYPES: AnalogInput[] = [
     // Skip sensor types we can't handle
-    { type: 0, sensorType: SENSOR_TYPE_NONE },
-    { type: 1, sensorType: SENSOR_TYPE_CO2, name: 'analogInputCo21', description: 'CO2 #1' },
-    { type: 2, sensorType: SENSOR_TYPE_CO2, name: 'analogInputCo22', description: 'CO2 #1' },
-    { type: 3, sensorType: SENSOR_TYPE_CO2, name: 'analogInputCo23', description: 'CO2 #1' },
-    { type: 4, sensorType: SENSOR_TYPE_RH, name: 'analogInputHumidity1', description: 'RH #1' },
-    { type: 5, sensorType: SENSOR_TYPE_RH, name: 'analogInputHumidity2', description: 'RH #1' },
-    { type: 6, sensorType: SENSOR_TYPE_RH, name: 'analogInputHumidity3', description: 'RH #1' },
+    { type: 0, sensorType: SensorType.NONE },
+    { type: 1, sensorType: SensorType.CO2, name: 'analogInputCo21', description: 'CO2 #1' },
+    { type: 2, sensorType: SensorType.CO2, name: 'analogInputCo22', description: 'CO2 #1' },
+    { type: 3, sensorType: SensorType.CO2, name: 'analogInputCo23', description: 'CO2 #1' },
+    { type: 4, sensorType: SensorType.RH, name: 'analogInputHumidity1', description: 'RH #1' },
+    { type: 5, sensorType: SensorType.RH, name: 'analogInputHumidity2', description: 'RH #1' },
+    { type: 6, sensorType: SensorType.RH, name: 'analogInputHumidity3', description: 'RH #1' },
     {
         type: 8,
-        sensorType: SENSOR_TYPE_ROOM_TEMP,
+        sensorType: SensorType.ROOM_TEMP,
         name: 'analogInputRoomTemperature1',
         description: 'Room temperature #1',
     },
     {
         type: 9,
-        sensorType: SENSOR_TYPE_ROOM_TEMP,
+        sensorType: SensorType.ROOM_TEMP,
         name: 'analogInputRoomTemperature2',
         description: 'Room temperature #1',
     },
     {
         type: 10,
-        sensorType: SENSOR_TYPE_ROOM_TEMP,
+        sensorType: SensorType.ROOM_TEMP,
         name: 'analogInputRoomTemperature3',
         description: 'Room temperature #1',
     },
 ]
 
-export const AUTOMATION_TYPE_LEGACY_EDA = 'LEGACY_EDA'
-export const AUTOMATION_TYPE_EDA = 'EDA'
-export const AUTOMATION_TYPE_MD = 'MD'
-export const AUTOMATION_HEATING_TYPE_ED = 'ED/MD'
-export const AUTOMATION_HEATING_TYPE_EDW = 'EDW/MDW'
-export const AUTOMATION_HEATING_TYPE_EDX = 'EDX/MDX'
-export const AUTOMATION_HEATING_TYPE_EDE = 'EDE/MDE'
+type AnalogSensorReadings = Record<string, number>
 
-export const determineAutomationType = (versionInt) => {
-    if (versionInt > 190 && versionInt <= 201) {
-        return AUTOMATION_TYPE_LEGACY_EDA
-    } else if (versionInt < 190) {
-        return AUTOMATION_TYPE_MD
+export enum AutomationHeatingType {
+    ED = 'ED/MD',
+    EDW = 'EDW/MDW',
+    EDX = 'EDX/MDX',
+    EDE = 'EDE/MDE',
+}
+
+export enum AutomationType {
+    LEGACY_EDA = 'LEGACY_EDA',
+    MD = 'MD',
+    EDA = 'EDA',
+}
+
+export const determineAutomationType = (version: number): AutomationType => {
+    if (version > 190 && version <= 201) {
+        return AutomationType.LEGACY_EDA
+    } else if (version < 190) {
+        return AutomationType.MD
     } else {
-        return AUTOMATION_TYPE_EDA
+        return AutomationType.EDA
     }
 }
 
-export const parseTemperature = (temperature) => {
+export const parseTemperature = (temperature: number): number => {
     if (temperature > 60000) {
         temperature = (65536 - temperature) * -1
     }
@@ -121,7 +222,7 @@ export const parseTemperature = (temperature) => {
     return temperature / 10
 }
 
-export const getDeviceFamilyName = (familyTypeInt) => {
+export const getDeviceFamilyName = (familyType: number): string => {
     return (
         [
             'Pingvin', // prettier-hack
@@ -133,11 +234,11 @@ export const getDeviceFamilyName = (familyTypeInt) => {
             'LTR-6',
             'LTR-7',
             'LTR-7 XL',
-        ][familyTypeInt] || 'unknown'
+        ][familyType] || 'unknown'
     )
 }
 
-export const getCoolingTypeName = (coolingTypeInt) => {
+export const getCoolingTypeName = (coolingType: number): string | null => {
     // 0=Ei jäähdytintä, 1=CW, 2=HP, 3=CG, 4=CX, 5=CX_INV, 6=X2CX, 7=CXBIN, 8=Cooler
     return [
         null,
@@ -149,26 +250,26 @@ export const getCoolingTypeName = (coolingTypeInt) => {
         'X2CX',
         'CXBIN',
         'Cooler',
-    ][coolingTypeInt]
+    ][coolingType]
 }
 
-export const getAutomationAndHeatingTypeName = (heatingTypeInt) => {
+export const getAutomationAndHeatingTypeName = (heatingType: number): string => {
     // 0=Ei lämmitintä, 1=VPK, 2=HP, 3=SLP, 4=SLP PWM
     // E prefix is used for units with EDA automation
     // M prefix is used for units with MD automation
     return (
         [
-            AUTOMATION_HEATING_TYPE_ED, // prettier-hack
-            AUTOMATION_HEATING_TYPE_EDW,
-            AUTOMATION_HEATING_TYPE_EDX,
-            AUTOMATION_HEATING_TYPE_EDE,
-        ][heatingTypeInt] || 'unknown'
+            AutomationHeatingType.ED, // prettier-hack
+            AutomationHeatingType.EDW,
+            AutomationHeatingType.EDX,
+            AutomationHeatingType.EDE,
+        ][heatingType] || 'unknown'
     )
 }
 
-export const createModelNameString = (deviceInformation) => {
+export const createModelNameString = (deviceInformation: Partial<DeviceInformation>): string => {
     // E.g. LTR-3 eco EDE/MDE - CG
-    let modelName = deviceInformation.modelType
+    let modelName = deviceInformation.modelType as string
 
     if (deviceInformation.fanType === 'EC') {
         modelName += ' eco'
@@ -185,11 +286,11 @@ export const createModelNameString = (deviceInformation) => {
     return modelName
 }
 
-export const parseAlarmTimestamp = (result) => {
+export const parseAlarmTimestamp = (result: ReadRegisterResult) => {
     return new Date(result.data[2] + 2000, result.data[3] - 1, result.data[4], result.data[5], result.data[6])
 }
 
-export const parseStateBitField = (state) => {
+export const parseStateBitField = (state: number) => {
     return {
         'normal': state === 0,
         'maxCooling': Boolean(state & 1),
@@ -211,11 +312,11 @@ export const parseStateBitField = (state) => {
     }
 }
 
-export const hasRoomTemperatureSensor = (sensorTypesResult) => {
+export const hasRoomTemperatureSensor = (sensorTypesResult: ReadRegisterResult): boolean => {
     for (let i = 0; i < 6; i++) {
         const sensor = ANALOG_INPUT_SENSOR_TYPES.find((sensor) => sensor.type === sensorTypesResult.data[i])
 
-        if (sensor?.sensorType === SENSOR_TYPE_ROOM_TEMP) {
+        if (sensor?.sensorType === SensorType.ROOM_TEMP) {
             return true
         }
     }
@@ -223,21 +324,24 @@ export const hasRoomTemperatureSensor = (sensorTypesResult) => {
     return false
 }
 
-export const parseAnalogSensors = (sensorTypesResult, sensorValuesResult) => {
-    const sensorReadings = {}
+export const parseAnalogSensors = (
+    sensorTypesResult: ReadRegisterResult,
+    sensorValuesResult: ReadRegisterResult
+): AnalogSensorReadings => {
+    const sensorReadings: AnalogSensorReadings = {}
 
     for (let i = 0; i < 6; i++) {
         const sensor = ANALOG_INPUT_SENSOR_TYPES.find((sensor) => sensor.type === sensorTypesResult.data[i])
 
         switch (sensor?.sensorType) {
             // Use raw value
-            case SENSOR_TYPE_CO2:
-            case SENSOR_TYPE_RH:
-                sensorReadings[sensor.name] = sensorValuesResult.data[i]
+            case SensorType.CO2:
+            case SensorType.RH:
+                sensorReadings[sensor.name!] = sensorValuesResult.data[i]
                 break
             // Parse as temperature
-            case SENSOR_TYPE_ROOM_TEMP:
-                sensorReadings[sensor.name] = parseTemperature(sensorValuesResult.data[i])
+            case SensorType.ROOM_TEMP:
+                sensorReadings[sensor.name!] = parseTemperature(sensorValuesResult.data[i])
                 break
         }
     }

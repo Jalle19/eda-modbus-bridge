@@ -1,19 +1,19 @@
 import express from 'express'
 import expressWinston from 'express-winston'
-import mqtt from 'mqtt'
+import mqtt, { MqttClient } from 'mqtt'
 import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
-import { configureRoutes } from './app/http.js'
+import { configureRoutes } from './app/http'
 import {
-    publishValues,
-    subscribeToChanges,
     handleMessage,
     publishDeviceInformation,
+    publishValues,
+    subscribeToChanges,
     validateBrokerUrl,
 } from './app/mqtt.js'
-import { configureMqttDiscovery } from './app/homeassistant.js'
-import { createLogger, setLogLevel } from './app/logger.js'
-import { MODBUS_DEVICE_TYPE, parseDevice, validateDevice } from './app/modbus.js'
+import { configureMqttDiscovery } from './app/homeassistant'
+import { createLogger, setLogLevel } from './app/logger'
+import { ModbusDeviceType, ModbusRtuDevice, ModbusTcpDevice, parseDevice, validateDevice } from './app/modbus'
 
 const MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS = 5
 
@@ -23,11 +23,13 @@ const argv = yargs(process.argv.slice(2))
         'device': {
             description:
                 'The Modbus device to use, e.g. /dev/ttyUSB0 for Modbus RTU or tcp://192.168.1.40:502 for Modbus TCP',
-            demand: true,
+            type: 'string',
+            demandOption: true,
             alias: 'd',
         },
         'modbusSlave': {
             description: 'The Modbus slave address',
+            type: 'number',
             default: 1,
             alias: 's',
         },
@@ -38,11 +40,13 @@ const argv = yargs(process.argv.slice(2))
         },
         'httpListenAddress': {
             description: 'The address to listen (HTTP)',
+            type: 'string',
             default: '0.0.0.0',
             alias: 'a',
         },
         'httpPort': {
             description: 'The port to listen on (HTTP)',
+            type: 'number',
             default: 8080,
             alias: 'p',
         },
@@ -77,9 +81,10 @@ const argv = yargs(process.argv.slice(2))
             default: false,
             alias: 'v',
         },
-    }).argv
+    })
+    .parseSync()
 
-;(async () => {
+void (async () => {
     // Create logger(s)
     const logger = createLogger('main')
     if (argv.debug) {
@@ -100,16 +105,18 @@ const argv = yargs(process.argv.slice(2))
     modbusClient.setTimeout(5000) // 5 seconds
 
     // Use buffered RTU or TCP depending on device type
-    if (modbusDevice.type === MODBUS_DEVICE_TYPE.RTU) {
-        await modbusClient.connectRTUBuffered(modbusDevice.path, {
+    if (modbusDevice.type === ModbusDeviceType.RTU) {
+        const rtuDevice = modbusDevice as ModbusRtuDevice
+        await modbusClient.connectRTUBuffered(rtuDevice.path, {
             baudRate: 19200,
             dataBits: 8,
             parity: 'none',
             stopBits: 1,
         })
-    } else if (modbusDevice.type === MODBUS_DEVICE_TYPE.TCP) {
-        await modbusClient.connectTCP(modbusDevice.hostname, {
-            port: modbusDevice.port,
+    } else if (modbusDevice.type === ModbusDeviceType.TCP) {
+        const tcpDevice = modbusDevice as ModbusTcpDevice
+        await modbusClient.connectTCP(tcpDevice.hostname, {
+            port: tcpDevice.port,
         })
     }
 
@@ -150,7 +157,7 @@ const argv = yargs(process.argv.slice(2))
 
                 // The MQTT client handles reconnections automatically, but only after it has connected successfully once.
                 // Retry manually until we get an initial connection.
-                let mqttClient
+                let mqttClient: MqttClient
                 let connectedOnce = false
                 const retryIntervalMs = MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS * 1000
 
@@ -160,13 +167,16 @@ const argv = yargs(process.argv.slice(2))
                         connectedOnce = true
                         logger.info(`Successfully connected to MQTT broker at ${argv.mqttBrokerUrl}`)
                     } catch (e) {
+                        const err = e as Error
                         logger.error(
-                            `Failed to connect to MQTT broker: ${e.message}. Retrying in ${retryIntervalMs} milliseconds`
+                            `Failed to connect to MQTT broker: ${err.message}. Retrying in ${retryIntervalMs} milliseconds`
                         )
 
                         await new Promise((resolve) => setTimeout(resolve, retryIntervalMs))
                     }
                 } while (!connectedOnce)
+
+                mqttClient = mqttClient!
 
                 // Publish device information once only (since it doesn't change)
                 await publishDeviceInformation(modbusClient, mqttClient)
@@ -197,7 +207,8 @@ const argv = yargs(process.argv.slice(2))
                     logger.info(`Attempting to reconnect to ${argv.mqttBrokerUrl}`)
                 })
             } catch (e) {
-                logger.error(`An exception occurred: ${e.name}: ${e.message}`, e.stack)
+                const err = e as Error
+                logger.error(`An exception occurred: ${err.name}: ${err.message}`, err.stack)
             }
         }
     }
