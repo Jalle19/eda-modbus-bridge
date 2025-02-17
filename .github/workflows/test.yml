@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ 14.x, 16.x, 18.x, 20.x, 22.x ]
+        node-version: [ 18.x, 20.x, 22.x ]
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
@@ -25,5 +25,7 @@ jobs:
         run: npm ci
       - name: Run tests
         run: npm test
+      - name: Build
+        run: npm run build
       - name: Verify program runs correctly
-        run: node eda-modbus-bridge.mjs --help
+        run: node dist/eda-modbus-bridge.js --help

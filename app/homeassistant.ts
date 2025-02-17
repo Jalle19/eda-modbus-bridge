@@ -1,4 +1,4 @@
-import { getDeviceInformation } from './modbus.mjs'
+import { getDeviceInformation } from './modbus'
 import {
     TOPIC_NAME_STATUS,
     TOPIC_PREFIX_ALARM,
@@ -6,13 +6,23 @@ import {
     TOPIC_PREFIX_MODE,
     TOPIC_PREFIX_READINGS,
     TOPIC_PREFIX_SETTINGS,
-} from './mqtt.mjs'
-import { createLogger } from './logger.mjs'
-import { AUTOMATION_TYPE_LEGACY_EDA, AUTOMATION_TYPE_MD, AVAILABLE_ALARMS, createModelNameString } from './enervent.mjs'
+} from './mqtt'
+import { createLogger } from './logger'
+import {
+    AlarmDescription,
+    AutomationType,
+    AVAILABLE_ALARMS,
+    createModelNameString,
+    DeviceInformation,
+} from './enervent'
+import ModbusRTU from 'modbus-serial'
+import { MqttClient } from 'mqtt'
+
+type EntityConfiguration = object
 
 const logger = createLogger('homeassistant')
 
-export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
+export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient: MqttClient) => {
     // Build information about the ventilation unit. The "deviceIdentifier" is used as <node_id> in discovery topic
     // names, so it must match [a-zA-Z0-9_-].
     const modbusDeviceInformation = await getDeviceInformation(modbusClient)
@@ -157,21 +167,21 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             configurationBase,
             'controlPanel1Temperature',
             'Control panel #1 temperature',
-            { 'enabled_by_default': automationType === AUTOMATION_TYPE_MD }
+            { 'enabled_by_default': automationType === AutomationType.MD }
         ),
         'controlPanel2Temperature': createTemperatureSensorConfiguration(
             configurationBase,
             'controlPanel2Temperature',
             'Control panel #2 temperature',
-            { 'enabled_by_default': automationType === AUTOMATION_TYPE_MD }
+            { 'enabled_by_default': automationType === AutomationType.MD }
         ),
         'supplyFanSpeed': createSensorConfiguration(configurationBase, 'supplyFanSpeed', 'Supply fan speed', {
             'unit_of_measurement': '%',
-            'enabled_by_default': automationType === AUTOMATION_TYPE_MD,
+            'enabled_by_default': automationType === AutomationType.MD,
         }),
         'exhaustFanSpeed': createSensorConfiguration(configurationBase, 'exhaustFanSpeed', 'Exhaust fan speed', {
             'unit_of_measurement': '%',
-            'enabled_by_default': automationType === AUTOMATION_TYPE_MD,
+            'enabled_by_default': automationType === AutomationType.MD,
         }),
     }
 
@@ -248,7 +258,7 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             'eco',
             'Eco',
             // Not supported by some units
-            { 'enabled_by_default': automationType === AUTOMATION_TYPE_MD }
+            { 'enabled_by_default': automationType === AutomationType.MD }
         ),
         // Settings switches
         'coolingAllowed': createSettingSwitchConfiguration(
@@ -256,42 +266,42 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
             'coolingAllowed',
             'Cooling allowed',
             // Not supported by some units
-            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
+            { 'enabled_by_default': automationType !== AutomationType.LEGACY_EDA }
         ),
         'heatingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'heatingAllowed',
             'Heating allowed',
             // Not supported by some units
-            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
+            { 'enabled_by_default': automationType !== AutomationType.LEGACY_EDA }
         ),
         'awayCoolingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'awayCoolingAllowed',
             'Cooling allowed (away mode)',
             // Not supported by some units
-            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
+            { 'enabled_by_default': automationType !== AutomationType.LEGACY_EDA }
         ),
         'awayHeatingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'awayHeatingAllowed',
             'Heating allowed (away mode)',
             // Not supported by some units
-            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
+            { 'enabled_by_default': automationType !== AutomationType.LEGACY_EDA }
         ),
         'longAwayCoolingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'longAwayCoolingAllowed',
             'Cooling allowed (long away mode)',
             // Not supported by some units
-            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
+            { 'enabled_by_default': automationType !== AutomationType.LEGACY_EDA }
         ),
         'longAwayHeatingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'longAwayHeatingAllowed',
             'Heating allowed (long away mode)',
             // Not supported by some units
-            { 'enabled_by_default': automationType !== AUTOMATION_TYPE_LEGACY_EDA }
+            { 'enabled_by_default': automationType !== AutomationType.LEGACY_EDA }
         ),
         'defrostingAllowed': createSettingSwitchConfiguration(
             configurationBase,
@@ -304,7 +314,10 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
     let binarySensorConfigurationMap = {}
 
     for (const alarm of AVAILABLE_ALARMS) {
-        binarySensorConfigurationMap[alarm.name] = createAlarmConfiguration(configurationBase, alarm)
+        binarySensorConfigurationMap = {
+            ...binarySensorConfigurationMap,
+            [alarm.name]: createAlarmConfiguration(configurationBase, alarm),
+        }
     }
 
     // Binary sensors for device state
@@ -373,18 +386,23 @@ export const configureMqttDiscovery = async (modbusClient, mqttClient) => {
 
             // "retain" is used so that the entities will be available immediately after a Home Assistant restart
             logger.debug(`Publishing Home Assistant auto-discovery configuration for ${entityType} "${entityName}"...`)
-            await mqttClient.publish(configurationTopicName, JSON.stringify(configuration), {
+            await mqttClient.publishAsync(configurationTopicName, JSON.stringify(configuration), {
                 retain: true,
             })
         }
     }
 }
 
-export const createDeviceIdentifierString = (modbusDeviceInformation) => {
+export const createDeviceIdentifierString = (modbusDeviceInformation: Partial<DeviceInformation>) => {
     return `enervent-${modbusDeviceInformation.modelType}-${modbusDeviceInformation.fanType}`.toLowerCase()
 }
 
-const createTemperatureSensorConfiguration = (configurationBase, readingName, entityName, extraProperties) => {
+const createTemperatureSensorConfiguration = (
+    configurationBase: EntityConfiguration,
+    readingName: string,
+    entityName: string,
+    extraProperties?: EntityConfiguration
+): EntityConfiguration => {
     if (!extraProperties) {
         extraProperties = {}
     }
@@ -396,7 +414,12 @@ const createTemperatureSensorConfiguration = (configurationBase, readingName, en
     })
 }
 
-const createHumiditySensorConfiguration = (configurationBase, readingName, entityName, extraProperties) => {
+const createHumiditySensorConfiguration = (
+    configurationBase: EntityConfiguration,
+    readingName: string,
+    entityName: string,
+    extraProperties?: EntityConfiguration
+): EntityConfiguration => {
     if (!extraProperties) {
         extraProperties = {}
     }
@@ -408,7 +431,12 @@ const createHumiditySensorConfiguration = (configurationBase, readingName, entit
     })
 }
 
-const createSensorConfiguration = (configurationBase, readingName, entityName, extraProperties) => {
+const createSensorConfiguration = (
+    configurationBase: EntityConfiguration,
+    readingName: string,
+    entityName: string,
+    extraProperties?: EntityConfiguration
+): EntityConfiguration => {
     if (!extraProperties) {
         extraProperties = {}
     }
@@ -424,7 +452,12 @@ const createSensorConfiguration = (configurationBase, readingName, entityName, e
     }
 }
 
-const createNumberConfiguration = (configurationBase, settingName, entityName, extraProperties) => {
+const createNumberConfiguration = (
+    configurationBase: EntityConfiguration,
+    settingName: string,
+    entityName: string,
+    extraProperties?: EntityConfiguration
+): EntityConfiguration => {
     if (!extraProperties) {
         extraProperties = {}
     }
@@ -441,7 +474,12 @@ const createNumberConfiguration = (configurationBase, settingName, entityName, e
     }
 }
 
-const createModeSwitchConfiguration = (configurationBase, modeName, entityName, extraProperties) => {
+const createModeSwitchConfiguration = (
+    configurationBase: EntityConfiguration,
+    modeName: string,
+    entityName: string,
+    extraProperties?: EntityConfiguration
+): EntityConfiguration => {
     if (!extraProperties) {
         extraProperties = {}
     }
@@ -458,7 +496,12 @@ const createModeSwitchConfiguration = (configurationBase, modeName, entityName, 
     }
 }
 
-const createSettingSwitchConfiguration = (configurationBase, settingName, entityName, extraProperties) => {
+const createSettingSwitchConfiguration = (
+    configurationBase: EntityConfiguration,
+    settingName: string,
+    entityName: string,
+    extraProperties?: EntityConfiguration
+): EntityConfiguration => {
     if (!extraProperties) {
         extraProperties = {}
     }
@@ -474,7 +517,10 @@ const createSettingSwitchConfiguration = (configurationBase, settingName, entity
     }
 }
 
-const createAlarmConfiguration = (configurationBase, alarm) => {
+const createAlarmConfiguration = (
+    configurationBase: EntityConfiguration,
+    alarm: AlarmDescription
+): EntityConfiguration => {
     return {
         ...configurationBase,
         'unique_id': `eda-${alarm.name}`,
@@ -486,7 +532,11 @@ const createAlarmConfiguration = (configurationBase, alarm) => {
     }
 }
 
-const createDeviceStateConfiguration = (configurationBase, stateName, entityName) => {
+const createDeviceStateConfiguration = (
+    configurationBase: EntityConfiguration,
+    stateName: string,
+    entityName: string
+): EntityConfiguration => {
     return {
         ...configurationBase,
         // Must not collide with switch names for the same thing, e.g. "away"
@@ -498,7 +548,11 @@ const createDeviceStateConfiguration = (configurationBase, stateName, entityName
     }
 }
 
-const createButtonConfiguration = (configurationBase, buttonName, entityName) => {
+const createButtonConfiguration = (
+    configurationBase: EntityConfiguration,
+    buttonName: string,
+    entityName: string
+): EntityConfiguration => {
     return {
         ...configurationBase,
         'unique_id': `eda-button-${buttonName}`,
@@ -508,7 +562,12 @@ const createButtonConfiguration = (configurationBase, buttonName, entityName) =>
     }
 }
 
-const createSelectConfiguration = (configurationBase, selectName, entityName, options) => {
+const createSelectConfiguration = (
+    configurationBase: EntityConfiguration,
+    selectName: string,
+    entityName: string,
+    options: string[]
+) => {
     return {
         ...configurationBase,
         'unique_id': `eda-select-${selectName}`,

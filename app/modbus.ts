@@ -1,9 +1,8 @@
 import { Mutex } from 'async-mutex'
-import { createLogger } from './logger.mjs'
+import { createLogger } from './logger'
 import {
-    AUTOMATION_HEATING_TYPE_EDW,
-    AUTOMATION_TYPE_LEGACY_EDA,
-    AUTOMATION_TYPE_MD,
+    AlarmIncident,
+    AutomationType,
     AVAILABLE_ALARMS,
     AVAILABLE_MODES,
     AVAILABLE_SETTINGS,
@@ -18,22 +17,43 @@ import {
     parseAnalogSensors,
     parseStateBitField,
     parseTemperature,
-} from './enervent.mjs'
+    DeviceInformation,
+    ModeSummary,
+    Readings,
+    Settings,
+    AlarmStatus,
+    AutomationHeatingType,
+} from './enervent'
+import ModbusRTU from 'modbus-serial'
+import { ReadCoilResult, ReadRegisterResult } from 'modbus-serial/ModbusRTU'
 
-export const MODBUS_DEVICE_TYPE = {
-    'RTU': 'rtu',
-    'TCP': 'tcp',
+export enum ModbusDeviceType {
+    RTU = 'RTU',
+    TCP = 'TCP',
 }
+
+export type ModbusRtuDevice = {
+    type: ModbusDeviceType
+    path: string
+}
+
+export type ModbusTcpDevice = {
+    type: ModbusDeviceType
+    hostname: string
+    port: number
+}
+
+export type ModbusDevice = ModbusRtuDevice | ModbusTcpDevice
 
 const mutex = new Mutex()
 const logger = createLogger('modbus')
 
 // Runtime cache for device information (retrieved once per run only since the information doesn't change)
-let CACHED_DEVICE_INFORMATION
+let CACHED_DEVICE_INFORMATION: DeviceInformation
 
-export const getModeSummary = async (modbusClient) => {
+export const getModeSummary = async (modbusClient: ModbusRTU): Promise<ModeSummary> => {
     let result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 0, 13))
-    let summary = {
+    let summary: ModeSummary = {
         // 'stop': result.data[0], // - Can not return value if stopped.
         'away': result.data[1],
         'longAway': result.data[2],
@@ -48,7 +68,7 @@ export const getModeSummary = async (modbusClient) => {
 
     // "eco" is a newfangled thing only available on newer units
     const deviceInformation = await getDeviceInformation(modbusClient)
-    if (deviceInformation.automationType === AUTOMATION_TYPE_MD) {
+    if (deviceInformation.automationType === AutomationType.MD) {
         result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 40, 1))
         summary = {
             ...summary,
@@ -59,7 +79,7 @@ export const getModeSummary = async (modbusClient) => {
     return summary
 }
 
-export const getMode = async (modbusClient, mode) => {
+export const getMode = async (modbusClient: ModbusRTU, mode: string) => {
     if (AVAILABLE_MODES[mode] === undefined) {
         throw new Error('Unknown mode')
     }
@@ -69,7 +89,7 @@ export const getMode = async (modbusClient, mode) => {
     return result.data[0]
 }
 
-export const setMode = async (modbusClient, mode, value) => {
+export const setMode = async (modbusClient: ModbusRTU, mode: string, value: boolean) => {
     if (AVAILABLE_MODES[mode] === undefined) {
         throw new Error('Unknown mode')
     }
@@ -82,7 +102,7 @@ export const setMode = async (modbusClient, mode, value) => {
     }
 }
 
-const disableAllModesExcept = async (modbusClient, exceptedMode) => {
+const disableAllModesExcept = async (modbusClient: ModbusRTU, exceptedMode: string) => {
     for (const mode in MUTUALLY_EXCLUSIVE_MODES) {
         if (mode === exceptedMode) {
             continue
@@ -92,11 +112,11 @@ const disableAllModesExcept = async (modbusClient, exceptedMode) => {
     }
 }
 
-export const getReadings = async (modbusClient) => {
+export const getReadings = async (modbusClient: ModbusRTU): Promise<Readings> => {
     logger.debug('Retrieving device readings...')
 
     let result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 6, 8))
-    let readings = {
+    let readings: Partial<Readings> = {
         'freshAirTemperature': parseTemperature(result.data[0]),
         'supplyAirTemperatureAfterHeatRecovery': parseTemperature(result.data[1]),
         'supplyAirTemperature': parseTemperature(result.data[2]),
@@ -160,7 +180,7 @@ export const getReadings = async (modbusClient) => {
 
     // Sensors that only work reliably on MD automation devices
     const deviceInformation = await getDeviceInformation(modbusClient)
-    if (deviceInformation.automationType === AUTOMATION_TYPE_MD) {
+    if (deviceInformation.automationType === AutomationType.MD) {
         result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 1, 4))
         readings = {
             ...readings,
@@ -175,7 +195,7 @@ export const getReadings = async (modbusClient) => {
     // While the value stored in both registers are always identical we publish two separate
     // sensors to avoid confusion.
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 11, 2))
-    if (deviceInformation.heatingTypeInstalled === AUTOMATION_HEATING_TYPE_EDW) {
+    if (deviceInformation.heatingTypeInstalled === AutomationHeatingType.EDW) {
         readings = {
             ...readings,
             'returnWaterTemperature': parseTemperature(result.data[1]),
@@ -187,14 +207,16 @@ export const getReadings = async (modbusClient) => {
         }
     }
 
-    return readings
+    return readings as Readings
 }
 
-export const getSettings = async (modbusClient) => {
+export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> => {
     logger.debug('Retrieving device settings...')
 
-    let result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 57, 1))
-    let settings = {
+    let result: ReadRegisterResult | ReadCoilResult
+
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 57, 1))
+    let settings: Partial<Settings> = {
         'overPressureDelay': result.data[0],
     }
 
@@ -217,7 +239,7 @@ export const getSettings = async (modbusClient) => {
     // Heating/cooling/heat recovery enabled in normal/away/long away modes (not available on some devices).
     // Note that the register order is swapped when querying register 18-21 compared to 52-55.
     const deviceInformation = await getDeviceInformation(modbusClient)
-    if (deviceInformation.automationType !== AUTOMATION_TYPE_LEGACY_EDA) {
+    if (deviceInformation.automationType !== AutomationType.LEGACY_EDA) {
         result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 52, 3))
         settings = {
             ...settings,
@@ -242,17 +264,37 @@ export const getSettings = async (modbusClient) => {
         'defrostingAllowed': result.data[0],
     }
 
-    return settings
+    return settings as Settings
 }
 
-export const setSetting = async (modbusClient, setting, value) => {
+export const setSetting = async (modbusClient: ModbusRTU, setting: string, value: string | boolean) => {
     const dataAddress = AVAILABLE_SETTINGS[setting]
     if (dataAddress === undefined) {
         throw new Error('Unknown setting')
     }
 
-    let coil = false
-    let intValue = parseInt(value, 10)
+    switch (typeof value) {
+        case 'string':
+            return setIntegerSetting(modbusClient, setting, parseInt(value, 10))
+        case 'boolean':
+            return setBooleanSetting(modbusClient, setting, value)
+    }
+}
+
+const setBooleanSetting = async (modbusClient: ModbusRTU, setting: string, boolValue: boolean) => {
+    const dataAddress = AVAILABLE_SETTINGS[setting]
+    if (dataAddress === undefined) {
+        throw new Error('Unknown setting')
+    }
+
+    await mutex.runExclusive(async () => tryWriteCoil(modbusClient, dataAddress, boolValue))
+}
+
+const setIntegerSetting = async (modbusClient: ModbusRTU, setting: string, intValue: number) => {
+    const dataAddress = AVAILABLE_SETTINGS[setting]
+    if (dataAddress === undefined) {
+        throw new Error('Unknown setting')
+    }
 
     switch (setting) {
         case 'awayVentilationLevel':
@@ -280,35 +322,23 @@ export const setSetting = async (modbusClient, setting, value) => {
             // No minimum/maximum values specified in the register documentation
             intValue *= 10
             break
-        case 'coolingAllowed':
-        case 'heatingAllowed':
-        case 'awayCoolingAllowed':
-        case 'awayHeatingAllowed':
-        case 'longAwayCoolingAllowed':
-        case 'longAwayHeatingAllowed':
-        case 'defrostingAllowed':
-            coil = true
-            break
     }
 
-    // This isn't very nice, but it's good enough for now
-    if (coil) {
-        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, dataAddress, value))
-    } else {
-        await mutex.runExclusive(async () => tryWriteHoldingRegister(modbusClient, dataAddress, intValue))
-    }
+    await mutex.runExclusive(async () => tryWriteHoldingRegister(modbusClient, dataAddress, intValue))
 }
 
-export const getDeviceInformation = async (modbusClient) => {
+export const getDeviceInformation = async (modbusClient: ModbusRTU): Promise<DeviceInformation> => {
     if (CACHED_DEVICE_INFORMATION) {
         return CACHED_DEVICE_INFORMATION
     }
 
     logger.debug('Retrieving device information...')
 
+    let result: ReadRegisterResult | ReadCoilResult
+
     // Start by reading the firmware version and determining the firmware type
-    let result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 599, 1))
-    let deviceInformation = {
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 599, 1))
+    let deviceInformation: Partial<DeviceInformation> = {
         'softwareVersion': result.data[0] / 100,
         'automationType': determineAutomationType(result.data[0]),
     }
@@ -351,26 +381,26 @@ export const getDeviceInformation = async (modbusClient) => {
         'modbusAddress': result.data[0],
     }
 
-    CACHED_DEVICE_INFORMATION = deviceInformation
-    return deviceInformation
+    CACHED_DEVICE_INFORMATION = deviceInformation as DeviceInformation
+    return deviceInformation as DeviceInformation
 }
 
-export const getAlarmSummary = async (modbusClient) => {
-    const alarmSummary = []
+export const getAlarmSummary = async (modbusClient: ModbusRTU): Promise<AlarmStatus[]> => {
+    const alarmSummary: AlarmStatus[] = []
     const newestAlarm = await getNewestAlarm(modbusClient)
 
     for (const alarm of AVAILABLE_ALARMS) {
         // Add each available alarm and have the state reflect the currently active alarm's state, if any
         alarmSummary.push({
             ...alarm,
-            state: alarm.type === newestAlarm?.type ? newestAlarm?.state : 0,
+            state: alarm.type === newestAlarm?.type ? newestAlarm.state : 0,
         })
     }
 
     return alarmSummary
 }
 
-export const getNewestAlarm = async (modbusClient) => {
+export const getNewestAlarm = async (modbusClient: ModbusRTU): Promise<AlarmIncident | null> => {
     const result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 385, 7))
 
     const type = result.data[0]
@@ -389,39 +419,39 @@ export const getNewestAlarm = async (modbusClient) => {
     }
 }
 
-export const acknowledgeAlarm = async (modbusClient) => {
+export const acknowledgeAlarm = async (modbusClient: ModbusRTU) => {
     await tryWriteHoldingRegister(modbusClient, 386, 1)
 }
 
-export const getDeviceState = async (modbusClient) => {
+export const getDeviceState = async (modbusClient: ModbusRTU) => {
     const result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 44, 1))
 
     return parseStateBitField(result.data[0])
 }
 
-export const validateDevice = (device) => {
+export const validateDevice = (device: string) => {
     return device.startsWith('/') || device.startsWith('tcp://')
 }
 
-export const parseDevice = (device) => {
+export const parseDevice = (device: string): ModbusDevice => {
     if (device.startsWith('/')) {
         // Serial device
         return {
-            type: MODBUS_DEVICE_TYPE.RTU,
+            type: ModbusDeviceType.RTU,
             path: device,
         }
     } else {
         // TCP URL
         const deviceUrl = new URL(device)
         return {
-            type: MODBUS_DEVICE_TYPE.TCP,
+            type: ModbusDeviceType.TCP,
             hostname: deviceUrl.hostname,
             port: parseInt(deviceUrl.port, 10),
         }
     }
 }
 
-const tryReadCoils = async (modbusClient, dataAddress, length) => {
+const tryReadCoils = async (modbusClient: ModbusRTU, dataAddress: number, length: number) => {
     try {
         logger.debug(`Reading coil address ${dataAddress}, length ${length}`)
         return await modbusClient.readCoils(dataAddress, length)
@@ -431,7 +461,7 @@ const tryReadCoils = async (modbusClient, dataAddress, length) => {
     }
 }
 
-const tryWriteCoil = async (modbusClient, dataAddress, value) => {
+const tryWriteCoil = async (modbusClient: ModbusRTU, dataAddress: number, value: boolean) => {
     try {
         logger.debug(`Writing ${value} to coil address ${dataAddress}`)
         return await modbusClient.writeCoil(dataAddress, value)
@@ -441,7 +471,7 @@ const tryWriteCoil = async (modbusClient, dataAddress, value) => {
     }
 }
 
-const tryReadHoldingRegisters = async (modbusClient, dataAddress, length) => {
+const tryReadHoldingRegisters = async (modbusClient: ModbusRTU, dataAddress: number, length: number) => {
     try {
         logger.debug(`Reading holding register address ${dataAddress}, length ${length}`)
         return await modbusClient.readHoldingRegisters(dataAddress, length)
@@ -451,7 +481,7 @@ const tryReadHoldingRegisters = async (modbusClient, dataAddress, length) => {
     }
 }
 
-const tryWriteHoldingRegister = async (modbusClient, dataAddress, value) => {
+const tryWriteHoldingRegister = async (modbusClient: ModbusRTU, dataAddress: number, value: number) => {
     try {
         logger.debug(`Writing ${value} to holding register address ${dataAddress}`)
         return await modbusClient.writeRegister(dataAddress, value)

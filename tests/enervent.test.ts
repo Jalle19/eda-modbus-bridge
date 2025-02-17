@@ -1,16 +1,15 @@
 import {
+    AutomationType,
     createModelNameString,
     determineAutomationType,
-    AUTOMATION_TYPE_EDA,
-    AUTOMATION_TYPE_LEGACY_EDA,
-    AUTOMATION_TYPE_MD,
     getAutomationAndHeatingTypeName,
     getDeviceFamilyName,
     parseAlarmTimestamp,
     parseAnalogSensors,
     parseStateBitField,
     parseTemperature,
-} from '../app/enervent.mjs'
+} from '../app/enervent'
+import { ReadRegisterResult } from 'modbus-serial/ModbusRTU'
 
 test('parse temperature', () => {
     // Positive, float
@@ -52,7 +51,7 @@ test('create model name from device information', () => {
 })
 
 test('parse alarm timestamp', () => {
-    const alarmResult = {
+    const alarmResult: ReadRegisterResult = {
         data: [
             10, // type
             2, // state,
@@ -62,6 +61,7 @@ test('parse alarm timestamp', () => {
             13, // hour
             45, // minute
         ],
+        buffer: Buffer.of(),
     }
 
     const timestamp = parseAlarmTimestamp(alarmResult)
@@ -170,20 +170,20 @@ test('parse state bitfield', () => {
 
 test('parseAnalogSensors', () => {
     // No sensors configured
-    let typesResult = { data: [0, 0, 0, 0, 0, 0] }
-    let valuesResult = { data: [0, 0, 0, 0, 0, 0] }
+    let typesResult: ReadRegisterResult = { data: [0, 0, 0, 0, 0, 0], buffer: Buffer.of() }
+    let valuesResult: ReadRegisterResult = { data: [0, 0, 0, 0, 0, 0], buffer: Buffer.of() }
     expect(parseAnalogSensors(typesResult, valuesResult)).toEqual({})
 
     // Single CO2 sensor
-    typesResult = { data: [1, 0, 0, 0, 0, 0] }
-    valuesResult = { data: [450, 0, 0, 0, 0, 0] }
+    typesResult.data = [1, 0, 0, 0, 0, 0]
+    valuesResult.data = [450, 0, 0, 0, 0, 0]
     expect(parseAnalogSensors(typesResult, valuesResult)).toEqual({
         'analogInputCo21': 450,
     })
 
     // Multitude of sensors, including ones we don't support
-    typesResult = { data: [1, 2, 4, 7, 8, 9] }
-    valuesResult = { data: [450, 481, 45, 210, 192, 201] }
+    typesResult.data = [1, 2, 4, 7, 8, 9]
+    valuesResult.data = [450, 481, 45, 210, 192, 201]
     expect(parseAnalogSensors(typesResult, valuesResult)).toEqual({
         'analogInputCo21': 450,
         'analogInputCo22': 481,
@@ -195,11 +195,11 @@ test('parseAnalogSensors', () => {
 
 test('determineAutomationType', () => {
     // https://github.com/Jalle19/eda-modbus-bridge/issues/104#issuecomment-1917709559
-    expect(determineAutomationType(217)).toEqual(AUTOMATION_TYPE_EDA)
-    expect(determineAutomationType(142)).toEqual(AUTOMATION_TYPE_MD)
-    expect(determineAutomationType(118)).toEqual(AUTOMATION_TYPE_MD)
-    expect(determineAutomationType(201)).toEqual(AUTOMATION_TYPE_LEGACY_EDA)
-    expect(determineAutomationType(554)).toEqual(AUTOMATION_TYPE_EDA)
-    expect(determineAutomationType(197)).toEqual(AUTOMATION_TYPE_LEGACY_EDA)
-    expect(determineAutomationType(194)).toEqual(AUTOMATION_TYPE_LEGACY_EDA)
+    expect(determineAutomationType(217)).toEqual(AutomationType.EDA)
+    expect(determineAutomationType(142)).toEqual(AutomationType.MD)
+    expect(determineAutomationType(118)).toEqual(AutomationType.MD)
+    expect(determineAutomationType(201)).toEqual(AutomationType.LEGACY_EDA)
+    expect(determineAutomationType(554)).toEqual(AutomationType.EDA)
+    expect(determineAutomationType(197)).toEqual(AutomationType.LEGACY_EDA)
+    expect(determineAutomationType(194)).toEqual(AutomationType.LEGACY_EDA)
 })

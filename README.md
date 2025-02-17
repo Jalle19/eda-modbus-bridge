@@ -34,7 +34,7 @@ unit's computer board, or alternatively using Modbus TCP for newer units that ca
 
 ## Requirements
 
-* Node.js 14.x or newer
+* Node.js 18.x or newer
 * An Enervent ventilation unit with EDA or MD automation (Pingvin, Pandion, Pelican and LTR-3 confirmed working)
 * An RS-485 device (e.g. `/dev/ttyUSB0`) connected to the Enervent unit's Freeway port (see 
   [docs/CONNECTION.md](./docs/CONNECTION.md) for details on how to connect to the unit). Newer units that can be
@@ -48,11 +48,12 @@ The following instructions will install the application to `/opt/eda-modbus-brid
 sudo su -
 git clone https://github.com/Jalle19/eda-modbus-bridge.git /opt/eda-modbus-bridge
 cd /opt/eda-modbus-bridge
-npm install --omit=dev
+npm install
+npm run build
 ```
 
 That's it, the application is now installed. You can run it manually with 
-`node /opt/eda-modbus-bridge/eda-modbus-bridge.mjs`, or see the next chapter on how to run it as a system service.
+`node /opt/eda-modbus-bridge/dist/eda-modbus-bridge.js`, or see the next chapter on how to run it as a system service.
 
 ### Running as a systemd service
 
@@ -82,7 +83,7 @@ See https://github.com/Jalle19/home-assistant-addon-repository/tree/main/eda-mod
 ## Usage
 
 ```
-node eda-modbus-bridge.mjs [options]
+node dist/eda-modbus-bridge.js [options]
 
 Options:
       --help                 Show help                                 [boolean]

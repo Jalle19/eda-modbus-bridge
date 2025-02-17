@@ -1,4 +1,4 @@
-import { validateDevice, parseDevice, MODBUS_DEVICE_TYPE } from '../app/modbus.mjs'
+import { validateDevice, parseDevice, ModbusDeviceType } from '../app/modbus'
 
 test('validateDevice', () => {
     expect(validateDevice('/dev/ttyUSB0')).toEqual(true)
@@ -9,16 +9,16 @@ test('validateDevice', () => {
 
 test('parseDevice', () => {
     expect(parseDevice('/dev/ttyUSB0')).toEqual({
-        type: MODBUS_DEVICE_TYPE.RTU,
+        type: ModbusDeviceType.RTU,
         path: '/dev/ttyUSB0',
     })
     expect(parseDevice('tcp://localhost:502')).toEqual({
-        type: MODBUS_DEVICE_TYPE.TCP,
+        type: ModbusDeviceType.TCP,
         hostname: 'localhost',
         port: 502,
     })
     expect(parseDevice('tcp://127.0.0.1:502')).toEqual({
-        type: MODBUS_DEVICE_TYPE.TCP,
+        type: ModbusDeviceType.TCP,
         hostname: '127.0.0.1',
         port: 502,
     })

@@ -1,0 +1,14 @@
+{
+  "extends": "@tsconfig/node14/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "allowJs": false,
+    "lib": [
+      "es2020",
+      "dom"
+    ]
+  },
+  "include": [
+    "./eda-modbus-bridge.ts", "./src/**/*.ts"
+  ]
+}
