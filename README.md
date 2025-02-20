@@ -165,6 +165,9 @@ in Home Assistant automatically through the MQTT integration. The following enti
   state require a restart of the unit to resume normal operation. However, the unit cannot be restarted via Modbus 
   (at least not officially), so it's best to acknowledge such alarms manually.
 
+* Some readings may be nonsensical depending on the exact ventilation unit used, e.g. "Exhaust air temperature 
+  (before heat recovery)" can erroneously show -40 °C.
+
 ## Troubleshooting
 
 See [docs/CONNECTION.md](./docs/CONNECTION.md)
