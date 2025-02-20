@@ -22,7 +22,7 @@ import {
     Readings,
     Settings,
     AlarmStatus,
-    AutomationHeatingType,
+    HeatingType,
 } from './enervent'
 import ModbusRTU from 'modbus-serial'
 import { ReadCoilResult, ReadRegisterResult } from 'modbus-serial/ModbusRTU'
@@ -195,7 +195,7 @@ export const getReadings = async (modbusClient: ModbusRTU): Promise<Readings> =>
     // While the value stored in both registers are always identical we publish two separate
     // sensors to avoid confusion.
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 11, 2))
-    if (deviceInformation.heatingTypeInstalled === AutomationHeatingType.EDW) {
+    if (deviceInformation.heatingTypeInstalled === HeatingType.EDW) {
         readings = {
             ...readings,
             'returnWaterTemperature': parseTemperature(result.data[1]),
