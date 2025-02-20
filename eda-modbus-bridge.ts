@@ -34,6 +34,12 @@ const argv = yargs(process.argv.slice(2))
             default: 1,
             alias: 's',
         },
+        'modbusTimeout': {
+            description: 'The timeout for Modbus operations (in seconds)',
+            type: 'number',
+            default: 5,
+            alias: 't',
+        },
         'http': {
             description: 'Whether to enable the HTTP server or not',
             type: 'boolean',
@@ -100,11 +106,13 @@ void (async () => {
         logger.error(`Malformed Modbus device ${argv.device} specified, exiting`)
         process.exit(1)
     }
-    logger.info(`Opening Modbus connection to ${argv.device}, slave ID ${argv.modbusSlave}`)
+    logger.info(
+        `Opening Modbus connection to ${argv.device}, slave ID ${argv.modbusSlave}, ${argv.modbusTimeout} second timeout`
+    )
     const modbusDevice = parseDevice(argv.device)
     const modbusClient = new ModbusRTU()
     modbusClient.setID(argv.modbusSlave)
-    modbusClient.setTimeout(5000) // 5 seconds
+    modbusClient.setTimeout(argv.modbusTimeout * 1000)
 
     // Use buffered RTU or TCP depending on device type
     if (modbusDevice.type === ModbusDeviceType.RTU) {
