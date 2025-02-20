@@ -193,7 +193,7 @@ export const ANALOG_INPUT_SENSOR_TYPES: AnalogInput[] = [
 
 type AnalogSensorReadings = Record<string, number>
 
-export enum AutomationHeatingType {
+export enum HeatingType {
     ED = 'ED/MD',
     EDW = 'EDW/MDW',
     EDX = 'EDX/MDX',
@@ -261,10 +261,10 @@ export const getAutomationAndHeatingTypeName = (heatingType: number): string => 
     // M prefix is used for units with MD automation
     return (
         [
-            AutomationHeatingType.ED, // prettier-hack
-            AutomationHeatingType.EDW,
-            AutomationHeatingType.EDX,
-            AutomationHeatingType.EDE,
+            HeatingType.ED, // prettier-hack
+            HeatingType.EDW,
+            HeatingType.EDX,
+            HeatingType.EDE,
         ][heatingType] || 'unknown'
     )
 }
