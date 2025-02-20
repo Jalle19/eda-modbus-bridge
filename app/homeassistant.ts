@@ -10,6 +10,7 @@ import {
 import { createLogger } from './logger'
 import {
     AlarmDescription,
+    HeatingType,
     AutomationType,
     AVAILABLE_ALARMS,
     createModelNameString,
@@ -28,6 +29,7 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
     const modbusDeviceInformation = await getDeviceInformation(modbusClient)
     const softwareVersion = modbusDeviceInformation.softwareVersion
     const automationType = modbusDeviceInformation.automationType
+    const heatingType = modbusDeviceInformation.heatingTypeInstalled
     const modelName = createModelNameString(modbusDeviceInformation)
     const deviceIdentifier = createDeviceIdentifierString(modbusDeviceInformation)
 
@@ -68,6 +70,18 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
             configurationBase,
             'exhaustAirTemperature',
             'Exhaust air temperature'
+        ),
+        'exhaustAirTemperatureBeforeHeatRecovery': createTemperatureSensorConfiguration(
+            configurationBase,
+            'exhaustAirTemperatureBeforeHeatRecovery',
+            'Exhaust air temperature (before heat recovery)',
+            { 'enabled_by_default': heatingType !== HeatingType.EDW }
+        ),
+        'returnWaterTemperature': createTemperatureSensorConfiguration(
+            configurationBase,
+            'returnWaterTemperature',
+            'Return water temperature',
+            { 'enabled_by_default': heatingType === HeatingType.EDW }
         ),
         'wasteAirTemperature': createTemperatureSensorConfiguration(
             configurationBase,
