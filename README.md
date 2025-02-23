@@ -159,7 +159,9 @@ in Home Assistant automatically through the MQTT integration. The following enti
 * Older firmware (e.g. Pingvin devices with software version 2.01) only support a smaller list of Modbus registers, so 
   some functionality may be missing. Open an issue if you feel like something isn't working that should be working. 
   Unsupported functionality is indicated by the corresponding sensor being disabled in Home Assistant, and the readings 
-  missing from the `/summary` HTTP endpoint.
+  missing from the `/summary` HTTP endpoint. However, some functionality cannot be reliably detected as available or 
+  not available, so try enabling any disabled sensors you're interested in to see if they actually report some values.
+  This seems to be especially common on Pandion units (or any unit that use firmware version 5.x).
 
 * While it's possible to acknowledge any active alarm, serious alarms that cause the unit to enter the "emergency stop" 
   state require a restart of the unit to resume normal operation. However, the unit cannot be restarted via Modbus 
