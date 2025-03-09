@@ -251,6 +251,26 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
             'max': 30,
             'unit_of_measurement': '°C',
         }),
+        'supplyFanOverPressure': createNumberConfiguration(
+            configurationBase,
+            'supplyFanOverPressure',
+            'Supply fan speed (during overpressure)',
+            {
+                min: 20,
+                max: 100,
+                'unit_of_measurement': '%',
+            }
+        ),
+        'exhaustFanOverPressure': createNumberConfiguration(
+            configurationBase,
+            'exhaustFanOverPressure',
+            'Exhaust fan speed (during overpressure)',
+            {
+                min: 20,
+                max: 100,
+                'unit_of_measurement': '%',
+            }
+        ),
     }
 
     // Configurable switches

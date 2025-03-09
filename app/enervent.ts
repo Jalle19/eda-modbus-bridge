@@ -39,6 +39,8 @@ export const AVAILABLE_SETTINGS: Record<string, number> = {
     'longAwayCoolingAllowed': 21,
     'longAwayHeatingAllowed': 20,
     'defrostingAllowed': 55,
+    'supplyFanOverPressure': 54,
+    'exhaustFanOverPressure': 55,
 }
 
 export type AlarmDescription = {
@@ -134,6 +136,8 @@ export type Settings = {
     longAwayCoolingAllowed?: boolean
     longAwayHeatingAllowed?: boolean
     defrostingAllowed: boolean
+    supplyFanOverPressure: number
+    exhaustFanOverPressure: number
 }
 
 export type DeviceInformation = {

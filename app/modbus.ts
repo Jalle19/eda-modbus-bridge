@@ -264,6 +264,14 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
         'defrostingAllowed': result.data[0],
     }
 
+    // Fan speeds during over-pressurization
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 54, 2))
+    settings = {
+        ...settings,
+        'supplyFanOverPressure': result.data[0],
+        'exhaustFanOverPressure': result.data[1],
+    }
+
     return settings as Settings
 }
 
@@ -321,6 +329,13 @@ const setIntegerSetting = async (modbusClient: ModbusRTU, setting: string, intVa
         case 'longAwayTemperatureReduction':
             // No minimum/maximum values specified in the register documentation
             intValue *= 10
+            break
+        case 'supplyFanOverPressure':
+        case 'exhaustFanOverPressure':
+            if (intValue < 20 || intValue > 100) {
+                throw new RangeError('level out of range')
+            }
+
             break
     }
 
