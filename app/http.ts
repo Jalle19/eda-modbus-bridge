@@ -27,8 +27,6 @@ const summary = async (modbusClient: ModbusRTU, req: Request, res: Response) => 
         const newestAlarm = await getNewestAlarm(modbusClient)
 
         const summary = {
-            // TODO: Remove in next major version
-            'flags': modeSummary,
             'modes': modeSummary,
             'readings': await getReadings(modbusClient),
             'settings': await getSettings(modbusClient),
