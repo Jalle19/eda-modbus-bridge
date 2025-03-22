@@ -90,6 +90,11 @@ const argv = yargs(process.argv.slice(2))
             alias: 'v',
         },
     })
+    .parserConfiguration({
+        // Protect against weird things happening if someone accidentally uses "-option" instead of "--option"
+        'short-option-groups': false,
+        'duplicate-arguments-array': false,
+    })
     .parseSync()
 
 void (async () => {
