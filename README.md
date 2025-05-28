@@ -170,6 +170,11 @@ in Home Assistant automatically through the MQTT integration. The following enti
 * Some readings may be nonsensical depending on the exact ventilation unit used, e.g. "Exhaust air temperature 
   (before heat recovery)" can erroneously show -40 °C.
 
+* The software doesn't handle all Modbus read errors and will sometimes crash if one is encountered. This is a
+  deliberate design choice, because it's not possible to distinguish between Modbus read errors that never work (e.g. 
+  an invalid register) or sporadic errors that can occur every now and then. Generally, once the software has started 
+  and retrieved all values at least once it should no longer crash in the event of a read error.
+
 ## Troubleshooting
 
 See [docs/CONNECTION.md](./docs/CONNECTION.md)
