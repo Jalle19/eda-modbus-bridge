@@ -18,6 +18,8 @@ import { setIntervalAsync } from 'set-interval-async'
 
 const MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS = 5
 
+const logger = createLogger('main')
+
 const argv = yargs(process.argv.slice(2))
     .usage('node $0 [options]')
     .options({
@@ -98,13 +100,10 @@ const argv = yargs(process.argv.slice(2))
     .parseSync()
 
 void (async () => {
-    // Create logger(s)
-    const logger = createLogger('main')
+    // Adjust log level
     if (argv.debug) {
         setLogLevel(logger, 'debug')
     }
-
-    const httpLogger = createLogger('http')
 
     // Create Modbus client. Abort if a malformed device is specified.
     if (!validateDevice(argv.device)) {
@@ -137,6 +136,9 @@ void (async () => {
 
     // Optionally create HTTP server
     if (argv.http) {
+        // Create component-specific logger
+        const httpLogger = createLogger('http')
+
         // Define middleware
         const httpServer = express()
         httpServer.use(expressWinston.logger({ winstonInstance: httpLogger }))
