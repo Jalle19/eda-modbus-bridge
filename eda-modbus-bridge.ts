@@ -99,6 +99,15 @@ const argv = yargs(process.argv.slice(2))
     })
     .parseSync()
 
+const handleError = (err: Error): void => {
+    logger.error(`An exception occurred: ${err.name}: ${err.message}`, err.stack)
+
+    // Re-throw some errors
+    if (err.name === 'PortNotOpenError') {
+        throw err
+    }
+}
+
 void (async () => {
     // Adjust log level
     if (argv.debug) {
@@ -204,8 +213,7 @@ void (async () => {
                 try {
                     await publishValues(modbusClient, mqttClient)
                 } catch (e) {
-                    const err = e as Error
-                    logger.error(`An exception occurred: ${err.name}: ${err.message}`, err.stack)
+                    handleError(e as Error)
                 }
             }, argv.mqttPublishInterval * 1000)
 
@@ -218,8 +226,7 @@ void (async () => {
                 try {
                     await handleMessage(modbusClient, mqttClient, topicName, payload)
                 } catch (e) {
-                    const err = e as Error
-                    logger.error(`An exception occurred: ${err.name}: ${err.message}`, err.stack)
+                    handleError(e as Error)
                 }
             })
 
