@@ -15,8 +15,10 @@ import { configureMqttDiscovery } from './app/homeassistant'
 import { createLogger, setLogLevel } from './app/logger'
 import { ModbusDeviceType, ModbusRtuDevice, ModbusTcpDevice, parseDevice, validateDevice } from './app/modbus'
 import { setIntervalAsync } from 'set-interval-async'
+import { ErrorHandler } from './app/error'
 
 const MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS = 5
+const MAX_SUBSEQUENT_ERRORS = 10
 
 const logger = createLogger('main')
 
@@ -98,15 +100,6 @@ const argv = yargs(process.argv.slice(2))
         'duplicate-arguments-array': false,
     })
     .parseSync()
-
-const handleError = (err: Error): void => {
-    logger.error(`An exception occurred: ${err.name}: ${err.message}`, err.stack)
-
-    // Re-throw some errors
-    if (err.name === 'PortNotOpenError') {
-        throw err
-    }
-}
 
 void (async () => {
     // Adjust log level
@@ -203,6 +196,8 @@ void (async () => {
 
             mqttClient = mqttClient!
 
+            const errorHandler = new ErrorHandler(MAX_SUBSEQUENT_ERRORS)
+
             // Publish device information once only (since it doesn't change)
             await publishDeviceInformation(modbusClient, mqttClient)
 
@@ -212,8 +207,9 @@ void (async () => {
             setIntervalAsync(async () => {
                 try {
                     await publishValues(modbusClient, mqttClient)
+                    errorHandler.resetCounter()
                 } catch (e) {
-                    handleError(e as Error)
+                    errorHandler.handleError(e as Error)
                 }
             }, argv.mqttPublishInterval * 1000)
 
@@ -225,8 +221,9 @@ void (async () => {
             mqttClient.on('message', async (topicName, payload) => {
                 try {
                     await handleMessage(modbusClient, mqttClient, topicName, payload)
+                    errorHandler.resetCounter()
                 } catch (e) {
-                    handleError(e as Error)
+                    errorHandler.handleError(e as Error)
                 }
             })
 

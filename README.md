@@ -141,6 +141,13 @@ in Home Assistant automatically through the MQTT integration. The following enti
 ![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha3.png "Home Assistant sensors")
 ![](https://raw.githubusercontent.com/Jalle19/eda-modbus-bridge/master/docs/readme_ha4.png "Home Assistant configuration")
 
+## Error handling
+
+The application will gracefully handle Modbus read/write errors, up to a maximum of 10 subsequent errors without a 
+succeeding operation in between. After this, the error will not be caught and the application will crash. It is 
+expected that the service manager (systemd or Home Assistant addon) restarts the software automatically in these 
+situations.
+
 ## Known issues
 
 * Some ventilation units sometimes trip the "TE20 Huoneilma kuuma" alarm when Modbus is used and a room temperature 
@@ -169,11 +176,6 @@ in Home Assistant automatically through the MQTT integration. The following enti
 
 * Some readings may be nonsensical depending on the exact ventilation unit used, e.g. "Exhaust air temperature 
   (before heat recovery)" can erroneously show -40 °C.
-
-* The software doesn't handle all Modbus read errors and will sometimes crash if one is encountered. This is a
-  deliberate design choice, because it's not possible to distinguish between Modbus read errors that never work (e.g. 
-  an invalid register) or sporadic errors that can occur every now and then. Generally, once the software has started 
-  and retrieved all values at least once it should no longer crash in the event of a read error.
 
 ## Troubleshooting
 
