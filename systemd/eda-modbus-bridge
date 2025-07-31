@@ -1,0 +1,4 @@
+#
+# Modify these to suit your preferences
+#
+OPTIONS="-d tcp://10.110.1.15:502 -m mqtt://10.110.1.13:1883 -i 30"
