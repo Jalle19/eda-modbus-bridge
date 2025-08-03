@@ -1,5 +1,11 @@
 # Change log
 
+## 3.0.2
+
+* Introduce a new error handler that gracefully handles Modbus read/write errors but also terminates the application 
+  if too many errors occur subsequently
+* Updated Systemd service file which reads command-line arguments from a dedicated file
+
 ## 3.0.1
 
 * Don't catch `PortNotOpenError` errors, fixes issue introduced in 3.0.0 where the program was left in a state it 
