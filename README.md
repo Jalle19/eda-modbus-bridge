@@ -61,18 +61,16 @@ The following instructions assume you've installed the application to `/opt/eda-
 
 ```bash
 sudo cp /opt/eda-modbus-bridge/systemd/eda-modbus-bridge.service /etc/systemd/system/
+sudo cp /opt/eda-modbus-bridge/systemd/eda-modbus-bridge /etc/default/
 sudo systemctl enable eda-modbus-bridge
 sudo systemctl start eda-modbus-bridge
 ```
 
-You can now check that it is running with `sudo systemctl status eda-modbus-bridge`.
-
-If you need to change any command-line options (e.g. to configure the MQTT broker URL), 
-edit `/etc/systemd/system/eda-modbus-bridge`. After you have edited the file you need to reload systemd and restart 
-the application:
+You can now check that it is running with `sudo systemctl status eda-modbus-bridge`. Most likely you'll need to modify 
+the options passed to the application by editing `/etc/default/eda-modbus-bridge`. After you have edited the file you need 
+to the application:
 
 ```bash
-sudo systemctl daemon-reload
 sudo systemctl restart eda-modbus-bridge
 ```
 
