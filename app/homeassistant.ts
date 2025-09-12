@@ -19,7 +19,9 @@ import {
 import ModbusRTU from 'modbus-serial'
 import { MqttClient } from 'mqtt'
 
-type EntityConfiguration = object
+type EntityConfiguration = {
+    [key: string]: unknown
+}
 
 const logger = createLogger('homeassistant')
 
@@ -42,7 +44,7 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
         'manufacturer': 'Enervent',
     }
 
-    const configurationBase = {
+    const configurationBase: EntityConfiguration = {
         'platform': 'mqtt',
         'availability_topic': TOPIC_NAME_STATUS,
         'device': mqttDeviceInformation,
