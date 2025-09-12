@@ -23,6 +23,7 @@ import {
     Settings,
     AlarmStatus,
     HeatingType,
+    TemperatureControlState,
 } from './enervent'
 import ModbusRTU from 'modbus-serial'
 import { ReadCoilResult, ReadRegisterResult } from 'modbus-serial/ModbusRTU'
@@ -135,12 +136,13 @@ export const getReadings = async (modbusClient: ModbusRTU): Promise<Readings> =>
         'mean48HourExhaustHumidity': result.data[6],
     }
 
-    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 47, 3))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 45, 5))
     readings = {
         ...readings,
-        'cascadeSp': result.data[0],
-        'cascadeP': result.data[1],
-        'cascadeI': result.data[2],
+        'temperatureControlState': TemperatureControlState[result.data[0]],
+        'cascadeSp': result.data[2],
+        'cascadeP': result.data[3],
+        'cascadeI': result.data[4],
     }
 
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 56, 1))

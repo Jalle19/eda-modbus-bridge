@@ -43,6 +43,25 @@ export const AVAILABLE_SETTINGS: Record<string, number> = {
     'exhaustFanOverPressure': 55,
 }
 
+export enum TemperatureControlState {
+    NONE,
+    COOLING,
+    HEAT_RECOVERY,
+    HEATING = 4,
+    STEP_DELAY_STATE,
+    SUMMER_NIGHT_COOLING,
+    STARTUP,
+    STOP,
+    HEAT_RECOVERY_CLEAN,
+    EXT_UNIT_DEFROST,
+}
+
+export const getTemperatureControlStateValues = (): string[] => {
+    const values = Object.values(TemperatureControlState) as string[]
+
+    return values.splice(0, values.length / 2)
+}
+
 export type AlarmDescription = {
     name: string
     description: string
@@ -119,6 +138,7 @@ export type Readings = {
     supplyFanSpeed?: number
     exhaustFanSpeed?: number
     returnWaterTemperature?: number
+    temperatureControlState: string
 }
 
 export type Settings = {
