@@ -22,7 +22,8 @@ export const TOPIC_PREFIX_DEVICE_INFORMATION = `${TOPIC_PREFIX}/deviceInformatio
 export const TOPIC_PREFIX_DEVICE_STATE = `${TOPIC_PREFIX}/deviceState`
 export const TOPIC_NAME_STATUS = `${TOPIC_PREFIX}/status`
 
-type TopicMap = Record<string, string>
+type TopicValue = string | number | boolean | null
+type TopicMap = Record<string, TopicValue>
 
 const logger = createLogger('mqtt')
 
@@ -40,7 +41,7 @@ export const publishValues = async (modbusClient: ModbusRTU, mqttClient: MqttCli
 
     for (const [reading, value] of Object.entries(readings)) {
         const topicName = `${TOPIC_PREFIX_READINGS}/${reading}`
-        topicMap[topicName] = JSON.stringify(value)
+        topicMap[topicName] = formatValue(value)
     }
 
     // Publish each setting
@@ -52,7 +53,7 @@ export const publishValues = async (modbusClient: ModbusRTU, mqttClient: MqttCli
     for (const [, alarm] of Object.entries(alarmSummary)) {
         const topicName = `${TOPIC_PREFIX_ALARM}/${alarm.name}`
 
-        topicMap[topicName] = createBinaryValue(alarm.state === 2)
+        topicMap[topicName] = formatBinaryValue(alarm.state === 2)
     }
 
     // Publish device state
@@ -61,7 +62,7 @@ export const publishValues = async (modbusClient: ModbusRTU, mqttClient: MqttCli
     for (const [name, value] of Object.entries(deviceState)) {
         const topicName = `${TOPIC_PREFIX_DEVICE_STATE}/${name}`
 
-        topicMap[topicName] = createBinaryValue(value)
+        topicMap[topicName] = formatBinaryValue(value)
     }
 
     await publishTopics(mqttClient, topicMap)
@@ -74,7 +75,7 @@ export const publishDeviceInformation = async (modbusClient: ModbusRTU, mqttClie
 
     for (const [item, value] of Object.entries(deviceInformation)) {
         const topicName = `${TOPIC_PREFIX_DEVICE_INFORMATION}/${item}`
-        topicMap[topicName] = JSON.stringify(value)
+        topicMap[topicName] = formatValue(value)
     }
 
     logger.debug('Publising device information...')
@@ -95,7 +96,7 @@ const publishModeSummary = async (modbusClient: ModbusRTU, mqttClient: MqttClien
     for (const [mode, state] of Object.entries(modeSummary)) {
         const topicName = `${TOPIC_PREFIX_MODE}/${mode}`
 
-        topicMap[topicName] = createBinaryValue(state)
+        topicMap[topicName] = formatBinaryValue(state)
     }
 
     await publishTopics(mqttClient, topicMap)
@@ -109,7 +110,7 @@ const publishSettings = async (modbusClient: ModbusRTU, mqttClient: MqttClient) 
     for (const [setting, value] of Object.entries(settings)) {
         const topicName = `${TOPIC_PREFIX_SETTINGS}/${setting}`
 
-        topicMap[topicName] = typeof value === 'boolean' ? createBinaryValue(value) : JSON.stringify(value)
+        topicMap[topicName] = formatValue(value)
     }
 
     await publishTopics(mqttClient, topicMap)
@@ -119,7 +120,7 @@ const publishTopics = async (mqttClient: MqttClient, topicMap: TopicMap, publish
     const publishPromises = []
 
     for (const [topic, value] of Object.entries(topicMap)) {
-        publishPromises.push(mqttClient.publishAsync(topic, value, publishOptions))
+        publishPromises.push(mqttClient.publishAsync(topic, String(value), publishOptions))
     }
 
     await Promise.all(publishPromises)
@@ -178,7 +179,11 @@ export const validateBrokerUrl = (brokerUrl: string) => {
     return brokerUrl.startsWith('mqtt://') || brokerUrl.startsWith('mqtts://')
 }
 
-const createBinaryValue = (value: boolean) => {
+const formatValue = (value: TopicValue) => {
+    return typeof value === 'boolean' ? formatBinaryValue(value) : value
+}
+
+const formatBinaryValue = (value: boolean) => {
     // Boolean values are exposed as "ON" and "OFF" respectively since those are the
     // defaults for MQTT binary sensors in Home Assistant
     return value ? 'ON' : 'OFF'
