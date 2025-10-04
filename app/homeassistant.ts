@@ -15,11 +15,14 @@ import {
     AVAILABLE_ALARMS,
     createModelNameString,
     DeviceInformation,
+    getTemperatureControlStateValues,
 } from './enervent'
 import ModbusRTU from 'modbus-serial'
 import { MqttClient } from 'mqtt'
 
-type EntityConfiguration = object
+type EntityConfiguration = {
+    [key: string]: unknown
+}
 
 const logger = createLogger('homeassistant')
 
@@ -42,7 +45,7 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
         'manufacturer': 'Enervent',
     }
 
-    const configurationBase = {
+    const configurationBase: EntityConfiguration = {
         'platform': 'mqtt',
         'availability_topic': TOPIC_NAME_STATUS,
         'device': mqttDeviceInformation,
@@ -132,6 +135,12 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
             'ventilationLevelActual',
             'Ventilation level (actual)',
             { 'unit_of_measurement': '%' }
+        ),
+        'temperatureControlState': createEnumSensorConfiguration(
+            configurationBase,
+            'temperatureControlState',
+            'Temperature control state',
+            getTemperatureControlStateValues()
         ),
         // Optional sensors. These are not available for all users, so the entities are disabled by default.
         'roomTemperatureAvg': createTemperatureSensorConfiguration(
@@ -463,6 +472,23 @@ const createHumiditySensorConfiguration = (
         'unit_of_measurement': '%',
         ...extraProperties,
     })
+}
+
+const createEnumSensorConfiguration = (
+    configurationBase: EntityConfiguration,
+    readingName: string,
+    entityName: string,
+    options: string[]
+): EntityConfiguration => {
+    const configuration = createSensorConfiguration(configurationBase, readingName, entityName, {
+        'device_class': 'enum',
+        'options': options,
+    })
+
+    // "state_class" and "options" are mutually exclusive
+    delete configuration['state_class']
+
+    return configuration
 }
 
 const createSensorConfiguration = (
