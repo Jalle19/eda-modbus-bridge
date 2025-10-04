@@ -44,16 +44,10 @@ export const AVAILABLE_SETTINGS: Record<string, number> = {
 }
 
 export enum TemperatureControlState {
-    NONE,
-    COOLING,
-    HEAT_RECOVERY,
+    NONE = 0,
+    COOLING = 1,
+    HEAT_RECOVERY = 2,
     HEATING = 4,
-    STEP_DELAY_STATE,
-    SUMMER_NIGHT_COOLING,
-    STARTUP,
-    STOP,
-    HEAT_RECOVERY_CLEAN,
-    EXT_UNIT_DEFROST,
 }
 
 export const getTemperatureControlStateValues = (): string[] => {
