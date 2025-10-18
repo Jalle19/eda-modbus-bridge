@@ -11,7 +11,6 @@ import {
     getAutomationAndHeatingTypeName,
     getCoolingTypeName,
     getDeviceFamilyName,
-    hasRoomTemperatureSensor,
     MUTUALLY_EXCLUSIVE_MODES,
     parseAlarmTimestamp,
     parseAnalogSensors,
@@ -170,14 +169,12 @@ export const getReadings = async (modbusClient: ModbusRTU): Promise<Readings> =>
         ...sensorReadings,
     }
 
-    // Room temperature average is always available, but its value is always zero unless one or more optional
-    // room temperature sensor are installed
-    if (hasRoomTemperatureSensor(sensorTypesResult)) {
-        result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 46, 1))
-        readings = {
-            ...readings,
-            'roomTemperatureAvg': parseTemperature(result.data[0]),
-        }
+    // Room temperature average (register 46). Contains average of analog sensors (types 8/9/10)
+    // or dedicated room temperature sensor (e.g., RJ10). Zero if no sensor configured.
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 46, 1))
+    readings = {
+        ...readings,
+        'roomTemperatureAvg': parseTemperature(result.data[0]),
     }
 
     // Sensors that only work reliably on MD automation devices
