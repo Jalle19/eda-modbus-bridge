@@ -24,26 +24,46 @@ export const MUTUALLY_EXCLUSIVE_MODES: Record<string, number> = {
     'eco': 40,
 }
 
-export const AVAILABLE_SETTINGS: Record<
-    string,
-    { dataAddress: number; decimalPrecision: number; registerType: 'coil' | 'holding' }
-> = {
-    'overPressureDelay': { dataAddress: 57, decimalPrecision: 0, registerType: 'holding' },
-    'awayVentilationLevel': { dataAddress: 100, decimalPrecision: 0, registerType: 'holding' },
-    'awayTemperatureReduction': { dataAddress: 101, decimalPrecision: 0, registerType: 'holding' },
-    'longAwayVentilationLevel': { dataAddress: 102, decimalPrecision: 0, registerType: 'holding' },
-    'longAwayTemperatureReduction': { dataAddress: 103, decimalPrecision: 0, registerType: 'holding' },
-    'temperatureControlMode': { dataAddress: 136, decimalPrecision: 0, registerType: 'holding' },
-    'temperatureTarget': { dataAddress: 135, decimalPrecision: 1, registerType: 'holding' },
-    'coolingAllowed': { dataAddress: 52, decimalPrecision: 0, registerType: 'coil' },
-    'heatingAllowed': { dataAddress: 54, decimalPrecision: 0, registerType: 'coil' },
-    'awayCoolingAllowed': { dataAddress: 19, decimalPrecision: 0, registerType: 'coil' },
-    'awayHeatingAllowed': { dataAddress: 18, decimalPrecision: 0, registerType: 'coil' },
-    'longAwayCoolingAllowed': { dataAddress: 21, decimalPrecision: 0, registerType: 'coil' },
-    'longAwayHeatingAllowed': { dataAddress: 20, decimalPrecision: 0, registerType: 'coil' },
-    'defrostingAllowed': { dataAddress: 55, decimalPrecision: 0, registerType: 'coil' },
-    'supplyFanOverPressure': { dataAddress: 54, decimalPrecision: 0, registerType: 'holding' },
-    'exhaustFanOverPressure': { dataAddress: 55, decimalPrecision: 0, registerType: 'holding' },
+export type CoilSettingConfiguration = {
+    dataAddress: number
+    registerType: 'coil'
+}
+
+export type HoldingRegisterSettingConfiguration = {
+    dataAddress: number
+    registerType: 'holding'
+    decimals: number
+    registerScale?: number
+    min?: number
+    max?: number
+}
+
+export type SettingConfiguration = CoilSettingConfiguration | HoldingRegisterSettingConfiguration
+
+export const AVAILABLE_SETTINGS: Record<string, SettingConfiguration> = {
+    'overPressureDelay': { dataAddress: 57, decimals: 0, registerType: 'holding', min: 0, max: 60 },
+    'awayVentilationLevel': { dataAddress: 100, decimals: 0, registerType: 'holding', min: 20, max: 100 },
+    'awayTemperatureReduction': { dataAddress: 101, decimals: 0, registerType: 'holding', registerScale: 10 },
+    'longAwayVentilationLevel': { dataAddress: 102, decimals: 0, registerType: 'holding', min: 20, max: 100 },
+    'longAwayTemperatureReduction': { dataAddress: 103, decimals: 0, registerType: 'holding', registerScale: 10 },
+    'temperatureControlMode': { dataAddress: 136, decimals: 0, registerType: 'holding' },
+    'temperatureTarget': {
+        dataAddress: 135,
+        decimals: 1,
+        registerType: 'holding',
+        registerScale: 10,
+        min: 10,
+        max: 30,
+    },
+    'coolingAllowed': { dataAddress: 52, registerType: 'coil' },
+    'heatingAllowed': { dataAddress: 54, registerType: 'coil' },
+    'awayCoolingAllowed': { dataAddress: 19, registerType: 'coil' },
+    'awayHeatingAllowed': { dataAddress: 18, registerType: 'coil' },
+    'longAwayCoolingAllowed': { dataAddress: 21, registerType: 'coil' },
+    'longAwayHeatingAllowed': { dataAddress: 20, registerType: 'coil' },
+    'defrostingAllowed': { dataAddress: 55, registerType: 'coil' },
+    'supplyFanOverPressure': { dataAddress: 54, decimals: 0, registerType: 'holding', min: 20, max: 100 },
+    'exhaustFanOverPressure': { dataAddress: 55, decimals: 0, registerType: 'holding', min: 20, max: 100 },
 }
 
 export enum TemperatureControlState {

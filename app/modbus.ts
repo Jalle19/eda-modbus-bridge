@@ -24,6 +24,8 @@ import {
     AlarmStatus,
     HeatingType,
     TemperatureControlState,
+    CoilSettingConfiguration,
+    HoldingRegisterSettingConfiguration,
 } from './enervent'
 import ModbusRTU from 'modbus-serial'
 import { ReadCoilResult, ReadRegisterResult } from 'modbus-serial/ModbusRTU'
@@ -277,14 +279,9 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
     return settings as Settings
 }
 
-export const parseSettingValue = (setting: string, value: string): number => {
-    const settingConfig = AVAILABLE_SETTINGS[setting]
-    if (settingConfig === undefined) {
-        throw new Error('Unknown setting')
-    }
-
-    if (settingConfig.decimalPrecision > 0) {
-        const multiplier = Math.pow(10, settingConfig.decimalPrecision)
+const parseSettingValue = (settingConfig: HoldingRegisterSettingConfiguration, value: string): number => {
+    if (settingConfig.decimals > 0) {
+        const multiplier = Math.pow(10, settingConfig.decimals)
         return Math.round(parseFloat(value) * multiplier) / multiplier
     } else {
         return parseInt(value, 10)
@@ -297,68 +294,50 @@ export const setSetting = async (modbusClient: ModbusRTU, setting: string, value
         throw new Error('Unknown setting')
     }
 
-    switch (typeof value) {
-        case 'string': {
-            const numericValue = parseSettingValue(setting, value)
-            return setIntegerSetting(modbusClient, setting, numericValue)
+    switch (settingConfig.registerType) {
+        case 'holding': {
+            // Holding registers expect numeric (string) values
+            if (typeof value !== 'string') {
+                throw new TypeError(`Setting '${setting}' expects a numeric value, got ${typeof value}`)
+            }
+            const numericValue = parseSettingValue(settingConfig, value)
+            return setNumericSetting(modbusClient, settingConfig, numericValue)
         }
-        case 'boolean': {
-            return setBooleanSetting(modbusClient, setting, value)
+        case 'coil': {
+            // Coils expect boolean values
+            if (typeof value !== 'boolean') {
+                throw new TypeError(`Setting '${setting}' expects a boolean value, got ${typeof value}`)
+            }
+            return setBooleanSetting(modbusClient, settingConfig, value)
         }
     }
 }
 
-const setBooleanSetting = async (modbusClient: ModbusRTU, setting: string, boolValue: boolean) => {
-    const settingConfig = AVAILABLE_SETTINGS[setting]
-    if (settingConfig === undefined) {
-        throw new Error('Unknown setting')
-    }
-
+const setBooleanSetting = async (
+    modbusClient: ModbusRTU,
+    settingConfig: CoilSettingConfiguration,
+    boolValue: boolean
+) => {
     await mutex.runExclusive(async () => tryWriteCoil(modbusClient, settingConfig.dataAddress, boolValue))
 }
 
-const setIntegerSetting = async (modbusClient: ModbusRTU, setting: string, intValue: number) => {
-    const settingConfig = AVAILABLE_SETTINGS[setting]
-    if (settingConfig === undefined) {
-        throw new Error('Unknown setting')
+const setNumericSetting = async (
+    modbusClient: ModbusRTU,
+    settingConfig: HoldingRegisterSettingConfiguration,
+    numericValue: number
+) => {
+    // Validate against min/max if specified
+    if (settingConfig.min !== undefined && numericValue < settingConfig.min) {
+        throw new RangeError(`value ${numericValue} below minimum ${settingConfig.min}`)
+    }
+    if (settingConfig.max !== undefined && numericValue > settingConfig.max) {
+        throw new RangeError(`value ${numericValue} above maximum ${settingConfig.max}`)
     }
 
-    switch (setting) {
-        case 'awayVentilationLevel':
-        case 'longAwayVentilationLevel':
-            if (intValue < 20 || intValue > 100) {
-                throw new RangeError('level out of range')
-            }
+    // Apply register scaling (default 1 = no scaling)
+    const scaledValue = numericValue * (settingConfig.registerScale ?? 1)
 
-            break
-        case 'temperatureTarget':
-            if (intValue < 10 || intValue > 30) {
-                throw new RangeError('temperature out of range')
-            }
-
-            intValue *= 10
-            break
-        case 'overPressureDelay':
-            if (intValue < 0 || intValue > 60) {
-                throw new RangeError('delay out of range')
-            }
-
-            break
-        case 'awayTemperatureReduction':
-        case 'longAwayTemperatureReduction':
-            // No minimum/maximum values specified in the register documentation
-            intValue *= 10
-            break
-        case 'supplyFanOverPressure':
-        case 'exhaustFanOverPressure':
-            if (intValue < 20 || intValue > 100) {
-                throw new RangeError('level out of range')
-            }
-
-            break
-    }
-
-    await mutex.runExclusive(async () => tryWriteHoldingRegister(modbusClient, settingConfig.dataAddress, intValue))
+    await mutex.runExclusive(async () => tryWriteHoldingRegister(modbusClient, settingConfig.dataAddress, scaledValue))
 }
 
 export const getDeviceInformation = async (modbusClient: ModbusRTU): Promise<DeviceInformation> => {
