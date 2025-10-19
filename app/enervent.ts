@@ -24,13 +24,16 @@ export const MUTUALLY_EXCLUSIVE_MODES: Record<string, number> = {
     'eco': 40,
 }
 
-export type CoilSettingConfiguration = {
+interface BaseSettingConfiguration {
     dataAddress: number
+    registerType: 'coil' | 'holding'
+}
+
+export interface CoilSettingConfiguration extends BaseSettingConfiguration {
     registerType: 'coil'
 }
 
-export type HoldingRegisterSettingConfiguration = {
-    dataAddress: number
+export interface HoldingRegisterSettingConfiguration extends BaseSettingConfiguration {
     registerType: 'holding'
     decimals: number
     registerScale?: number
