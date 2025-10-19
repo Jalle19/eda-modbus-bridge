@@ -1,4 +1,4 @@
-import { validateDevice, parseDevice, ModbusDeviceType } from '../app/modbus'
+import { validateDevice, parseDevice, ModbusDeviceType, parseSettingValue } from '../app/modbus'
 
 test('validateDevice', () => {
     expect(validateDevice('/dev/ttyUSB0')).toEqual(true)
@@ -22,4 +22,18 @@ test('parseDevice', () => {
         hostname: '127.0.0.1',
         port: 502,
     })
+})
+
+test('parseSettingValue', () => {
+    // Settings with decimals should parse floats
+    expect(parseSettingValue('temperatureTarget', '22.0')).toEqual(22)
+    expect(parseSettingValue('temperatureTarget', '22')).toEqual(22)
+    expect(parseSettingValue('temperatureTarget', '22.5')).toEqual(22.5)
+    expect(parseSettingValue('temperatureTarget', '18.75')).toEqual(18.8)
+    expect(parseSettingValue('temperatureTarget', '18.74')).toEqual(18.7)
+
+    // Settings without decimals should parse integers (truncates decimals)
+    expect(parseSettingValue('awayVentilationLevel', '50.5')).toEqual(50)
+    expect(parseSettingValue('awayVentilationLevel', '50')).toEqual(50)
+    expect(parseSettingValue('overPressureDelay', '30')).toEqual(30)
 })

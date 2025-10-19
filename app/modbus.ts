@@ -277,32 +277,49 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
     return settings as Settings
 }
 
+export const parseSettingValue = (setting: string, value: string): number => {
+    const settingConfig = AVAILABLE_SETTINGS[setting]
+    if (settingConfig === undefined) {
+        throw new Error('Unknown setting')
+    }
+
+    if (settingConfig.decimalPrecision > 0) {
+        const multiplier = Math.pow(10, settingConfig.decimalPrecision)
+        return Math.round(parseFloat(value) * multiplier) / multiplier
+    } else {
+        return parseInt(value, 10)
+    }
+}
+
 export const setSetting = async (modbusClient: ModbusRTU, setting: string, value: string | boolean) => {
-    const dataAddress = AVAILABLE_SETTINGS[setting]
-    if (dataAddress === undefined) {
+    const settingConfig = AVAILABLE_SETTINGS[setting]
+    if (settingConfig === undefined) {
         throw new Error('Unknown setting')
     }
 
     switch (typeof value) {
-        case 'string':
-            return setIntegerSetting(modbusClient, setting, parseInt(value, 10))
-        case 'boolean':
+        case 'string': {
+            const numericValue = parseSettingValue(setting, value)
+            return setIntegerSetting(modbusClient, setting, numericValue)
+        }
+        case 'boolean': {
             return setBooleanSetting(modbusClient, setting, value)
+        }
     }
 }
 
 const setBooleanSetting = async (modbusClient: ModbusRTU, setting: string, boolValue: boolean) => {
-    const dataAddress = AVAILABLE_SETTINGS[setting]
-    if (dataAddress === undefined) {
+    const settingConfig = AVAILABLE_SETTINGS[setting]
+    if (settingConfig === undefined) {
         throw new Error('Unknown setting')
     }
 
-    await mutex.runExclusive(async () => tryWriteCoil(modbusClient, dataAddress, boolValue))
+    await mutex.runExclusive(async () => tryWriteCoil(modbusClient, settingConfig.dataAddress, boolValue))
 }
 
 const setIntegerSetting = async (modbusClient: ModbusRTU, setting: string, intValue: number) => {
-    const dataAddress = AVAILABLE_SETTINGS[setting]
-    if (dataAddress === undefined) {
+    const settingConfig = AVAILABLE_SETTINGS[setting]
+    if (settingConfig === undefined) {
         throw new Error('Unknown setting')
     }
 
@@ -341,7 +358,7 @@ const setIntegerSetting = async (modbusClient: ModbusRTU, setting: string, intVa
             break
     }
 
-    await mutex.runExclusive(async () => tryWriteHoldingRegister(modbusClient, dataAddress, intValue))
+    await mutex.runExclusive(async () => tryWriteHoldingRegister(modbusClient, settingConfig.dataAddress, intValue))
 }
 
 export const getDeviceInformation = async (modbusClient: ModbusRTU): Promise<DeviceInformation> => {
