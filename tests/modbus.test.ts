@@ -67,7 +67,7 @@ describe('setSetting', () => {
 
         test('should reject boolean values for numeric settings', async () => {
             await expect(setSetting(mockClient, 'temperatureTarget', true)).rejects.toThrow(
-                "Setting 'temperatureTarget' expects a numeric value, got boolean"
+                'Setting "temperatureTarget" expects a numeric value, got boolean'
             )
         })
 
@@ -116,14 +116,16 @@ describe('setSetting', () => {
 
         test('should reject string values for coil settings', async () => {
             await expect(setSetting(mockClient, 'coolingAllowed', '1')).rejects.toThrow(
-                "Setting 'coolingAllowed' expects a boolean value, got string"
+                'Setting "coolingAllowed" expects a boolean value, got string'
             )
         })
     })
 
     describe('unknown settings', () => {
         test('should reject unknown setting names', async () => {
-            await expect(setSetting(mockClient, 'nonExistentSetting', '123')).rejects.toThrow('Unknown setting')
+            await expect(setSetting(mockClient, 'nonExistentSetting', '123')).rejects.toThrow(
+                'Unknown setting "nonExistentSetting"'
+            )
         })
     })
 })
