@@ -288,14 +288,14 @@ const parseSettingValue = (settingConfig: HoldingRegisterSettingConfiguration, v
 export const setSetting = async (modbusClient: ModbusRTU, setting: string, value: string | boolean) => {
     const settingConfig = AVAILABLE_SETTINGS[setting]
     if (settingConfig === undefined) {
-        throw new Error('Unknown setting')
+        throw new Error(`Unknown setting "${setting}"`)
     }
 
     switch (settingConfig.registerType) {
         case 'holding': {
             // Holding registers expect numeric (string) values
             if (typeof value !== 'string') {
-                throw new TypeError(`Setting '${setting}' expects a numeric value, got ${typeof value}`)
+                throw new TypeError(`Setting "${setting}" expects a numeric value, got ${typeof value}`)
             }
             const numericValue = parseSettingValue(settingConfig, value)
             return setNumericSetting(modbusClient, settingConfig, numericValue)
@@ -303,7 +303,7 @@ export const setSetting = async (modbusClient: ModbusRTU, setting: string, value
         case 'coil': {
             // Coils expect boolean values
             if (typeof value !== 'boolean') {
-                throw new TypeError(`Setting '${setting}' expects a boolean value, got ${typeof value}`)
+                throw new TypeError(`Setting "${setting}" expects a boolean value, got ${typeof value}`)
             }
             return setBooleanSetting(modbusClient, settingConfig, value)
         }
