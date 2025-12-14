@@ -577,6 +577,7 @@ const createSettingSwitchConfiguration = (
         'object_id': `eda_${settingName}`,
         'state_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}`,
         'command_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}/set`,
+        'entity_category': 'config',
         ...extraProperties,
     }
 }
