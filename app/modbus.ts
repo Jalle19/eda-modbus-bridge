@@ -11,7 +11,6 @@ import {
     getAutomationAndHeatingTypeName,
     getCoolingTypeName,
     getDeviceFamilyName,
-    MUTUALLY_EXCLUSIVE_MODES,
     parseAlarmTimestamp,
     parseAnalogSensors,
     parseStateBitField,
@@ -102,7 +101,7 @@ export const setMode = async (modbusClient: ModbusRTU, mode: string, value: bool
 }
 
 const disableAllModesExcept = async (modbusClient: ModbusRTU, exceptedMode: string) => {
-    for (const mode in MUTUALLY_EXCLUSIVE_MODES) {
+    for (const mode in AVAILABLE_MODES) {
         if (mode === exceptedMode) {
             continue
         }

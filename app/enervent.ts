@@ -10,17 +10,6 @@ export const AVAILABLE_MODES: Record<string, number> = {
     'eco': 40,
 }
 
-// Modes that can only be true one at a time (mapped to their coil number)
-export const MUTUALLY_EXCLUSIVE_MODES: Record<string, number> = {
-    'away': 1,
-    'longAway': 2,
-    'overPressure': 3,
-    'maxHeating': 6,
-    'maxCooling': 7,
-    'manualBoost': 10,
-    'eco': 40,
-}
-
 interface BaseSettingConfiguration {
     dataAddress: number
     registerType: 'coil' | 'holding'
