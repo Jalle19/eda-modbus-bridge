@@ -63,7 +63,6 @@ export const getModeSummary = async (modbusClient: ModbusRTU): Promise<ModeSumma
         'maxHeating': result.data[6],
         'maxCooling': result.data[7],
         'manualBoost': result.data[10],
-        'summerNightCooling': result.data[12],
     }
 
     // "eco" is a newfangled thing only available on newer units
@@ -261,6 +260,13 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
     settings = {
         ...settings,
         'defrostingAllowed': result.data[0],
+    }
+
+    // Summer night cooling allowed
+    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 12, 1))
+    settings = {
+        ...settings,
+        'summerNightCoolingAllowed': result.data[0],
     }
 
     // Fan speeds during over-pressurization
