@@ -60,8 +60,6 @@ export const getModeSummary = async (modbusClient: ModbusRTU): Promise<ModeSumma
         'away': result.data[1],
         'longAway': result.data[2],
         'overPressure': result.data[3],
-        'cookerHood': result.data[4],
-        'centralVacuumCleaner': result.data[5],
         'maxHeating': result.data[6],
         'maxCooling': result.data[7],
         'manualBoost': result.data[10],

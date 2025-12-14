@@ -4,8 +4,6 @@ export const AVAILABLE_MODES: Record<string, number> = {
     'away': 1,
     'longAway': 2,
     'overPressure': 3,
-    'cookerHood': 4,
-    'centralVacuumCleaner': 5,
     'maxHeating': 6,
     'maxCooling': 7,
     'manualBoost': 10,
@@ -124,8 +122,6 @@ export type ModeSummary = {
     away: boolean
     longAway: boolean
     overPressure: boolean
-    cookerHood: boolean
-    centralVacuumCleaner: boolean
     maxHeating: boolean
     maxCooling: boolean
     manualBoost: boolean
