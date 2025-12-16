@@ -335,6 +335,11 @@ export const setSetting = async (modbusClient: ModbusRTU, setting: string, value
             }
             return setBooleanSetting(modbusClient, settingConfig, value)
         }
+        case 'special':
+            if (setting === 'mode') {
+                logger.info('Changing mode to ' + value)
+                break
+            }
     }
 }
 
