@@ -2,7 +2,10 @@ import { ReadRegisterResult } from 'modbus-serial/ModbusRTU'
 
 export type ModeConfiguration = {
     name: string
-    dataAddress: number
+    /**
+     * "Normal" mode doesn't have an address, we're in that mode when all other modes are disabled
+     */
+    dataAddress?: number
     /**
      * Returns whether this mode is available on units with the specified automation type
      * @param automationType
@@ -11,7 +14,7 @@ export type ModeConfiguration = {
 }
 
 export const AVAILABLE_MODES: ModeConfiguration[] = [
-    { name: 'normal', dataAddress: 0 },
+    { name: 'normal' },
     { name: 'away', dataAddress: 1 },
     { name: 'longAway', dataAddress: 2 },
     { name: 'overPressure', dataAddress: 3 },
