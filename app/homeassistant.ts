@@ -10,12 +10,14 @@ import {
 import { createLogger } from './logger'
 import {
     AlarmDescription,
-    HeatingType,
     AutomationType,
     AVAILABLE_ALARMS,
+    AVAILABLE_MODES,
     createModelNameString,
     DeviceInformation,
     getTemperatureControlStateValues,
+    HeatingType,
+    ModeConfiguration,
 } from './enervent'
 import ModbusRTU from 'modbus-serial'
 import { MqttClient } from 'mqtt'
@@ -402,9 +404,11 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
         ),
     }
 
-    // Select for changing temperature control mode
     const selectConfigurationMap = {
-        'temperatureControlMode': createSelectConfiguration(
+        // Select for changing ventilation mode
+        'mode': createModeSelectConfiguration(configurationBase, 'mode', 'Mode', automationType),
+        // Select for changing temperature control mode
+        'temperatureControlMode': createTemperatureControlModeSelectConfiguration(
             configurationBase,
             'temperatureControlMode',
             'Temperature control mode',
@@ -630,7 +634,7 @@ const createButtonConfiguration = (
     }
 }
 
-const createSelectConfiguration = (
+const createTemperatureControlModeSelectConfiguration = (
     configurationBase: EntityConfiguration,
     selectName: string,
     entityName: string,
@@ -647,5 +651,32 @@ const createSelectConfiguration = (
         'command_topic': `${TOPIC_PREFIX_SETTINGS}/${selectName}/set`,
         'command_template': '{{ this.attributes.options.index(value) + 1 }}',
         'value_template': '{{ this.attributes.options[(value | int) - 1] }}',
+    }
+}
+
+const createModeSelectConfiguration = (
+    configurationBase: EntityConfiguration,
+    selectName: string,
+    entityName: string,
+    automationType: AutomationType
+) => {
+    // Determine options
+    const options = AVAILABLE_MODES.filter((mode: ModeConfiguration) => {
+        return !mode.isSupportedBy || mode.isSupportedBy(automationType)
+    }).map((mode: ModeConfiguration) => {
+        return mode.name
+    })
+
+    return {
+        ...configurationBase,
+        'unique_id': `eda-select-${selectName}`,
+        'name': entityName,
+        'default_entity_id': `select.eda_select_${selectName}`,
+        'object_id': `eda_Select_${selectName}`,
+        'options': options,
+        'state_topic': `${TOPIC_PREFIX_SETTINGS}/${selectName}`,
+        'command_topic': `${TOPIC_PREFIX_SETTINGS}/${selectName}/set`,
+        // 'command_template': '{{ this.attributes.options.index(value) + 1 }}',
+        // 'value_template': '{{ this.attributes.options[(value | int) - 1] }}',
     }
 }
