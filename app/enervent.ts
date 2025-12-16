@@ -4,20 +4,6 @@ export const AVAILABLE_MODES: Record<string, number> = {
     'away': 1,
     'longAway': 2,
     'overPressure': 3,
-    'cookerHood': 4,
-    'centralVacuumCleaner': 5,
-    'maxHeating': 6,
-    'maxCooling': 7,
-    'manualBoost': 10,
-    'summerNightCooling': 12,
-    'eco': 40,
-}
-
-// Modes that can only be true one at a time (mapped to their coil number)
-export const MUTUALLY_EXCLUSIVE_MODES: Record<string, number> = {
-    'away': 1,
-    'longAway': 2,
-    'overPressure': 3,
     'maxHeating': 6,
     'maxCooling': 7,
     'manualBoost': 10,
@@ -65,6 +51,7 @@ export const AVAILABLE_SETTINGS: Record<string, SettingConfiguration> = {
     'longAwayCoolingAllowed': { dataAddress: 21, registerType: 'coil' },
     'longAwayHeatingAllowed': { dataAddress: 20, registerType: 'coil' },
     'defrostingAllowed': { dataAddress: 55, registerType: 'coil' },
+    'summerNightCoolingAllowed': { dataAddress: 12, registerType: 'coil' },
     'supplyFanOverPressure': { dataAddress: 54, decimals: 0, registerType: 'holding', min: 20, max: 100 },
     'exhaustFanOverPressure': { dataAddress: 55, decimals: 0, registerType: 'holding', min: 20, max: 100 },
 }
@@ -124,12 +111,9 @@ export type ModeSummary = {
     away: boolean
     longAway: boolean
     overPressure: boolean
-    cookerHood: boolean
-    centralVacuumCleaner: boolean
     maxHeating: boolean
     maxCooling: boolean
     manualBoost: boolean
-    summerNightCooling: boolean
     eco?: boolean
 }
 
@@ -176,6 +160,7 @@ export type Settings = {
     longAwayCoolingAllowed?: boolean
     longAwayHeatingAllowed?: boolean
     defrostingAllowed: boolean
+    summerNightCoolingAllowed: boolean
     supplyFanOverPressure: number
     exhaustFanOverPressure: number
 }

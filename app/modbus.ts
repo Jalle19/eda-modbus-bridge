@@ -11,7 +11,6 @@ import {
     getAutomationAndHeatingTypeName,
     getCoolingTypeName,
     getDeviceFamilyName,
-    MUTUALLY_EXCLUSIVE_MODES,
     parseAlarmTimestamp,
     parseAnalogSensors,
     parseStateBitField,
@@ -60,12 +59,9 @@ export const getModeSummary = async (modbusClient: ModbusRTU): Promise<ModeSumma
         'away': result.data[1],
         'longAway': result.data[2],
         'overPressure': result.data[3],
-        'cookerHood': result.data[4],
-        'centralVacuumCleaner': result.data[5],
         'maxHeating': result.data[6],
         'maxCooling': result.data[7],
         'manualBoost': result.data[10],
-        'summerNightCooling': result.data[12],
     }
 
     // "eco" is a newfangled thing only available on newer units
@@ -105,7 +101,7 @@ export const setMode = async (modbusClient: ModbusRTU, mode: string, value: bool
 }
 
 const disableAllModesExcept = async (modbusClient: ModbusRTU, exceptedMode: string) => {
-    for (const mode in MUTUALLY_EXCLUSIVE_MODES) {
+    for (const mode in AVAILABLE_MODES) {
         if (mode === exceptedMode) {
             continue
         }
@@ -263,6 +259,13 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
     settings = {
         ...settings,
         'defrostingAllowed': result.data[0],
+    }
+
+    // Summer night cooling allowed
+    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 12, 1))
+    settings = {
+        ...settings,
+        'summerNightCoolingAllowed': result.data[0],
     }
 
     // Fan speeds during over-pressurization
