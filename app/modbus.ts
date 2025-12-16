@@ -77,22 +77,26 @@ export const getModeSummary = async (modbusClient: ModbusRTU): Promise<ModeSumma
     return summary
 }
 
-export const getMode = async (modbusClient: ModbusRTU, mode: string) => {
-    if (AVAILABLE_MODES[mode] === undefined) {
+export const getMode = async (modbusClient: ModbusRTU, mode: string): Promise<boolean> => {
+    const modeConfig = AVAILABLE_MODES.find((c) => c.name === mode)
+
+    if (!modeConfig) {
         throw new Error('Unknown mode')
     }
 
-    const result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, AVAILABLE_MODES[mode], 1))
+    const result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, modeConfig.dataAddress, 1))
 
     return result.data[0]
 }
 
 export const setMode = async (modbusClient: ModbusRTU, mode: string, value: boolean) => {
-    if (AVAILABLE_MODES[mode] === undefined) {
+    const modeConfig = AVAILABLE_MODES.find((c) => c.name === mode)
+
+    if (!modeConfig) {
         throw new Error('Unknown mode')
     }
 
-    await mutex.runExclusive(async () => tryWriteCoil(modbusClient, AVAILABLE_MODES[mode], value))
+    await mutex.runExclusive(async () => tryWriteCoil(modbusClient, modeConfig.dataAddress, value))
 
     // Modes are mutually exclusive, disable all others when enabling one
     if (value) {
@@ -101,12 +105,12 @@ export const setMode = async (modbusClient: ModbusRTU, mode: string, value: bool
 }
 
 const disableAllModesExcept = async (modbusClient: ModbusRTU, exceptedMode: string) => {
-    for (const mode in AVAILABLE_MODES) {
-        if (mode === exceptedMode) {
+    for (const modeConfig of AVAILABLE_MODES) {
+        if (modeConfig.name === exceptedMode) {
             continue
         }
 
-        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, AVAILABLE_MODES[mode], false))
+        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, modeConfig.dataAddress, false))
     }
 }
 
