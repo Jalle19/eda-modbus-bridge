@@ -73,7 +73,15 @@ export const getMode = async (modbusClient: ModbusRTU, mode: string): Promise<bo
         throw new Error('Unknown mode')
     }
 
-    const result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, modeConfig.dataAddress, 1))
+    // Special case for "normal" which is not represented by a specific coil, but can be gleaned from
+    // the device state
+    if (!modeConfig.dataAddress) {
+        const deviceState = await getDeviceState(modbusClient)
+
+        return deviceState['normal']
+    }
+
+    const result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, modeConfig.dataAddress!, 1))
 
     return result.data[0]
 }
@@ -85,7 +93,9 @@ export const setMode = async (modbusClient: ModbusRTU, mode: string, value: bool
         throw new Error('Unknown mode')
     }
 
-    await mutex.runExclusive(async () => tryWriteCoil(modbusClient, modeConfig.dataAddress, value))
+    if (modeConfig.dataAddress) {
+        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, modeConfig.dataAddress!, value))
+    }
 
     // Modes are mutually exclusive, disable all others when enabling one
     if (value) {
@@ -99,7 +109,9 @@ const disableAllModesExcept = async (modbusClient: ModbusRTU, exceptedMode: stri
             continue
         }
 
-        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, modeConfig.dataAddress, false))
+        if (modeConfig.dataAddress) {
+            await mutex.runExclusive(async () => tryWriteCoil(modbusClient, modeConfig.dataAddress!, false))
+        }
     }
 }
 
