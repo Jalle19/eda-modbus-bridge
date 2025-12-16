@@ -1,4 +1,4 @@
-import { validateDevice, parseDevice, ModbusDeviceType, setSetting } from '../app/modbus'
+import { validateDevice, parseDevice, ModbusDeviceType, setSetting, getMode, setMode } from '../app/modbus'
 import ModbusRTU from 'modbus-serial'
 
 test('validateDevice', () => {
@@ -22,6 +22,20 @@ test('parseDevice', () => {
         type: ModbusDeviceType.TCP,
         hostname: '127.0.0.1',
         port: 502,
+    })
+})
+
+describe('get and set mode', () => {
+    test('getMode throws on unknown mode', async () => {
+        let client: ModbusRTU = {} as any
+
+        await expect(getMode(client, 'foo')).rejects.toThrow('Unknown mode')
+    })
+
+    test('setMode throws on unknown mode', async () => {
+        let client: ModbusRTU = {} as any
+
+        await expect(setMode(client, 'foo', true)).rejects.toThrow('Unknown mode')
     })
 })
 

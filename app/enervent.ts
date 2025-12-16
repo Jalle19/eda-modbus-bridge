@@ -1,14 +1,29 @@
 import { ReadRegisterResult } from 'modbus-serial/ModbusRTU'
 
-export const AVAILABLE_MODES: Record<string, number> = {
-    'away': 1,
-    'longAway': 2,
-    'overPressure': 3,
-    'maxHeating': 6,
-    'maxCooling': 7,
-    'manualBoost': 10,
-    'eco': 40,
+export type ModeConfiguration = {
+    name: string
+    dataAddress: number
+    /**
+     * Returns whether this mode is available on units with the specified automation type
+     * @param automationType
+     */
+    isSupportedBy?: (automationType: AutomationType) => boolean
 }
+
+export const AVAILABLE_MODES: ModeConfiguration[] = [
+    { name: 'normal', dataAddress: 0 },
+    { name: 'away', dataAddress: 1 },
+    { name: 'longAway', dataAddress: 2 },
+    { name: 'overPressure', dataAddress: 3 },
+    { name: 'maxHeating', dataAddress: 6 },
+    { name: 'maxCooling', dataAddress: 7 },
+    { name: 'manualBoost', dataAddress: 10 },
+    {
+        name: 'eco',
+        dataAddress: 40,
+        isSupportedBy: (automationType) => automationType === AutomationType.MD,
+    },
+]
 
 interface BaseSettingConfiguration {
     dataAddress: number
