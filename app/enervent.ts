@@ -7,7 +7,6 @@ export const AVAILABLE_MODES: Record<string, number> = {
     'maxHeating': 6,
     'maxCooling': 7,
     'manualBoost': 10,
-    'eco': 40,
 }
 
 interface BaseSettingConfiguration {
@@ -54,6 +53,7 @@ export const AVAILABLE_SETTINGS: Record<string, SettingConfiguration> = {
     'summerNightCoolingAllowed': { dataAddress: 12, registerType: 'coil' },
     'supplyFanOverPressure': { dataAddress: 54, decimals: 0, registerType: 'holding', min: 20, max: 100 },
     'exhaustFanOverPressure': { dataAddress: 55, decimals: 0, registerType: 'holding', min: 20, max: 100 },
+    'eco': { dataAddress: 40, registerType: 'coil' },
 }
 
 export enum TemperatureControlState {
@@ -163,6 +163,7 @@ export type Settings = {
     summerNightCoolingAllowed: boolean
     supplyFanOverPressure: number
     exhaustFanOverPressure: number
+    eco: boolean
 }
 
 export type DeviceInformation = {
