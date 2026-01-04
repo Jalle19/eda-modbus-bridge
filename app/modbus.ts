@@ -276,6 +276,15 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
         'exhaustFanOverPressure': result.data[1],
     }
 
+    // Eco mode (not available on all units)
+    if (deviceInformation.automationType === AutomationType.MD) {
+        result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 40, 1))
+        settings = {
+            ...settings,
+            'eco': result.data[0],
+        }
+    }
+
     return settings as Settings
 }
 
