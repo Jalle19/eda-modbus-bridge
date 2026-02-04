@@ -291,14 +291,14 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
         'maxHeating': createModeSwitchConfiguration(configurationBase, 'maxHeating', 'Max heating'),
         'maxCooling': createModeSwitchConfiguration(configurationBase, 'maxCooling', 'Max cooling'),
         'manualBoost': createModeSwitchConfiguration(configurationBase, 'manualBoost', 'Manual boost'),
-        'eco': createModeSwitchConfiguration(
+        // Settings switches
+        'eco': createSettingSwitchConfiguration(
             configurationBase,
             'eco',
             'Eco',
             // Not supported by some units
             { 'enabled_by_default': automationType === AutomationType.MD }
         ),
-        // Settings switches
         'coolingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'coolingAllowed',
