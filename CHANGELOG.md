@@ -1,5 +1,14 @@
 # Change log
 
+## 3.1.0
+
+* Update various dependencies
+* Expose 3x0045 ("temperature control step") as a text sensor
+* Fix room temperature average sensor for dedicated sensors (thanks @lauw)
+* Add `default_entity_id` to Home Assistant discovery messages
+* Change "summer night cooling" and "eco" to be setting switches, not modes
+* Use the "config" entity category for settings switches
+
 ## 3.0.2
 
 * Introduce a new error handler that gracefully handles Modbus read/write errors but also terminates the application 
