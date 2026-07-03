@@ -54,6 +54,14 @@ export const AVAILABLE_SETTINGS: Record<string, SettingConfiguration> = {
     'supplyFanOverPressure': { dataAddress: 54, decimals: 0, registerType: 'holding', min: 20, max: 100 },
     'exhaustFanOverPressure': { dataAddress: 55, decimals: 0, registerType: 'holding', min: 20, max: 100 },
     'eco': { dataAddress: 40, registerType: 'coil' },
+    // Auxiliary function coils (on/off, independent of the operating modes)
+    'cookerHood': { dataAddress: 4, registerType: 'coil' },
+    'centralVacuumCleaner': { dataAddress: 5, registerType: 'coil' },
+    // Writable fan levels (percent). "ventilationLevel" is the target level normally
+    // set from the control panel; the base speeds are the per-fan setpoints.
+    'ventilationLevel': { dataAddress: 53, decimals: 0, registerType: 'holding', min: 20, max: 100 },
+    'supplyFanBaseSpeed': { dataAddress: 51, decimals: 0, registerType: 'holding', min: 20, max: 100 },
+    'exhaustFanBaseSpeed': { dataAddress: 52, decimals: 0, registerType: 'holding', min: 20, max: 100 },
 }
 
 export enum TemperatureControlState {
@@ -164,6 +172,11 @@ export type Settings = {
     supplyFanOverPressure: number
     exhaustFanOverPressure: number
     eco: boolean
+    cookerHood: boolean
+    centralVacuumCleaner: boolean
+    ventilationLevel: number
+    supplyFanBaseSpeed: number
+    exhaustFanBaseSpeed: number
 }
 
 export type DeviceInformation = {

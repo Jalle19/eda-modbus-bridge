@@ -268,6 +268,23 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
         'summerNightCoolingAllowed': result.data[0],
     }
 
+    // Auxiliary function coils (cooker hood = 4, central vacuum cleaner = 5)
+    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 4, 2))
+    settings = {
+        ...settings,
+        'cookerHood': result.data[0],
+        'centralVacuumCleaner': result.data[1],
+    }
+
+    // Writable fan levels (supply base = 51, exhaust base = 52, ventilation level = 53)
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 51, 3))
+    settings = {
+        ...settings,
+        'supplyFanBaseSpeed': result.data[0],
+        'exhaustFanBaseSpeed': result.data[1],
+        'ventilationLevel': result.data[2],
+    }
+
     // Fan speeds during over-pressurization
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 54, 2))
     settings = {

@@ -280,6 +280,31 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
                 'unit_of_measurement': '%',
             }
         ),
+        'ventilationLevel': createNumberConfiguration(configurationBase, 'ventilationLevel', 'Ventilation level', {
+            min: 20,
+            max: 100,
+            'unit_of_measurement': '%',
+        }),
+        'supplyFanBaseSpeed': createNumberConfiguration(
+            configurationBase,
+            'supplyFanBaseSpeed',
+            'Supply fan base speed',
+            {
+                min: 20,
+                max: 100,
+                'unit_of_measurement': '%',
+            }
+        ),
+        'exhaustFanBaseSpeed': createNumberConfiguration(
+            configurationBase,
+            'exhaustFanBaseSpeed',
+            'Exhaust fan base speed',
+            {
+                min: 20,
+                max: 100,
+                'unit_of_measurement': '%',
+            }
+        ),
     }
 
     // Configurable switches
@@ -350,6 +375,13 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
             configurationBase,
             'summerNightCoolingAllowed',
             'Summer night cooling allowed'
+        ),
+        // Auxiliary functions (on/off), independent of the operating modes
+        'cookerHood': createSettingSwitchConfiguration(configurationBase, 'cookerHood', 'Cooker hood'),
+        'centralVacuumCleaner': createSettingSwitchConfiguration(
+            configurationBase,
+            'centralVacuumCleaner',
+            'Central vacuum cleaner'
         ),
     }
 

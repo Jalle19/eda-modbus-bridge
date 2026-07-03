@@ -103,6 +103,24 @@ describe('setSetting', () => {
             await setSetting(mockClient, 'temperatureControlMode', '2')
             expect(mockClient.writeRegister).toHaveBeenCalledWith(136, 2) // no validation, no scaling
         })
+
+        test('should write fan level settings', async () => {
+            await setSetting(mockClient, 'ventilationLevel', '60')
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(53, 60)
+
+            await setSetting(mockClient, 'supplyFanBaseSpeed', '34')
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(51, 34)
+
+            await setSetting(mockClient, 'exhaustFanBaseSpeed', '35')
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(52, 35)
+        })
+
+        test('should enforce the fan level minimum of 20', async () => {
+            await expect(setSetting(mockClient, 'ventilationLevel', '10')).rejects.toThrow('value 10 below minimum 20')
+
+            await setSetting(mockClient, 'ventilationLevel', '20')
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(53, 20)
+        })
     })
 
     describe('coil settings (boolean)', () => {
@@ -112,6 +130,14 @@ describe('setSetting', () => {
 
             await setSetting(mockClient, 'heatingAllowed', false)
             expect(mockClient.writeCoil).toHaveBeenCalledWith(54, false)
+        })
+
+        test('should write auxiliary function coils', async () => {
+            await setSetting(mockClient, 'cookerHood', true)
+            expect(mockClient.writeCoil).toHaveBeenCalledWith(4, true)
+
+            await setSetting(mockClient, 'centralVacuumCleaner', true)
+            expect(mockClient.writeCoil).toHaveBeenCalledWith(5, true)
         })
 
         test('should reject string values for coil settings', async () => {
