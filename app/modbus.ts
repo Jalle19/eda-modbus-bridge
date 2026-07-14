@@ -486,7 +486,7 @@ const tryReadCoils = async (modbusClient: ModbusRTU, dataAddress: number, length
 const tryWriteCoil = async (modbusClient: ModbusRTU, dataAddress: number, value: boolean) => {
     try {
         logger.debug(`Writing ${value} to coil address ${dataAddress}`)
-        return await modbusClient.writeCoil(dataAddress, value)
+        return await modbusClient.writeCoils(dataAddress, value)
     } catch (e) {
         logger.error(`Failed to write coil address ${dataAddress}, value ${value}`)
         throw e
