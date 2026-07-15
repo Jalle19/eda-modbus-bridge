@@ -215,6 +215,16 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
             'max': 60,
             'unit_of_measurement': 'minutes',
         }),
+        'ventilationLevel': createNumberConfiguration(
+            configurationBase,
+            'ventilationLevel',
+            'Ventilation level',
+            {
+                'min': 20,
+                'max': 100,
+                'unit_of_measurement': '%',
+            }
+        ),
         'awayVentilationLevel': createNumberConfiguration(
             configurationBase,
             'awayVentilationLevel',

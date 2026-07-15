@@ -217,6 +217,14 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
         'overPressureDelay': result.data[0],
     }
 
+    // Home/normal ventilation level (register 53) — the everyday fan-speed setpoint.
+    // This is the writable counterpart of the read-only "ventilationLevelTarget" reading.
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 53, 1))
+    settings = {
+        ...settings,
+        'ventilationLevel': result.data[0],
+    }
+
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 100, 4))
     settings = {
         ...settings,
