@@ -506,7 +506,7 @@ const tryReadHoldingRegisters = async (modbusClient: ModbusRTU, dataAddress: num
 const tryWriteHoldingRegister = async (modbusClient: ModbusRTU, dataAddress: number, value: number) => {
     try {
         logger.debug(`Writing ${value} to holding register address ${dataAddress}`)
-        return await modbusClient.writeRegister(dataAddress, value)
+        return await modbusClient.writeRegisters(dataAddress, [value])
     } catch (e) {
         logger.error(`Failed to write holding register address ${dataAddress}, value ${value}`)
         throw e
