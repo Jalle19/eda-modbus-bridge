@@ -73,6 +73,7 @@ eda/readings/exhaustFanSpeed
 eda/readings/returnWaterTemperature
 eda/readings/exhaustAirTemperatureBeforeHeatRecovery
 eda/settings/coolingAllowed
+eda/settings/heatRecoveryAllowed
 eda/settings/heatingAllowed
 eda/settings/awayCoolingAllowed
 eda/settings/awayHeatingAllowed

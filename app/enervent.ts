@@ -45,6 +45,8 @@ export const AVAILABLE_SETTINGS: Record<string, SettingConfiguration> = {
         max: 30,
     },
     'coolingAllowed': { dataAddress: 52, registerType: 'coil' },
+    // COIL_LTO_EN. Only implemented on EDA automation, reads as "not used" on MD.
+    'heatRecoveryAllowed': { dataAddress: 53, registerType: 'coil' },
     'heatingAllowed': { dataAddress: 54, registerType: 'coil' },
     'awayCoolingAllowed': { dataAddress: 19, registerType: 'coil' },
     'awayHeatingAllowed': { dataAddress: 18, registerType: 'coil' },
@@ -156,6 +158,7 @@ export type Settings = {
     temperatureTarget: number
     temperatureControlMode: number
     coolingAllowed?: boolean
+    heatRecoveryAllowed?: boolean
     heatingAllowed?: boolean
     awayCoolingAllowed?: boolean
     awayHeatingAllowed?: boolean

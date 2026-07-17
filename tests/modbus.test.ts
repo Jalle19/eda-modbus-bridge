@@ -113,6 +113,9 @@ describe('setSetting', () => {
             await setSetting(mockClient, 'coolingAllowed', true)
             expect(mockClient.writeCoils).toHaveBeenCalledWith(52, [true])
 
+            await setSetting(mockClient, 'heatRecoveryAllowed', true)
+            expect(mockClient.writeCoils).toHaveBeenCalledWith(53, [true])
+
             await setSetting(mockClient, 'heatingAllowed', false)
             expect(mockClient.writeCoils).toHaveBeenCalledWith(54, [false])
         })

@@ -316,6 +316,13 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
             // Not supported by some units
             { 'enabled_by_default': automationType !== AutomationType.LEGACY_EDA }
         ),
+        'heatRecoveryAllowed': createSettingSwitchConfiguration(
+            configurationBase,
+            'heatRecoveryAllowed',
+            'Heat recovery allowed',
+            // Only implemented on EDA automation
+            { 'enabled_by_default': automationType === AutomationType.EDA }
+        ),
         'heatingAllowed': createSettingSwitchConfiguration(
             configurationBase,
             'heatingAllowed',

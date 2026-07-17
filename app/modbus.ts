@@ -252,6 +252,14 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
             'heatingAllowed': result.data[2],
         }
 
+        // Coil 53 (COIL_LTO_EN) is only implemented on EDA automation, it reads as "not used" on MD
+        if (deviceInformation.automationType === AutomationType.EDA) {
+            settings = {
+                ...settings,
+                'heatRecoveryAllowed': result.data[1],
+            }
+        }
+
         result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 18, 4))
         settings = {
             ...settings,

@@ -56,6 +56,7 @@ Returns a JSON object like this:
     "longAwayTemperatureReduction": 0,
     "temperatureTarget": 17,
     "coolingAllowed": true,
+    "heatRecoveryAllowed": true,
     "heatingAllowed": true,
     "awayCoolingAllowed": true,
     "awayHeatingAllowed": false,
