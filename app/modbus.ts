@@ -486,10 +486,7 @@ const tryReadCoils = async (modbusClient: ModbusRTU, dataAddress: number, length
 const tryWriteCoil = async (modbusClient: ModbusRTU, dataAddress: number, value: boolean) => {
     try {
         logger.debug(`Writing ${value} to coil address ${dataAddress}`)
-
-        // When connecting via TCP to a Freeway gateway, FC05 (write coil) requests get silently dropped, while FC15
-        // (write coils) are correctly passed through to the device.
-        return await modbusClient.writeCoils(dataAddress, [value])
+        return await modbusClient.writeCoil(dataAddress, value)
     } catch (e) {
         logger.error(`Failed to write coil address ${dataAddress}, value ${value}`)
         throw e
@@ -509,10 +506,7 @@ const tryReadHoldingRegisters = async (modbusClient: ModbusRTU, dataAddress: num
 const tryWriteHoldingRegister = async (modbusClient: ModbusRTU, dataAddress: number, value: number) => {
     try {
         logger.debug(`Writing ${value} to holding register address ${dataAddress}`)
-
-        // When connecting via TCP to a Freeway gateway, FC06 (write register) requests get silently dropped, while FC16
-        // (write registers) are correctly passed through to the device.
-        return await modbusClient.writeRegisters(dataAddress, [value])
+        return await modbusClient.writeRegister(dataAddress, value)
     } catch (e) {
         logger.error(`Failed to write holding register address ${dataAddress}, value ${value}`)
         throw e

@@ -30,39 +30,39 @@ describe('setSetting', () => {
 
     beforeEach(() => {
         mockClient = {
-            writeRegisters: jest.fn().mockResolvedValue(undefined),
-            writeCoils: jest.fn().mockResolvedValue(undefined),
+            writeRegister: jest.fn().mockResolvedValue(undefined),
+            writeCoil: jest.fn().mockResolvedValue(undefined),
         } as any
     })
 
     describe('holding register settings (numeric)', () => {
         test('should accept string values for numeric settings', async () => {
             await setSetting(mockClient, 'temperatureTarget', '22.5')
-            expect(mockClient.writeRegisters).toHaveBeenCalledWith(135, [225]) // 22.5 * 10
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(135, 225) // 22.5 * 10
         })
 
         test('should parse and round decimal values correctly', async () => {
             await setSetting(mockClient, 'temperatureTarget', '22.0')
-            expect(mockClient.writeRegisters).toHaveBeenCalledWith(135, [220])
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(135, 220)
 
             await setSetting(mockClient, 'temperatureTarget', '18.75')
-            expect(mockClient.writeRegisters).toHaveBeenCalledWith(135, [188]) // rounds to 18.8 * 10
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(135, 188) // rounds to 18.8 * 10
 
             await setSetting(mockClient, 'temperatureTarget', '18.74')
-            expect(mockClient.writeRegisters).toHaveBeenCalledWith(135, [187]) // rounds to 18.7 * 10
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(135, 187) // rounds to 18.7 * 10
         })
 
         test('should parse integer strings for settings without decimals', async () => {
             await setSetting(mockClient, 'awayVentilationLevel', '50')
-            expect(mockClient.writeRegisters).toHaveBeenCalledWith(100, [50])
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(100, 50)
 
             await setSetting(mockClient, 'overPressureDelay', '30')
-            expect(mockClient.writeRegisters).toHaveBeenCalledWith(57, [30])
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(57, 30)
         })
 
         test('should truncate decimals for integer-only settings', async () => {
             await setSetting(mockClient, 'awayVentilationLevel', '50.5')
-            expect(mockClient.writeRegisters).toHaveBeenCalledWith(100, [50]) // truncates to 50
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(100, 50) // truncates to 50
         })
 
         test('should reject boolean values for numeric settings', async () => {
@@ -73,12 +73,12 @@ describe('setSetting', () => {
 
         test('should apply registerScale when set', async () => {
             await setSetting(mockClient, 'awayTemperatureReduction', '5')
-            expect(mockClient.writeRegisters).toHaveBeenCalledWith(101, [50]) // 5 * 10
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(101, 50) // 5 * 10
         })
 
         test('should not scale when registerScale is not set', async () => {
             await setSetting(mockClient, 'awayVentilationLevel', '75')
-            expect(mockClient.writeRegisters).toHaveBeenCalledWith(100, [75]) // no scaling
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(100, 75) // no scaling
         })
 
         test('should enforce min/max validation', async () => {
@@ -88,30 +88,30 @@ describe('setSetting', () => {
 
         test('should allow values within min/max range', async () => {
             await setSetting(mockClient, 'temperatureTarget', '20')
-            expect(mockClient.writeRegisters).toHaveBeenCalledWith(135, [200]) // 20 * 10
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(135, 200) // 20 * 10
         })
 
         test('should accept boundary values for min/max', async () => {
             await setSetting(mockClient, 'temperatureTarget', '10')
-            expect(mockClient.writeRegisters).toHaveBeenCalledWith(135, [100]) // 10 * 10
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(135, 100) // 10 * 10
 
             await setSetting(mockClient, 'temperatureTarget', '30')
-            expect(mockClient.writeRegisters).toHaveBeenCalledWith(135, [300]) // 30 * 10
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(135, 300) // 30 * 10
         })
 
         test('should handle settings without min/max', async () => {
             await setSetting(mockClient, 'temperatureControlMode', '2')
-            expect(mockClient.writeRegisters).toHaveBeenCalledWith(136, [2]) // no validation, no scaling
+            expect(mockClient.writeRegister).toHaveBeenCalledWith(136, 2) // no validation, no scaling
         })
     })
 
     describe('coil settings (boolean)', () => {
         test('should accept boolean values for coil settings', async () => {
             await setSetting(mockClient, 'coolingAllowed', true)
-            expect(mockClient.writeCoils).toHaveBeenCalledWith(52, [true])
+            expect(mockClient.writeCoil).toHaveBeenCalledWith(52, true)
 
             await setSetting(mockClient, 'heatingAllowed', false)
-            expect(mockClient.writeCoils).toHaveBeenCalledWith(54, [false])
+            expect(mockClient.writeCoil).toHaveBeenCalledWith(54, false)
         })
 
         test('should reject string values for coil settings', async () => {
