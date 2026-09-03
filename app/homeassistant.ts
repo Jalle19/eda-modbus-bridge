@@ -2,6 +2,7 @@ import { getDeviceInformation } from './modbus'
 import {
     TOPIC_NAME_STATUS,
     TOPIC_PREFIX_ALARM,
+    TOPIC_PREFIX_DEVICE_INFORMATION,
     TOPIC_PREFIX_DEVICE_STATE,
     TOPIC_PREFIX_MODE,
     TOPIC_PREFIX_READINGS,
@@ -206,6 +207,16 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
             'unit_of_measurement': '%',
             'enabled_by_default': automationType === AutomationType.MD,
         }),
+        'automationType': createEnumSensorConfiguration(
+            configurationBase,
+            'automationType',
+            'Automation type',
+            [AutomationType.LEGACY_EDA, AutomationType.MD, AutomationType.EDA],
+            {
+                'entity_category': 'diagnostic',
+                'state_topic': `${TOPIC_PREFIX_DEVICE_INFORMATION}/automationType`,
+            }
+        ),
     }
 
     // Configurable numbers
@@ -483,11 +494,13 @@ const createEnumSensorConfiguration = (
     configurationBase: EntityConfiguration,
     readingName: string,
     entityName: string,
-    options: string[]
+    options: string[],
+    extraProperties?: EntityConfiguration
 ): EntityConfiguration => {
     const configuration = createSensorConfiguration(configurationBase, readingName, entityName, {
         'device_class': 'enum',
         'options': options,
+        ...extraProperties,
     })
 
     // "state_class" and "options" are mutually exclusive
