@@ -210,6 +210,11 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
 
     // Configurable numbers
     const numberConfigurationMap = {
+        'ventilationLevel': createNumberConfiguration(configurationBase, 'ventilationLevel', 'Ventilation level', {
+            'min': 20,
+            'max': 100,
+            'unit_of_measurement': '%',
+        }),
         'overPressureDelay': createNumberConfiguration(configurationBase, 'overPressureDelay', 'Overpressure delay', {
             'min': 1,
             'max': 60,

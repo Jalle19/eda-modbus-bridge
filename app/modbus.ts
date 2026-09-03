@@ -212,8 +212,14 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
 
     let result: ReadRegisterResult | ReadCoilResult
 
-    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 57, 1))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 53, 1))
     let settings: Partial<Settings> = {
+        'ventilationLevel': result.data[0],
+    }
+
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 57, 1))
+    settings = {
+        ...settings,
         'overPressureDelay': result.data[0],
     }
 
