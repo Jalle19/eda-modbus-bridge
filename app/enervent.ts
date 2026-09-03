@@ -29,6 +29,7 @@ export interface HoldingRegisterSettingConfiguration extends BaseSettingConfigur
 export type SettingConfiguration = CoilSettingConfiguration | HoldingRegisterSettingConfiguration
 
 export const AVAILABLE_SETTINGS: Record<string, SettingConfiguration> = {
+    'ventilationLevel': { dataAddress: 53, decimals: 0, registerType: 'holding', min: 20, max: 100 },
     'overPressureDelay': { dataAddress: 57, decimals: 0, registerType: 'holding', min: 0, max: 60 },
     'awayVentilationLevel': { dataAddress: 100, decimals: 0, registerType: 'holding', min: 20, max: 100 },
     'awayTemperatureReduction': { dataAddress: 101, decimals: 0, registerType: 'holding', registerScale: 10 },
@@ -146,6 +147,7 @@ export type Readings = {
 }
 
 export type Settings = {
+    ventilationLevel: number
     overPressureDelay: number
     awayVentilationLevel: number
     awayTemperatureReduction: number
