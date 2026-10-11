@@ -1,7 +1,6 @@
 import express from 'express'
 import expressWinston from 'express-winston'
 import mqtt, { MqttClient } from 'mqtt'
-import yargs from 'yargs'
 import ModbusRTU from 'modbus-serial'
 import { configureRoutes } from './app/http'
 import {
@@ -16,90 +15,12 @@ import { createLogger, setLogLevel } from './app/logger'
 import { ModbusDeviceType, ModbusRtuDevice, ModbusTcpDevice, parseDevice, validateDevice } from './app/modbus'
 import { setIntervalAsync } from 'set-interval-async'
 import { ErrorHandler } from './app/error'
+import { argv } from './app/args'
 
 const MQTT_INITIAL_RECONNECT_RETRY_INTERVAL_SECONDS = 5
 const MAX_SUBSEQUENT_ERRORS = 10
 
 const logger = createLogger('main')
-
-const argv = yargs(process.argv.slice(2))
-    .usage('node $0 [options]')
-    .options({
-        'device': {
-            description:
-                'The Modbus device to use, e.g. /dev/ttyUSB0 for Modbus RTU or tcp://192.168.1.40:502 for Modbus TCP',
-            type: 'string',
-            demandOption: true,
-            alias: 'd',
-        },
-        'modbusSlave': {
-            description: 'The Modbus slave address',
-            type: 'number',
-            default: 1,
-            alias: 's',
-        },
-        'modbusTimeout': {
-            description: 'The timeout for Modbus operations (in seconds)',
-            type: 'number',
-            default: 5,
-            alias: 't',
-        },
-        'http': {
-            description: 'Whether to enable the HTTP server or not',
-            type: 'boolean',
-            default: true,
-        },
-        'httpListenAddress': {
-            description: 'The address to listen (HTTP)',
-            type: 'string',
-            default: '0.0.0.0',
-            alias: 'a',
-        },
-        'httpPort': {
-            description: 'The port to listen on (HTTP)',
-            type: 'number',
-            default: 8080,
-            alias: 'p',
-        },
-        'mqttBrokerUrl': {
-            description: 'The URL to the MQTT broker, e.g. mqtt://localhost:1883. Omit to disable MQTT support.',
-            type: 'string',
-            default: undefined,
-            alias: 'm',
-        },
-        'mqttUsername': {
-            description: 'The username to use when connecting to the MQTT broker. Omit to disable authentication.',
-            default: undefined,
-        },
-        'mqttPassword': {
-            description:
-                'The password to use when connecting to the MQTT broker. Required when mqttUsername is defined. Omit to disable authentication.',
-            default: undefined,
-        },
-        'mqttPublishInterval': {
-            description: 'How often messages should be published over MQTT (in seconds)',
-            default: 10,
-            alias: 'i',
-        },
-        'mqttDiscovery': {
-            description:
-                'Whether to enable Home Assistant MQTT discovery support. Only effective when mqttBrokerUrl is defined.',
-            type: 'boolean',
-            default: true,
-        },
-        'debug': {
-            description: 'Enable debug logging',
-            type: 'boolean',
-            default: false,
-            alias: 'v',
-        },
-    })
-    .parserConfiguration({
-        // Protect against weird things happening if someone accidentally uses "-option" instead of "--option"
-        'short-option-groups': false,
-        'duplicate-arguments-array': false,
-    })
-    .parseSync()
 
 void (async () => {
     // Adjust log level
