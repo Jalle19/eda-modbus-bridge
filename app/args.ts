@@ -65,6 +65,12 @@ const parserConfiguration = yargs(process.argv.slice(2))
             type: 'boolean',
             default: true,
         },
+        'mqttTopicPrefix': {
+            description: 'The prefix to use for MQTT topics',
+            type: 'string',
+            default: 'eda',
+            alias: 'P',
+        },
         'debug': {
             description: 'Enable debug logging',
             type: 'boolean',
