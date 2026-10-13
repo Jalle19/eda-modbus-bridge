@@ -114,7 +114,6 @@ export type ModeSummary = {
     maxHeating: boolean
     maxCooling: boolean
     manualBoost: boolean
-    eco?: boolean
 }
 
 export type Readings = {
@@ -163,7 +162,7 @@ export type Settings = {
     summerNightCoolingAllowed: boolean
     supplyFanOverPressure: number
     exhaustFanOverPressure: number
-    eco: boolean
+    eco?: boolean
 }
 
 export type DeviceInformation = {

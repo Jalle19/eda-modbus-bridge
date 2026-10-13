@@ -2,28 +2,28 @@ import { Mutex } from 'async-mutex'
 import { createLogger } from './logger'
 import {
     AlarmIncident,
+    AlarmStatus,
     AutomationType,
     AVAILABLE_ALARMS,
     AVAILABLE_MODES,
     AVAILABLE_SETTINGS,
+    CoilSettingConfiguration,
     createModelNameString,
     determineAutomationType,
+    DeviceInformation,
     getAutomationAndHeatingTypeName,
     getCoolingTypeName,
     getDeviceFamilyName,
+    HeatingType,
+    HoldingRegisterSettingConfiguration,
+    ModeSummary,
     parseAlarmTimestamp,
     parseAnalogSensors,
     parseStateBitField,
     parseTemperature,
-    DeviceInformation,
-    ModeSummary,
     Readings,
     Settings,
-    AlarmStatus,
-    HeatingType,
     TemperatureControlState,
-    CoilSettingConfiguration,
-    HoldingRegisterSettingConfiguration,
 } from './enervent'
 import ModbusRTU from 'modbus-serial'
 import { ReadCoilResult, ReadRegisterResult } from 'modbus-serial/ModbusRTU'
@@ -53,8 +53,9 @@ const logger = createLogger('modbus')
 let CACHED_DEVICE_INFORMATION: DeviceInformation
 
 export const getModeSummary = async (modbusClient: ModbusRTU): Promise<ModeSummary> => {
-    let result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 0, 13))
-    let summary: ModeSummary = {
+    const result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 0, 13))
+
+    return {
         // 'stop': result.data[0], // - Can not return value if stopped.
         'away': result.data[1],
         'longAway': result.data[2],
@@ -63,18 +64,6 @@ export const getModeSummary = async (modbusClient: ModbusRTU): Promise<ModeSumma
         'maxCooling': result.data[7],
         'manualBoost': result.data[10],
     }
-
-    // "eco" is a newfangled thing only available on newer units
-    const deviceInformation = await getDeviceInformation(modbusClient)
-    if (deviceInformation.automationType === AutomationType.MD) {
-        result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 40, 1))
-        summary = {
-            ...summary,
-            'eco': result.data[0],
-        }
-    }
-
-    return summary
 }
 
 export const getMode = async (modbusClient: ModbusRTU, mode: string) => {
