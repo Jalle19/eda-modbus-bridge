@@ -12,8 +12,9 @@ import {
 import { createLogger } from './logger'
 import ModbusRTU from 'modbus-serial'
 import { MqttClient } from 'mqtt'
+import { argv } from './args'
 
-export const TOPIC_PREFIX = 'eda'
+export const TOPIC_PREFIX = argv.mqttTopicPrefix
 export const TOPIC_PREFIX_MODE = `${TOPIC_PREFIX}/mode`
 export const TOPIC_PREFIX_READINGS = `${TOPIC_PREFIX}/readings`
 export const TOPIC_PREFIX_SETTINGS = `${TOPIC_PREFIX}/settings`
