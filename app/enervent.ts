@@ -29,15 +29,20 @@ export const AVAILABLE_MODES: ModeConfiguration[] = [
 ]
 
 interface BaseSettingConfiguration {
-    dataAddress: number
-    registerType: 'coil' | 'holding'
+    registerType: 'coil' | 'holding' | 'special'
+}
+
+export interface SpecialSettingConfiguration extends BaseSettingConfiguration {
+    registerType: 'special'
 }
 
 export interface CoilSettingConfiguration extends BaseSettingConfiguration {
+    dataAddress: number
     registerType: 'coil'
 }
 
 export interface HoldingRegisterSettingConfiguration extends BaseSettingConfiguration {
+    dataAddress: number
     registerType: 'holding'
     decimals: number
     registerScale?: number
@@ -45,9 +50,15 @@ export interface HoldingRegisterSettingConfiguration extends BaseSettingConfigur
     max?: number
 }
 
-export type SettingConfiguration = CoilSettingConfiguration | HoldingRegisterSettingConfiguration
+export type SettingConfiguration =
+    | SpecialSettingConfiguration
+    | CoilSettingConfiguration
+    | HoldingRegisterSettingConfiguration
 
 export const AVAILABLE_SETTINGS: Record<string, SettingConfiguration> = {
+    // Special case for mode which is not controlled via a single register
+    'mode': { registerType: 'special' },
+    // Normal single register settings
     'overPressureDelay': { dataAddress: 57, decimals: 0, registerType: 'holding', min: 0, max: 60 },
     'awayVentilationLevel': { dataAddress: 100, decimals: 0, registerType: 'holding', min: 20, max: 100 },
     'awayTemperatureReduction': { dataAddress: 101, decimals: 0, registerType: 'holding', registerScale: 10 },

@@ -320,6 +320,14 @@ export const setSetting = async (modbusClient: ModbusRTU, setting: string, value
             }
             return setBooleanSetting(modbusClient, settingConfig, value)
         }
+        case 'special': {
+            if (setting === 'mode') {
+                const mode = resolveModeConfiguration(value as string)
+
+                await setMode(modbusClient, mode.name, true)
+                break
+            }
+        }
     }
 }
 
