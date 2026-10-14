@@ -16,6 +16,8 @@ import {
     getDeviceFamilyName,
     HeatingType,
     HoldingRegisterSettingConfiguration,
+    Mode,
+    ModeConfiguration,
     ModeSummary,
     parseAlarmTimestamp,
     parseAnalogSensors,
@@ -66,44 +68,38 @@ export const getModeSummary = async (modbusClient: ModbusRTU): Promise<ModeSumma
     }
 }
 
-export const getMode = async (modbusClient: ModbusRTU, mode: string): Promise<boolean> => {
-    const modeConfig = AVAILABLE_MODES.find((c) => c.name === mode)
-
-    if (!modeConfig) {
+const resolveModeConfiguration = (modeName: string): ModeConfiguration => {
+    if (!Object.values<string>(Mode).includes(modeName)) {
         throw new Error('Unknown mode')
     }
 
-    // Special case for "normal" which is not represented by a specific coil, but can be gleaned from
-    // the device state
-    if (!modeConfig.dataAddress) {
-        const deviceState = await getDeviceState(modbusClient)
-
-        return deviceState['normal']
-    }
-
-    const result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, modeConfig.dataAddress!, 1))
-
-    return result.data[0]
+    return AVAILABLE_MODES.find((c) => (c.name as string) === modeName)!
 }
 
-export const setMode = async (modbusClient: ModbusRTU, mode: string, value: boolean) => {
-    const modeConfig = AVAILABLE_MODES.find((c) => c.name === mode)
+export const getMode = async (modbusClient: ModbusRTU, modeName: string): Promise<boolean> => {
+    const mode = resolveModeConfiguration(modeName)
 
-    if (!modeConfig) {
-        throw new Error('Unknown mode')
-    }
+    // Judge the current mode based on the device state, this way we can easily support "normal" mode too which isn't
+    // backed by a register
+    const deviceState = await getDeviceState(modbusClient)
 
-    if (modeConfig.dataAddress) {
-        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, modeConfig.dataAddress!, value))
+    return deviceState[mode.name]
+}
+
+export const setMode = async (modbusClient: ModbusRTU, modeName: string, value: boolean) => {
+    const mode = resolveModeConfiguration(modeName)
+
+    if (mode.name !== Mode.NORMAL) {
+        await mutex.runExclusive(async () => tryWriteCoil(modbusClient, mode.dataAddress!, value))
     }
 
     // Modes are mutually exclusive, disable all others when enabling one
     if (value) {
-        await disableAllModesExcept(modbusClient, mode)
+        await disableAllModesExcept(modbusClient, mode.name)
     }
 }
 
-const disableAllModesExcept = async (modbusClient: ModbusRTU, exceptedMode: string) => {
+const disableAllModesExcept = async (modbusClient: ModbusRTU, exceptedMode: Mode) => {
     for (const modeConfig of AVAILABLE_MODES) {
         if (modeConfig.name === exceptedMode) {
             continue

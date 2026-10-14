@@ -1,7 +1,17 @@
 import { ReadRegisterResult } from 'modbus-serial/ModbusRTU'
 
+export enum Mode {
+    NORMAL = 'normal',
+    AWAY = 'away',
+    LONG_AWAY = 'longAway',
+    OVER_PRESSURE = 'overPressure',
+    MAX_HEATING = 'maxHeating',
+    MAX_COOLING = 'maxCooling',
+    MANUAL_BOOST = 'manualBoost',
+}
+
 export type ModeConfiguration = {
-    name: string
+    name: Mode
     /**
      * "Normal" mode doesn't have an address, we're in that mode when all other modes are disabled
      */
@@ -9,13 +19,13 @@ export type ModeConfiguration = {
 }
 
 export const AVAILABLE_MODES: ModeConfiguration[] = [
-    { name: 'normal' },
-    { name: 'away', dataAddress: 1 },
-    { name: 'longAway', dataAddress: 2 },
-    { name: 'overPressure', dataAddress: 3 },
-    { name: 'maxHeating', dataAddress: 6 },
-    { name: 'maxCooling', dataAddress: 7 },
-    { name: 'manualBoost', dataAddress: 10 },
+    { name: Mode.NORMAL },
+    { name: Mode.AWAY, dataAddress: 1 },
+    { name: Mode.LONG_AWAY, dataAddress: 2 },
+    { name: Mode.OVER_PRESSURE, dataAddress: 3 },
+    { name: Mode.MAX_HEATING, dataAddress: 6 },
+    { name: Mode.MAX_COOLING, dataAddress: 7 },
+    { name: Mode.MANUAL_BOOST, dataAddress: 10 },
 ]
 
 interface BaseSettingConfiguration {
