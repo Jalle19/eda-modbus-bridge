@@ -175,6 +175,7 @@ export type Readings = {
 }
 
 export type Settings = {
+    mode: Mode
     overPressureDelay: number
     awayVentilationLevel: number
     awayTemperatureReduction: number

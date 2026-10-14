@@ -76,6 +76,17 @@ const resolveModeConfiguration = (modeName: string): ModeConfiguration => {
     return AVAILABLE_MODES.find((c) => (c.name as string) === modeName)!
 }
 
+export const getCurrentMode = async (modbusClient: ModbusRTU): Promise<Mode> => {
+    for (const mode of AVAILABLE_MODES) {
+        if (await getMode(modbusClient, mode.name)) {
+            return mode.name
+        }
+    }
+
+    // Doesn't happen
+    return Mode.NORMAL
+}
+
 export const getMode = async (modbusClient: ModbusRTU, modeName: string): Promise<boolean> => {
     const mode = resolveModeConfiguration(modeName)
 
@@ -211,10 +222,17 @@ export const getReadings = async (modbusClient: ModbusRTU): Promise<Readings> =>
 export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> => {
     logger.debug('Retrieving device settings...')
 
+    let settings: Partial<Settings> = {}
     let result: ReadRegisterResult | ReadCoilResult
 
+    settings = {
+        ...settings,
+        'mode': await getCurrentMode(modbusClient),
+    }
+
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 57, 1))
-    let settings: Partial<Settings> = {
+    settings = {
+        ...settings,
         'overPressureDelay': result.data[0],
     }
 
