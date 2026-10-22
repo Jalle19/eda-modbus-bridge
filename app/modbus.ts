@@ -206,6 +206,12 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
         'overPressureDelay': result.data[0],
     }
 
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 69, 1))
+    settings = {
+        ...settings,
+        'humidityBoostFixedLimit': result.data[0],
+    }
+
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 100, 4))
     settings = {
         ...settings,
