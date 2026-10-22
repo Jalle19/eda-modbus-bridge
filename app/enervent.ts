@@ -30,6 +30,7 @@ export type SettingConfiguration = CoilSettingConfiguration | HoldingRegisterSet
 
 export const AVAILABLE_SETTINGS: Record<string, SettingConfiguration> = {
     'overPressureDelay': { dataAddress: 57, decimals: 0, registerType: 'holding', min: 0, max: 60 },
+    'humidityBoostFixedLimit': { dataAddress: 69, decimals: 0, registerType: 'holding', min: 0, max: 100 },
     'awayVentilationLevel': { dataAddress: 100, decimals: 0, registerType: 'holding', min: 20, max: 100 },
     'awayTemperatureReduction': { dataAddress: 101, decimals: 0, registerType: 'holding', registerScale: 10 },
     'longAwayVentilationLevel': { dataAddress: 102, decimals: 0, registerType: 'holding', min: 20, max: 100 },
@@ -146,6 +147,7 @@ export type Readings = {
 
 export type Settings = {
     overPressureDelay: number
+    humidityBoostFixedLimit: number
     awayVentilationLevel: number
     awayTemperatureReduction: number
     longAwayVentilationLevel: number

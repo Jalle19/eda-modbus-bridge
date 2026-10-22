@@ -215,6 +215,16 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
             'max': 60,
             'unit_of_measurement': 'minutes',
         }),
+        'humidityBoostFixedLimit': createNumberConfiguration(
+            configurationBase,
+            'humidityBoostFixedLimit',
+            'Humidity boost threshold',
+            {
+                'min': 0,
+                'max': 100,
+                'unit_of_measurement': '%',
+            }
+        ),
         'awayVentilationLevel': createNumberConfiguration(
             configurationBase,
             'awayVentilationLevel',
