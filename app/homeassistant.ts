@@ -534,7 +534,6 @@ const createSensorConfiguration = (
         'state_class': 'measurement',
         'name': entityName,
         'default_entity_id': `sensor.eda_${readingName}`,
-        'object_id': `eda_${readingName}`,
         'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
         'unique_id': `eda-${readingName}`,
         ...extraProperties,
@@ -559,7 +558,6 @@ const createNumberConfiguration = (
         'entity_category': 'config',
         'name': entityName,
         'default_entity_id': `number.eda_${settingName}`,
-        'object_id': `eda_${settingName}`,
         ...extraProperties,
     }
 }
@@ -579,7 +577,6 @@ const createModeSwitchConfiguration = (
         'unique_id': `eda-${modeName}`,
         'name': entityName,
         'default_entity_id': `switch.eda_${modeName}`,
-        'object_id': `eda_${modeName}`,
         'icon': 'mdi:fan',
         'state_topic': `${TOPIC_PREFIX_MODE}/${modeName}`,
         'command_topic': `${TOPIC_PREFIX_MODE}/${modeName}/set`,
@@ -602,7 +599,6 @@ const createSettingSwitchConfiguration = (
         'unique_id': `eda-${settingName}`,
         'name': entityName,
         'default_entity_id': `switch.eda_${settingName}`,
-        'object_id': `eda_${settingName}`,
         'state_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}`,
         'command_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}/set`,
         'entity_category': 'config',
@@ -619,7 +615,6 @@ const createAlarmConfiguration = (
         'unique_id': `eda-${alarm.name}`,
         'name': alarm.description,
         'default_entity_id': `binary_sensor.eda_${alarm.name}`,
-        'object_id': `eda_${alarm.name}`,
         'icon': 'mdi:alarm-bell',
         'state_topic': `${TOPIC_PREFIX_ALARM}/${alarm.name}`,
         'entity_category': 'diagnostic',
@@ -637,7 +632,6 @@ const createDeviceStateConfiguration = (
         'unique_id': `eda-state-${stateName}`,
         'name': entityName,
         'default_entity_id': `binary_sensor.eda_state_${stateName}`,
-        'object_id': `eda_state_${stateName}`,
         'state_topic': `${TOPIC_PREFIX_DEVICE_STATE}/${stateName}`,
         'entity_category': 'diagnostic',
     }
@@ -653,7 +647,6 @@ const createButtonConfiguration = (
         'unique_id': `eda-button-${buttonName}`,
         'name': entityName,
         'default_entity_id': `button.eda_button_${buttonName}`,
-        'object_id': `eda_button_${buttonName}`,
         'command_topic': `${TOPIC_PREFIX_ALARM}/acknowledge`,
     }
 }
@@ -669,7 +662,6 @@ const createSelectConfiguration = (
         'unique_id': `eda-select-${selectName}`,
         'name': entityName,
         'default_entity_id': `select.eda_select_${selectName}`,
-        'object_id': `eda_Select_${selectName}`,
         'options': options,
         'state_topic': `${TOPIC_PREFIX_SETTINGS}/${selectName}`,
         'command_topic': `${TOPIC_PREFIX_SETTINGS}/${selectName}/set`,
