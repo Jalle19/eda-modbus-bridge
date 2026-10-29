@@ -153,10 +153,10 @@ situations.
   seconds to something like 30 seconds, or fixed permanently by either connecting an NTC10 temperature sensor or a 10 
   kilo-ohm resistor to the sensor input terminals (not tested, but confirmed by Enervent).
 
-* It is not possible to adjust the ventilation level when the unit is operating in normal mode. Enervent has confirmed 
-  that this is a limitation in the protocol and there is no direct solution. A workaround is to repurpose one of the 
-  modes, e.g. "long away", to be a "manual control" mode, since the ventilation level can be adjusted for all non-
-  normal modes of operation. A slight caveat with this is that the temperature target is also reduced, and the 
+* On some units, it is not possible to adjust the ventilation level when the unit is operating in normal mode. Enervent 
+  has confirmed that this is a limitation in the protocol and there is no direct solution. A workaround is to repurpose
+  one of the modes, e.g. "long away", to be a "manual control" mode, since the ventilation level can be adjusted for all
+  non-normal modes of operation. A slight caveat with this is that the temperature target is also reduced, and the 
   temperature target reduction setting doesn't always seem to accept values below 2 degrees Celsius. Experiment with 
   these values to find something that suits your use case, or trust the built-in automation in the ventilation unit to 
   do its job.
