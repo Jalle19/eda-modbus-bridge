@@ -246,7 +246,7 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
             'awayVentilationLevel',
             'Away ventilation level',
             {
-                'min': 1,
+                'min': 20,
                 'max': 100,
                 'unit_of_measurement': '%',
             }
@@ -266,7 +266,7 @@ export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient
             'longAwayVentilationLevel',
             'Long away ventilation level',
             {
-                'min': 1,
+                'min': 20,
                 'max': 100,
                 'unit_of_measurement': '%',
             }
