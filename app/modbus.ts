@@ -126,6 +126,9 @@ export const getReadings = async (modbusClient: ModbusRTU): Promise<Readings> =>
     readings = {
         ...readings,
         'temperatureControlState': TemperatureControlState[result.data[0]],
+        // Room temperature average (register 46). Contains average of analog sensors (types 8/9/10)
+        // or dedicated room temperature sensor (e.g., RJ10). Zero if no sensor configured.
+        'roomTemperatureAvg': parseTemperature(result.data[1]),
         'cascadeSp': result.data[2],
         'cascadeP': result.data[3],
         'cascadeI': result.data[4],
@@ -154,14 +157,6 @@ export const getReadings = async (modbusClient: ModbusRTU): Promise<Readings> =>
     readings = {
         ...readings,
         ...sensorReadings,
-    }
-
-    // Room temperature average (register 46). Contains average of analog sensors (types 8/9/10)
-    // or dedicated room temperature sensor (e.g., RJ10). Zero if no sensor configured.
-    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 46, 1))
-    readings = {
-        ...readings,
-        'roomTemperatureAvg': parseTemperature(result.data[0]),
     }
 
     // Sensors that only work reliably on MD automation devices
@@ -201,15 +196,12 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
 
     let result: ReadRegisterResult | ReadCoilResult
 
-    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 53, 1))
+    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 53, 5))
     let settings: Partial<Settings> = {
         'ventilationLevel': result.data[0],
-    }
-
-    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 57, 1))
-    settings = {
-        ...settings,
-        'overPressureDelay': result.data[0],
+        'supplyFanOverPressure': result.data[1],
+        'exhaustFanOverPressure': result.data[2],
+        'overPressureDelay': result.data[4],
     }
 
     result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 69, 1))
@@ -238,11 +230,12 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
     // Note that the register order is swapped when querying register 18-21 compared to 52-55.
     const deviceInformation = await getDeviceInformation(modbusClient)
     if (deviceInformation.automationType !== AutomationType.LEGACY_EDA) {
-        result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 52, 3))
+        result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 52, 4))
         settings = {
             ...settings,
             'coolingAllowed': result.data[0],
             'heatingAllowed': result.data[2],
+            'defrostingAllowed': result.data[3],
         }
 
         result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 18, 4))
@@ -255,26 +248,11 @@ export const getSettings = async (modbusClient: ModbusRTU): Promise<Settings> =>
         }
     }
 
-    // Defrosting allowed
-    result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 55, 1))
-    settings = {
-        ...settings,
-        'defrostingAllowed': result.data[0],
-    }
-
     // Summer night cooling allowed
     result = await mutex.runExclusive(async () => tryReadCoils(modbusClient, 12, 1))
     settings = {
         ...settings,
         'summerNightCoolingAllowed': result.data[0],
-    }
-
-    // Fan speeds during over-pressurization
-    result = await mutex.runExclusive(async () => tryReadHoldingRegisters(modbusClient, 54, 2))
-    settings = {
-        ...settings,
-        'supplyFanOverPressure': result.data[0],
-        'exhaustFanOverPressure': result.data[1],
     }
 
     // Eco mode (not available on all units)
