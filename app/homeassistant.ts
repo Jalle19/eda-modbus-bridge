@@ -1,6 +1,7 @@
 import { getDeviceInformation } from './modbus'
 import {
     TOPIC_NAME_STATUS,
+    TOPIC_PREFIX,
     TOPIC_PREFIX_ALARM,
     TOPIC_PREFIX_DEVICE_INFORMATION,
     TOPIC_PREFIX_DEVICE_STATE,
@@ -26,6 +27,9 @@ type EntityConfiguration = {
 }
 
 const logger = createLogger('homeassistant')
+
+// Make the entity names follow the MQTT prefix, otherwise both instances will publish the same entities
+const ENTITY_PREFIX = TOPIC_PREFIX
 
 export const configureMqttDiscovery = async (modbusClient: ModbusRTU, mqttClient: MqttClient) => {
     // Build information about the ventilation unit. The "deviceIdentifier" is used as <node_id> in discovery topic
@@ -533,10 +537,9 @@ const createSensorConfiguration = (
         ...configurationBase,
         'state_class': 'measurement',
         'name': entityName,
-        'default_entity_id': `sensor.eda_${readingName}`,
-        'object_id': `eda_${readingName}`,
+        'default_entity_id': `sensor.${ENTITY_PREFIX}_${readingName}`,
         'state_topic': `${TOPIC_PREFIX_READINGS}/${readingName}`,
-        'unique_id': `eda-${readingName}`,
+        'unique_id': `${ENTITY_PREFIX}-${readingName}`,
         ...extraProperties,
     }
 }
@@ -555,11 +558,10 @@ const createNumberConfiguration = (
         ...configurationBase,
         'command_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}/set`,
         'state_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}`,
-        'unique_id': `eda-${settingName}`,
+        'unique_id': `${ENTITY_PREFIX}-${settingName}`,
         'entity_category': 'config',
         'name': entityName,
-        'default_entity_id': `number.eda_${settingName}`,
-        'object_id': `eda_${settingName}`,
+        'default_entity_id': `number.${ENTITY_PREFIX}_${settingName}`,
         ...extraProperties,
     }
 }
@@ -576,10 +578,9 @@ const createModeSwitchConfiguration = (
 
     return {
         ...configurationBase,
-        'unique_id': `eda-${modeName}`,
+        'unique_id': `${ENTITY_PREFIX}-${modeName}`,
         'name': entityName,
-        'default_entity_id': `switch.eda_${modeName}`,
-        'object_id': `eda_${modeName}`,
+        'default_entity_id': `switch.${ENTITY_PREFIX}_${modeName}`,
         'icon': 'mdi:fan',
         'state_topic': `${TOPIC_PREFIX_MODE}/${modeName}`,
         'command_topic': `${TOPIC_PREFIX_MODE}/${modeName}/set`,
@@ -599,10 +600,9 @@ const createSettingSwitchConfiguration = (
 
     return {
         ...configurationBase,
-        'unique_id': `eda-${settingName}`,
+        'unique_id': `${ENTITY_PREFIX}-${settingName}`,
         'name': entityName,
-        'default_entity_id': `switch.eda_${settingName}`,
-        'object_id': `eda_${settingName}`,
+        'default_entity_id': `switch.${ENTITY_PREFIX}_${settingName}`,
         'state_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}`,
         'command_topic': `${TOPIC_PREFIX_SETTINGS}/${settingName}/set`,
         'entity_category': 'config',
@@ -616,10 +616,9 @@ const createAlarmConfiguration = (
 ): EntityConfiguration => {
     return {
         ...configurationBase,
-        'unique_id': `eda-${alarm.name}`,
+        'unique_id': `${ENTITY_PREFIX}-${alarm.name}`,
         'name': alarm.description,
-        'default_entity_id': `binary_sensor.eda_${alarm.name}`,
-        'object_id': `eda_${alarm.name}`,
+        'default_entity_id': `binary_sensor.${ENTITY_PREFIX}_${alarm.name}`,
         'icon': 'mdi:alarm-bell',
         'state_topic': `${TOPIC_PREFIX_ALARM}/${alarm.name}`,
         'entity_category': 'diagnostic',
@@ -634,10 +633,9 @@ const createDeviceStateConfiguration = (
     return {
         ...configurationBase,
         // Must not collide with switch names for the same thing, e.g. "away"
-        'unique_id': `eda-state-${stateName}`,
+        'unique_id': `${ENTITY_PREFIX}-state-${stateName}`,
         'name': entityName,
-        'default_entity_id': `binary_sensor.eda_state_${stateName}`,
-        'object_id': `eda_state_${stateName}`,
+        'default_entity_id': `binary_sensor.${ENTITY_PREFIX}_state_${stateName}`,
         'state_topic': `${TOPIC_PREFIX_DEVICE_STATE}/${stateName}`,
         'entity_category': 'diagnostic',
     }
@@ -650,10 +648,9 @@ const createButtonConfiguration = (
 ): EntityConfiguration => {
     return {
         ...configurationBase,
-        'unique_id': `eda-button-${buttonName}`,
+        'unique_id': `${ENTITY_PREFIX}-button-${buttonName}`,
         'name': entityName,
-        'default_entity_id': `button.eda_button_${buttonName}`,
-        'object_id': `eda_button_${buttonName}`,
+        'default_entity_id': `button.${ENTITY_PREFIX}_button_${buttonName}`,
         'command_topic': `${TOPIC_PREFIX_ALARM}/acknowledge`,
     }
 }
@@ -666,10 +663,9 @@ const createSelectConfiguration = (
 ) => {
     return {
         ...configurationBase,
-        'unique_id': `eda-select-${selectName}`,
+        'unique_id': `${ENTITY_PREFIX}-select-${selectName}`,
         'name': entityName,
-        'default_entity_id': `select.eda_select_${selectName}`,
-        'object_id': `eda_Select_${selectName}`,
+        'default_entity_id': `select.${ENTITY_PREFIX}_select_${selectName}`,
         'options': options,
         'state_topic': `${TOPIC_PREFIX_SETTINGS}/${selectName}`,
         'command_topic': `${TOPIC_PREFIX_SETTINGS}/${selectName}/set`,
